@@ -1583,7 +1583,7 @@ $("bookForm").onsubmit = async e => {
   if ($("loc").value === "Choose on map" && !pinConfirmed) return show("Please confirm the selected map address before requesting the booking.", true);
   if ($("loc").value === "Enter an address" && !$("addr").value.trim()) return show("Please type the address for the shoot.", true);
   if (!$("name").value.trim()) return show("Please enter your name.", true);
-  if (!/^\\S+@\\S+\\.\\S+$/.test($("email").value.trim())) return show("Please enter a valid email.", true);
+  if (!/^\S+@\S+\.\S+$/.test($("email").value.trim())) return show("Please enter a valid email.", true);
 
   const submitButton = $("bookForm").querySelector('button[type="submit"]');
   const originalLabel = submitButton.textContent;
