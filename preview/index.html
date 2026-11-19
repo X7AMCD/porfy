@@ -1571,8 +1571,9 @@ function summary() {
 
 function show(text, err) { const m = $("msg"); m.textContent = text; m.className = "msg" + (err ? " err" : ""); m.style.display = "block"; }
 
-/* Submit: validate, mark slot taken, open an email to the photographer */
-$("bookForm").onsubmit = e => {
+/* Submit: validate and save booking to the X7 Studios database */
+const BOOKING_API = "https://api.x7studios.co.za/bookings";
+$("bookForm").onsubmit = async e => {
   e.preventDefault();
   if (!state.type) return show("Please choose a shoot type.", true);
   if (!$("date").value) return show("Please pick a date.", true);
@@ -1582,21 +1583,50 @@ $("bookForm").onsubmit = e => {
   if ($("loc").value === "Choose on map" && !pinConfirmed) return show("Please confirm the selected map address before requesting the booking.", true);
   if ($("loc").value === "Enter an address" && !$("addr").value.trim()) return show("Please type the address for the shoot.", true);
   if (!$("name").value.trim()) return show("Please enter your name.", true);
-  if (!/^\S+@\S+\.\S+$/.test($("email").value)) return show("Please enter a valid email.", true);
+  if (!/^\\S+@\\S+\\.\\S+$/.test($("email").value.trim())) return show("Please enter a valid email.", true);
 
-  const t = taken(); (t[$("date").value] ||= []).push(state.time);
-  try { localStorage.setItem("taken", JSON.stringify(t)); } catch {}
+  const submitButton = $("bookForm").querySelector('button[type="submit"]');
+  const originalLabel = submitButton.textContent;
+  submitButton.disabled = true;
+  submitButton.textContent = "Sending request…";
+  const locationDetails = locText();
+  const message = [
+    "Photography style: " + state.style,
+    "Location: " + locationDetails,
+    "Quoted total: " + money(totalPrice()),
+    "Phone: " + ($("phone").value.trim() || "Not provided"),
+    "Additional notes: " + ($("notes").value.trim() || "None")
+  ].join("\\n");
 
-  const body = [
-    `Shoot: ${state.type} (${money(SHOOTS[state.type])})`, `Date: ${$("date").value}`, `Time: ${state.time}`,
-    `Style: ${state.style} (${styleAdjustment() > 0 ? "+" : styleAdjustment() < 0 ? "−" : ""}${money(Math.abs(styleAdjustment()))})`,
-    `Total price: ${money(totalPrice())}`, `Location: ${locText()}`, `Name: ${$("name").value}`, `Phone: ${$("phone").value}`,
-    `Email: ${$("email").value}`, `Notes: ${$("notes").value}`
-  ].join("\n");
-  location.href = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent("Photoshoot booking: " + state.type)}&body=${encodeURIComponent(body)}`;
-
-  show(`Thanks ${$("name").value.split(" ")[0]}! Your request for ${state.type} on ${$("date").value} at ${state.time} is ready. Send the email that just opened and I'll confirm within 24 hours.`);
-  drawSlots();
+  try {
+    const response = await fetch(BOOKING_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer_name: $("name").value.trim(),
+        email: $("email").value.trim(),
+        phone: $("phone").value.trim(),
+        service: state.type + " photography — " + state.style + " ( " + money(totalPrice()) + " )",
+        booking_date: $("date").value,
+        booking_time: state.time,
+        message
+      })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Your request could not be saved. Please try again.");
+    const t = taken();
+    (t[$("date").value] ||= []).push(state.time);
+    try { localStorage.setItem("taken", JSON.stringify(t)); } catch {}
+    show("Thank you, " + $("name").value.trim().split(" ")[0] + "! Your booking request has been received. We’ll confirm it within 24 hours.");
+    $("bookForm").reset();
+    state.type = null; state.time = null; state.style = null;
+    summary(); drawSlots();
+  } catch (error) {
+    show(error.message || "Something went wrong. Please try again.", true);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = originalLabel;
+  }
 };
 $("date").addEventListener("input", summary);
 
