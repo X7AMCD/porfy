@@ -144,6 +144,83 @@ button:focus-visible,a:focus-visible{outline:3px solid rgba(76,169,213,.35);outl
  .notice{font-size:11px}
 }
 
+
+/* Lunor-inspired X7 visual refinement: retain X7 colours, sharpen the geometry */
+:root{
+ --bg:#f2f5f7;--panel:#fff;--ink:#17212b;--muted:#7b8791;--line:#e1e7eb;
+ --accent:#89cff0;--accent-strong:#4ca9d5;--nav:#0e151b;--nav-soft:#192630;
+ --shadow:none;--radius:6px
+}
+body{background:var(--bg);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;letter-spacing:0}
+.shell{grid-template-columns:246px minmax(0,1fr);background:var(--bg)}
+aside{background:#0e151b;border-right:1px solid #26323a;padding:27px 17px 20px;gap:25px}
+.brand{padding:2px 10px 18px;font-size:17px;letter-spacing:.14em}
+.brand:before{width:7px;height:7px;border-radius:1px;transform:rotate(45deg);box-shadow:none}
+.brand small{color:#84929c}
+nav{gap:3px}
+nav a{min-height:39px;padding:9px 11px;border-radius:5px;color:#a5b0b8;font-size:12px;border:1px solid transparent}
+nav a:before{width:6px;height:6px;border-radius:1px;margin-right:11px;transform:none;border-color:#73818b}
+nav a.active,nav a:hover{background:#1b2a34;border-color:#30414c;color:#fff}
+nav a.active:before{background:var(--accent);border-color:var(--accent);box-shadow:none}
+.logout{border-radius:5px;background:#1a2832;border-color:#34434e}
+.note{color:#7f8d97}
+main{padding:35px clamp(22px,4vw,60px) 56px}
+.top{margin-bottom:26px}
+.eyebrow{color:#84919b;letter-spacing:.16em}
+h1{color:#182832;font-weight:550;letter-spacing:-.045em}
+.date{color:#7e8c96}
+.pill{border-radius:5px;background:#eaf6fb;border-color:#d4eaf3;color:#397c9d}
+.notice{border-radius:5px;box-shadow:none;background:#f0f8fb;border-color:#d7e9f0;color:#496a79}
+.grid{gap:13px;margin-bottom:22px}
+.card{min-height:124px;padding:19px 20px;border-radius:6px;border:1px solid #e0e6ea;box-shadow:none;background:#fff}
+.card:hover{transform:none;box-shadow:none;border-color:#cbdde6}
+.card:after{top:0;right:0;width:54px;height:100%;border-radius:0;background:#f3f8fa;border-left:1px solid #e5edf1}
+.label{color:#7d8992;font-size:11px}
+.metric{font-size:32px;font-weight:550;color:#172832;letter-spacing:-.05em}
+.panel{border:1px solid #e0e6ea;border-radius:6px;padding:21px;background:#fff;box-shadow:none}
+h2{font-size:15px;font-weight:600;letter-spacing:-.015em;color:#1b2b36}
+.booking-card,.module-item{border:1px solid #e1e7eb;border-radius:5px;box-shadow:none}
+.booking-card{padding:17px}
+.booking-name{font-size:14px;font-weight:600}
+.booking-details{border-color:#edf0f2}
+.booking-message{border-radius:4px;background:#f5f8f9;border-color:#e6ecef;color:#40515d}
+.status{border-radius:3px;font-weight:600}
+.booking-tools{margin:0 0 15px}
+.view-switch{border-radius:4px;padding:2px;background:#f4f7f8}
+.view-switch button{border-radius:3px}
+.view-switch button.active{background:#1b2b36;box-shadow:none}
+.refresh,.secondary-btn,.primary-btn,.save-booking,.delete-booking,
+.booking-select,.form-field input,.form-field select,.form-field textarea,
+.module-nav a,.module-item{border-radius:4px}
+.refresh,.secondary-btn{background:#fff}
+.refresh:hover,.secondary-btn:hover{background:#f0f8fb;border-color:#b9dce9}
+.save-booking,.primary-btn{background:#1b2b36;border-color:#1b2b36}
+.save-booking:hover,.primary-btn:hover{background:#2b4859;transform:none}
+.booking-select,.form-field input,.form-field select,.form-field textarea{border-color:#dce4e8}
+.booking-select:focus,.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#78bfdf;box-shadow:0 0 0 2px rgba(137,207,240,.16)}
+.empty{border-radius:5px;background:#fafcfd;border-color:#dce5ea}
+.module-nav a{background:#fff;border-color:#e1e7eb;color:#53636e}
+.module-nav a:hover{background:#edf7fb;border-color:#c8e6f3;color:#286b8a}
+.module-item{padding:12px}
+.module-item img{border-radius:3px}
+.table-wrap,.list-view{border-radius:5px}
+.list-view{border-color:#e1e7eb}
+th{background:#f6f8f9;color:#7b8791}
+td{color:#34434d}
+button:focus-visible,a:focus-visible{outline:2px solid rgba(76,169,213,.42);outline-offset:2px}
+@media(max-width:900px){
+ .shell{grid-template-columns:210px minmax(0,1fr)}
+ aside{padding:23px 13px}
+}
+@media(max-width:620px){
+ aside{padding:15px 14px 12px}
+ .brand{padding:0 5px 2px}
+ nav a{min-height:36px;border-radius:4px}
+ main{padding:23px 15px 38px}
+ .card{min-height:108px;padding:15px}
+ .panel{padding:16px}
+}
+
 </style>
 </head>
 <body>
