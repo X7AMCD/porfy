@@ -2238,6 +2238,7 @@ $("aBook").onclick = () => {
 const BAR_PHOTOS = [];   // leave empty to use every photo from all collections (add paths here only to override)
 (() => {
   const ALL = BAR_PHOTOS.length ? BAR_PHOTOS : COLLECTIONS.flatMap(c => c.photos);   // every collection photo
+  const photoAlt = src => { const group = COLLECTIONS.find(c => c.photos.some(p => p === src)); return group ? `${group.title} photography by X7 Studios` : "Selected photography by X7 Studios"; };
   const COLS = 6, PER = ALL.length ? Math.ceil(ALL.length / COLS) : 5, SHARE = [.27, .23, .29, .25, .28, .24, .26];   // each photo is this share of the column height → about 3–4 on screen
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const order = shuffle(Array.from({ length: COLS * PER }, (_, n) => n));   // new random order on every page load
@@ -2317,7 +2318,7 @@ const BAR_PHOTOS = [];   // leave empty to use every photo from all collections 
     const t = thumbOf(e.src);
     load(t).catch(() => t !== e.src ? load(e.src) : Promise.reject())
       .then(u => e.tiles.forEach(x => {
-        const photo = document.createElement("img"); photo.className = "vphoto"; photo.alt = ""; photo.draggable = false; photo.decoding = "async"; photo.src = u;
+        const photo = document.createElement("img"); photo.className = "vphoto"; photo.alt = photoAlt(e.src); photo.draggable = false; photo.decoding = "async"; photo.src = u;
         x.append(photo);
         const show = () => requestAnimationFrame(() => photo.classList.add("ready"));
         if (photo.decode) photo.decode().then(show).catch(show); else { photo.onload = show; photo.onerror = () => photo.remove(); }
@@ -2408,7 +2409,7 @@ const BAR_PHOTOS = [];   // leave empty to use every photo from all collections 
     sl.style.backgroundImage = `url("${src + HERO_PARAMS}")`;
     sl.style.backgroundPosition = "center";
     sl.style.backgroundSize = "cover";
-    const im = new Image(); im.className = "sbg"; im.alt = ""; im.draggable = false; im.decoding = "async"; im.loading = "eager";
+    const im = new Image(); im.className = "sbg"; im.alt = sl.dataset.story || sl.dataset.title || "X7 Studios photography"; im.draggable = false; im.decoding = "async"; im.loading = "eager";
     if (k === 0) im.fetchPriority = "high";
     im.src = src + HERO_PARAMS; sl.prepend(im);
     decoded[k] = im.decode().then(() => { ready[k] = true; im.classList.add("ready"); }).catch(() => { ready[k] = true; /* Keep the CSS background fallback visible if decoding fails. */ });
