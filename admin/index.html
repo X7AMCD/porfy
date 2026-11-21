@@ -106,7 +106,7 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 <div class="module-actions"><button class="primary-btn" id="uploadPortfolio" type="button">Upload selected images</button><button class="secondary-btn" id="refreshPortfolio" type="button">Refresh library</button></div>
 <div class="module-status" id="portfolioStatus" role="status">Your existing ImageKit images will remain unchanged.</div>
 </div>
-<div><h2>Media library</h2><div id="portfolioLibrary" class="module-list"><div class="empty">Load media library to view uploaded images.</div></div></div>
+<div><h2>Media library</h2><div id="portfolioLibrary" class="module-list"><div class="empty">Load media library to view uploaded images.</div></div><h2 style="margin-top:24px">Website placements</h2><p class="label">Images assigned to the hero slideshow or Selected Work section.</p><div id="portfolioPlacements" class="module-list"><div class="empty">Load placements to view current assignments.</div></div></div>
 </div>
 </section>
 <section class="panel module-section" id="services">
@@ -248,9 +248,15 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
  function status(id,msg,error=false){const el=$(id);if(el){el.textContent=msg;el.style.color=error?"#a33232":""}}
  function list(id,rows,render){const el=$(id);if(!el)return;el.innerHTML=rows&&rows.length?rows.map(render).join(""):'<div class="empty">Nothing to show yet.</div>'}
  async function loadMedia(){
-  status("portfolioStatus","Loading ImageKit media library…");
-  try{const d=await request("/admin/media");const rows=d.media||d.assets||[];list("portfolioLibrary",rows,x=>'<div class="module-item"><img src="'+String(x.url||x.thumbnail_url||"").replace(/"/g,"&quot;")+'" alt=""><div class="grow"><strong>'+esc(x.name||x.file_name||"Image")+'</strong><small>'+esc(x.collection_slug||x.folder||"ImageKit")+'</small></div></div>');status("portfolioStatus",rows.length+" media item(s) loaded.");}
-  catch(e){status("portfolioStatus",e.message,true)}
+  status("portfolioStatus","Loading ImageKit media and website placements…");
+  try{
+   const [d,p]=await Promise.all([request("/admin/media"),request("/admin/placements")]);
+   const rows=d.media||d.assets||[];
+   list("portfolioLibrary",rows,x=>'<div class="module-item"><img src="'+String(x.url||x.thumbnail_url||"").replace(/"/g,"&quot;")+'" alt=""><div class="grow"><strong>'+esc(x.name||x.file_name||"Image")+'</strong><small>'+esc(x.collection_slug||x.folder||"ImageKit")+'</small></div></div>');
+   const placements=p.placements||[];
+   list("portfolioPlacements",placements,x=>'<div class="module-item"><img src="'+esc(x.url||x.thumbnail_url||"")+'" alt=""><div class="grow"><strong>'+esc(x.placement_type==="selected_work"?"Selected Work":x.placement_type||"Placement")+'</strong><small>'+esc(x.title||x.alt_text||x.file_name||"Assigned image")+(x.is_visible===0||x.is_visible===false?" · Hidden":" · Visible")+'</small></div></div>');
+   status("portfolioStatus",rows.length+" media item(s) and "+placements.length+" placement(s) loaded.");
+  }catch(e){status("portfolioStatus",e.message,true)}
  }
  function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
  $("refreshPortfolio").addEventListener("click",loadMedia);
