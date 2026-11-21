@@ -61,7 +61,6 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 <div class="brand">X7 STUDIOS<small>ADMINISTRATION</small></div>
 <nav aria-label="Admin sections">
 <a class="active" href="#overview">Overview</a>
-<a href="#portfolio">Portfolio</a>
 <a href="#bookings">Bookings</a>
 <a href="#portfolio">Portfolio</a>
 <a href="#services">Services & pricing</a>
@@ -230,6 +229,10 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
   const hash=(location.hash||"#overview").slice(1);
   const target=sections.includes(hash)?hash:"overview";
   document.querySelectorAll(".module-section").forEach(el=>el.classList.toggle("active",el.id===target));
+  const overviewParts=[...document.querySelector("main").children].filter(el=>!el.classList.contains("module-section"));
+  overviewParts.forEach(el=>{el.style.display=(target==="overview"||target==="bookings")?"":"none";});
+  if(target==="bookings"){const tools=document.querySelector(".module-nav");if(tools)tools.style.display="none";const quick=document.querySelector(".columns > .panel:not(#bookings)");if(quick)quick.style.display="none";}
+  else {const tools=document.querySelector(".module-nav");if(tools)tools.style.display="";const quick=document.querySelector(".columns > .panel:not(#bookings)");if(quick)quick.style.display="";}
   document.querySelectorAll('aside nav a').forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+target));
   const heading=target==="overview"?"Overview":target==="bookings"?"Bookings":target==="portfolio"?"Portfolio management":target==="services"?"Services & pricing":target==="clients"?"Client management":target==="galleries"?"Private galleries":target==="content"?"Website content":"Website settings";
   const h=document.querySelector("main h1"); if(h)h.textContent=heading;
