@@ -1,0 +1,27 @@
+name: Build X7 admin preview package
+
+on:
+  push:
+    branches:
+      - admin-systems-build
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out development branch
+        uses: actions/checkout@v4
+
+      - name: Package website for safe local preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: x7-admin-preview
+          path: .
+          if-no-files-found: error
+          retention-days: 5
+          exclude: |
+            .git/**
