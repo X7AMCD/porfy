@@ -32,6 +32,27 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 .actions{display:grid;gap:10px}.action{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.action:last-child{border:0}.arrow{color:var(--muted)}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}}
 @media(max-width:620px){.booking-card{padding:14px}.booking-details{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.booking-controls{align-items:stretch}.booking-select{flex:1;min-width:100%}.save-booking{flex:1}.delete-booking{margin-left:0;flex:1}.shell{grid-template-columns:1fr}aside{padding:17px;gap:14px}.brand small,.note{display:none}nav{display:flex;overflow:auto}nav a{white-space:nowrap;padding:8px 10px}main{padding:25px 17px}.top{align-items:flex-start}.pill{font-size:9px;padding:7px 10px}.grid{gap:9px}.card{padding:14px;min-height:100px}.metric{font-size:25px}.panel{padding:17px}}
+
+/* X7 management modules */
+.module-nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
+.module-nav a{border:1px solid var(--line);background:#fff;color:#333;text-decoration:none;border-radius:7px;padding:8px 12px;font-size:12px}
+.module-section{display:none;margin-top:18px}.module-section.active{display:block}
+.module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form-field{display:grid;gap:5px}.form-field.full{grid-column:1/-1}
+.form-field label{font-size:11px;color:var(--muted)}
+.form-field input,.form-field select,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:inherit;font-size:12px}
+.form-field textarea{min-height:90px;resize:vertical}
+.primary-btn,.secondary-btn{border:1px solid #171717;background:#171717;color:#fff;border-radius:7px;padding:10px 14px;font:inherit;font-size:12px;cursor:pointer}
+.secondary-btn{background:#fff;color:#171717;border-color:var(--line)}
+.module-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.module-list{display:grid;gap:10px;margin-top:14px}
+.module-item{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.module-item img{width:76px;height:62px;object-fit:cover;border-radius:5px;background:#eee}
+.module-item .grow{flex:1;min-width:0}.module-item strong{display:block;font-size:12px}.module-item small{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.module-status{font-size:11px;color:var(--muted);margin-top:10px;white-space:pre-wrap}
+@media(max-width:700px){.module-grid,.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.module-item{align-items:flex-start}.module-item img{width:64px;height:56px}}
+
 </style>
 </head>
 <body>
@@ -42,7 +63,11 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 <a class="active" href="#overview">Overview</a>
 <a href="#portfolio">Portfolio</a>
 <a href="#bookings">Bookings</a>
+<a href="#portfolio">Portfolio</a>
+<a href="#services">Services & pricing</a>
 <a href="#clients">Clients</a>
+<a href="#galleries">Private galleries</a>
+<a href="#content">Website content</a>
 <a href="#settings">Settings</a>
 </nav>
 <a class="logout" href="https://x7studios.co.za/cdn-cgi/access/logout?returnTo=https%3A%2F%2Fx7studios.co.za%2F" aria-label="Log out of X7 Studios admin">Log out</a><div class="note">Your admin session is protected by Cloudflare Access.</div>
@@ -56,6 +81,9 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 <div class="card"><div class="label">Portfolio collections</div><div class="metric">6</div><div class="label">Existing website categories</div></div>
 <div class="card"><div class="label">Active clients</div><div class="metric">—</div><div class="label">Private client accounts</div></div>
 </div>
+<div class="module-nav" aria-label="Management sections">
+<a href="#portfolio">Portfolio</a><a href="#services">Services & pricing</a><a href="#clients">Clients</a><a href="#galleries">Private galleries</a><a href="#content">Website content</a>
+</div>
 <div class="columns">
 <section class="panel" id="bookings"><h2>Bookings</h2><div class="booking-tools"><div class="booking-tools-left"><span class="label" id="bookingSummary">Loading booking records…</span><div class="view-switch" role="group" aria-label="Booking view"><button type="button" class="active" id="cardViewBtn" aria-pressed="true">Cards</button><button type="button" id="listViewBtn" aria-pressed="false">List</button></div></div><button class="refresh" id="refreshBookings" type="button">Refresh</button></div><div id="bookingOutput" class="empty" role="status" aria-live="polite">Connecting to bookings database…</div><p class="api-message" id="lastUpdated"></p></section>
 <section class="panel"><h2>Quick management</h2><div class="actions">
@@ -64,6 +92,53 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 <div class="action" id="settings"><span>Website settings</span><span class="arrow">→</span></div>
 </div></section>
 </div>
+
+<section class="panel module-section" id="portfolio">
+<h2>Portfolio management</h2>
+<p class="label">Upload photographs from your computer to ImageKit, then assign them to a website collection or placement.</p>
+<div class="module-grid">
+<div>
+<div class="form-grid">
+<div class="form-field full"><label for="portfolioFiles">Choose photographs</label><input id="portfolioFiles" type="file" accept="image/*" multiple></div>
+<div class="form-field"><label for="portfolioCollection">Collection</label><select id="portfolioCollection"><option value="portraits">Portraits</option><option value="street-urban">Street & Urban</option><option value="lifestyle">Lifestyle</option><option value="brand-product">Brand & Product</option><option value="events">Events</option><option value="nature">Nature</option></select></div>
+<div class="form-field"><label for="portfolioPlacement">Website placement</label><select id="portfolioPlacement"><option value="collection">Collection only</option><option value="hero">Hero slideshow</option><option value="selected-work">Selected Work</option></select></div>
+<div class="form-field full"><label for="portfolioAlt">Image title / alt text</label><input id="portfolioAlt" maxlength="180" placeholder="Describe the photograph"></div>
+</div>
+<div class="module-actions"><button class="primary-btn" id="uploadPortfolio" type="button">Upload selected images</button><button class="secondary-btn" id="refreshPortfolio" type="button">Refresh library</button></div>
+<div class="module-status" id="portfolioStatus" role="status">Your existing ImageKit images will remain unchanged.</div>
+</div>
+<div><h2>Media library</h2><div id="portfolioLibrary" class="module-list"><div class="empty">Load media library to view uploaded images.</div></div></div>
+</div>
+</section>
+<section class="panel module-section" id="services">
+<h2>Services & pricing</h2><p class="label">Create and maintain the services and packages shown to clients. Changes are saved to the API when the matching admin endpoints are available.</p>
+<div class="form-grid">
+<div class="form-field"><label for="serviceName">Service name</label><input id="serviceName" maxlength="100" placeholder="Portrait photography"></div>
+<div class="form-field"><label for="servicePrice">Starting price (ZAR)</label><input id="servicePrice" type="number" min="0" step="1" placeholder="1500"></div>
+<div class="form-field full"><label for="serviceDescription">Description</label><textarea id="serviceDescription" maxlength="1000"></textarea></div>
+</div><div class="module-actions"><button class="primary-btn" id="saveService" type="button">Save service</button><button class="secondary-btn" id="loadServices" type="button">Refresh services</button></div><div class="module-status" id="servicesStatus"></div><div id="servicesList" class="module-list"></div>
+</section>
+<section class="panel module-section" id="clients">
+<h2>Client management</h2><p class="label">Client records can be linked to bookings and private galleries.</p>
+<div class="form-grid"><div class="form-field"><label for="clientName">Client name</label><input id="clientName" maxlength="120"></div><div class="form-field"><label for="clientEmail">Email</label><input id="clientEmail" type="email" maxlength="180"></div><div class="form-field"><label for="clientPhone">Phone</label><input id="clientPhone" maxlength="40"></div><div class="form-field"><label for="clientNotes">Notes</label><input id="clientNotes" maxlength="500"></div></div>
+<div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><button class="secondary-btn" id="loadClients" type="button">Refresh clients</button></div><div class="module-status" id="clientsStatus"></div><div id="clientsList" class="module-list"></div>
+</section>
+<section class="panel module-section" id="galleries">
+<h2>Private client galleries</h2><p class="label">Create password-protected client galleries and add selected photographs. Public portfolio images and private gallery files remain separate placements.</p>
+<div class="form-grid"><div class="form-field"><label for="galleryClient">Client ID</label><input id="galleryClient" type="number" min="1"></div><div class="form-field"><label for="galleryTitle">Gallery title</label><input id="galleryTitle" maxlength="120" placeholder="Client gallery"></div><div class="form-field"><label for="galleryExpiry">Expiry date</label><input id="galleryExpiry" type="date"></div><div class="form-field"><label for="galleryPassword">Access password</label><input id="galleryPassword" type="password" autocomplete="new-password" placeholder="Set a unique password"></div></div>
+<div class="module-actions"><button class="primary-btn" id="createGallery" type="button">Create private gallery</button><button class="secondary-btn" id="loadGalleries" type="button">Refresh galleries</button></div><div class="module-status" id="galleriesStatus"></div><div id="galleriesList" class="module-list"></div>
+</section>
+<section class="panel module-section" id="content">
+<h2>Website content</h2><p class="label">Manage editable website text without changing the existing layout or ImageKit image links.</p>
+<div class="form-grid"><div class="form-field"><label for="contentSection">Section key</label><input id="contentSection" maxlength="80" placeholder="about"></div><div class="form-field"><label for="contentKey">Content key</label><input id="contentKey" maxlength="80" placeholder="heading"></div><div class="form-field full"><label for="contentValue">Text / content</label><textarea id="contentValue" maxlength="5000"></textarea></div></div>
+<div class="module-actions"><button class="primary-btn" id="saveContent" type="button">Save content</button><button class="secondary-btn" id="loadContent" type="button">Refresh content</button></div><div class="module-status" id="contentStatus"></div><div id="contentList" class="module-list"></div>
+</section>
+<section class="panel module-section" id="settings">
+<h2>Website settings</h2><p class="label">Central settings for the site and admin systems.</p>
+<div class="form-grid"><div class="form-field"><label for="settingKey">Setting key</label><input id="settingKey" maxlength="100" placeholder="booking_notice"></div><div class="form-field"><label for="settingValue">Setting value</label><input id="settingValue" maxlength="1000"></div></div>
+<div class="module-actions"><button class="primary-btn" id="saveSetting" type="button">Save setting</button><button class="secondary-btn" id="loadSettings" type="button">Refresh settings</button></div><div class="module-status" id="settingsStatus"></div><div id="settingsList" class="module-list"></div>
+</section>
+
 </main>
 <script>
 (()=>{
@@ -145,5 +220,64 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 })();
 </script>
 </div>
+
+<script>
+(()=>{
+ const api="https://api.x7studios.co.za";
+ const $=id=>document.getElementById(id);
+ const sections=["overview","bookings","portfolio","services","clients","galleries","content","settings"];
+ function showSection(){
+  const hash=(location.hash||"#overview").slice(1);
+  const target=sections.includes(hash)?hash:"overview";
+  document.querySelectorAll(".module-section").forEach(el=>el.classList.toggle("active",el.id===target));
+  document.querySelectorAll('aside nav a').forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+target));
+  const heading=target==="overview"?"Overview":target==="bookings"?"Bookings":target==="portfolio"?"Portfolio management":target==="services"?"Services & pricing":target==="clients"?"Client management":target==="galleries"?"Private galleries":target==="content"?"Website content":"Website settings";
+  const h=document.querySelector("main h1"); if(h)h.textContent=heading;
+  if(target==="portfolio")loadMedia();
+ }
+ window.addEventListener("hashchange",showSection);showSection();
+ async function request(path,options={}){
+  const res=await fetch(api+path,{credentials:"include",...options,headers:{Accept:"application/json",...(options.body?{"Content-Type":"application/json"}:{}),...(options.headers||{})}});
+  const data=await res.json().catch(()=>({error:"The API returned an unreadable response."}));
+  if(!res.ok)throw new Error(data.error||"Request failed (HTTP "+res.status+").");
+  return data;
+ }
+ function status(id,msg,error=false){const el=$(id);if(el){el.textContent=msg;el.style.color=error?"#a33232":""}}
+ function list(id,rows,render){const el=$(id);if(!el)return;el.innerHTML=rows&&rows.length?rows.map(render).join(""):'<div class="empty">Nothing to show yet.</div>'}
+ async function loadMedia(){
+  status("portfolioStatus","Loading ImageKit media library…");
+  try{const d=await request("/admin/media");const rows=d.media||d.assets||[];list("portfolioLibrary",rows,x=>'<div class="module-item"><img src="'+String(x.url||x.thumbnail_url||"").replace(/"/g,"&quot;")+'" alt=""><div class="grow"><strong>'+esc(x.name||x.file_name||"Image")+'</strong><small>'+esc(x.collection_slug||x.folder||"ImageKit")+'</small></div></div>');status("portfolioStatus",rows.length+" media item(s) loaded.");}
+  catch(e){status("portfolioStatus",e.message,true)}
+ }
+ function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+ $("refreshPortfolio").addEventListener("click",loadMedia);
+ $("uploadPortfolio").addEventListener("click",async()=>{
+  const files=[...$("portfolioFiles").files];if(!files.length){status("portfolioStatus","Choose at least one image first.",true);return}
+  const btn=$("uploadPortfolio");btn.disabled=true;status("portfolioStatus","Uploading "+files.length+" image(s)…");
+  try{
+   for(const file of files){
+    const form=new FormData();form.append("file",file);form.append("collection", $("portfolioCollection").value);form.append("placement",$("portfolioPlacement").value);form.append("alt_text",$("portfolioAlt").value.trim());
+    const res=await fetch(api+"/admin/media/upload",{method:"POST",credentials:"include",body:form});const d=await res.json().catch(()=>({error:"Upload response could not be read."}));if(!res.ok)throw new Error(d.error||"Image upload failed.");
+   }
+   $("portfolioFiles").value="";status("portfolioStatus","Upload complete.");await loadMedia();
+  }catch(e){status("portfolioStatus",e.message,true)}finally{btn.disabled=false}
+ });
+ async function loadModule(path,listId,statusId,itemsKey){
+  status(statusId,"Loading…");try{const d=await request(path);const rows=d[itemsKey]||d.items||[];list(listId,rows,x=>'<div class="module-item"><div class="grow"><strong>'+esc(x.name||x.title||x.email||x.key||"Record")+'</strong><small>'+esc(x.description||x.email||x.value||x.status||"")+'</small></div></div>');status(statusId,rows.length+" record(s) loaded.");}
+  catch(e){status(statusId,e.message,true)}
+ }
+ async function save(path,body,statusId,after){try{status(statusId,"Saving…");await request(path,{method:"POST",body:JSON.stringify(body)});status(statusId,"Saved successfully.");if(after)await after()}catch(e){status(statusId,e.message,true)}}
+ $("loadServices").addEventListener("click",()=>loadModule("/admin/services","servicesList","servicesStatus","services"));
+ $("saveService").addEventListener("click",()=>save("/admin/services",{name:$("serviceName").value.trim(),starting_price:Number($("servicePrice").value),description:$("serviceDescription").value.trim()},"servicesStatus",()=>$("loadServices").click()));
+ $("loadClients").addEventListener("click",()=>loadModule("/admin/clients","clientsList","clientsStatus","clients"));
+ $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",()=>$("loadClients").click()));
+ $("loadGalleries").addEventListener("click",()=>loadModule("/admin/galleries","galleriesList","galleriesStatus","galleries"));
+ $("createGallery").addEventListener("click",()=>save("/admin/galleries",{client_id:Number($("galleryClient").value),title:$("galleryTitle").value.trim(),expires_at:$("galleryExpiry").value,password:$("galleryPassword").value},"galleriesStatus",()=>$("loadGalleries").click()));
+ $("loadContent").addEventListener("click",()=>loadModule("/admin/content","contentList","contentStatus","content"));
+ $("saveContent").addEventListener("click",()=>save("/admin/content",{section:$("contentSection").value.trim(),content_key:$("contentKey").value.trim(),value:$("contentValue").value},"contentStatus",()=>$("loadContent").click()));
+ $("loadSettings").addEventListener("click",()=>loadModule("/admin/settings","settingsList","settingsStatus","settings"));
+ $("saveSetting").addEventListener("click",()=>save("/admin/settings",{key:$("settingKey").value.trim(),value:$("settingValue").value},"settingsStatus",()=>$("loadSettings").click()));
+})();
+</script>
 </body>
 </html>
