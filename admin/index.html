@@ -376,19 +376,49 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 </div><div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><button class="secondary-btn" id="loadClients" type="button">Refresh clients</button></div><div class="module-status" id="clientsStatus"></div></div><div class="feature-panel"><h3>Client directory</h3><div id="clientsList" class="module-list"></div></div>
 </section>
 <section class="panel module-section" id="galleries">
-<h2>Private client galleries</h2><p class="label">Create password-protected client galleries and add selected photographs. Public portfolio images and private gallery files remain separate placements.</p>
-<div class="feature-panel"><h3>Create a gallery</h3><div class="form-grid"><div class="form-field"><label for="galleryClient">Client ID</label><input id="galleryClient" type="number" min="1"></div><div class="form-field"><label for="galleryTitle">Gallery title</label><input id="galleryTitle" maxlength="120" placeholder="Client gallery"></div><div class="form-field"><label for="galleryExpiry">Expiry date</label><input id="galleryExpiry" type="date"></div><div class="form-field"><label for="galleryPassword">Access password</label><input id="galleryPassword" type="password" autocomplete="new-password" placeholder="Set a unique password"></div></div>
-</div><div class="module-actions"><button class="primary-btn" id="createGallery" type="button">Create private gallery</button><button class="secondary-btn" id="loadGalleries" type="button">Refresh galleries</button></div><div class="module-status" id="galleriesStatus"></div></div><div class="feature-panel"><h3>Existing galleries</h3><div id="galleriesList" class="module-list"></div></div>
+<h2>Private client galleries</h2>
+<p class="label">Create password-protected client galleries and add selected photographs. Public portfolio images and private gallery files remain separate placements.</p>
+<div class="feature-panel">
+<h3>Create a gallery</h3>
+<div class="form-grid">
+<div class="form-field"><label for="galleryClient">Client ID</label><input id="galleryClient" type="number" min="1"></div>
+<div class="form-field"><label for="galleryTitle">Gallery title</label><input id="galleryTitle" maxlength="120" placeholder="Client gallery"></div>
+<div class="form-field"><label for="galleryExpiry">Expiry date</label><input id="galleryExpiry" type="date"></div>
+<div class="form-field"><label for="galleryPassword">Access password</label><input id="galleryPassword" type="password" autocomplete="new-password" placeholder="Set a unique password"></div>
+</div>
+<div class="module-actions"><button class="primary-btn" id="createGallery" type="button">Create private gallery</button><button class="secondary-btn" id="loadGalleries" type="button">Refresh galleries</button></div>
+<div class="module-status" id="galleriesStatus" role="status"></div>
+</div>
+<div class="feature-panel"><h3>Existing galleries</h3><div id="galleriesList" class="module-list"><div class="empty">Select Refresh galleries to load existing galleries.</div></div></div>
 </section>
 <section class="panel module-section" id="content">
-<h2>Website content</h2><p class="label">Manage editable website text without changing the existing layout or ImageKit image links.</p>
-<div class="feature-panel"><h3>Edit website content</h3><div class="form-grid"><div class="form-field"><label for="contentSection">Section key</label><input id="contentSection" maxlength="80" placeholder="about"></div><div class="form-field"><label for="contentKey">Content key</label><input id="contentKey" maxlength="80" placeholder="heading"></div><div class="form-field full"><label for="contentValue">Text / content</label><textarea id="contentValue" maxlength="5000"></textarea></div></div>
-</div><div class="module-actions"><button class="primary-btn" id="saveContent" type="button">Save content</button><button class="secondary-btn" id="loadContent" type="button">Refresh content</button></div><div class="module-status" id="contentStatus"></div></div><div class="feature-panel"><h3>Saved content</h3><div id="contentList" class="module-list"></div></div>
+<h2>Website content</h2>
+<p class="label">Manage editable website text without changing the existing layout or ImageKit image links.</p>
+<div class="feature-panel">
+<h3>Edit website content</h3>
+<div class="form-grid">
+<div class="form-field"><label for="contentSection">Section key</label><input id="contentSection" maxlength="80" placeholder="about"></div>
+<div class="form-field"><label for="contentKey">Content key</label><input id="contentKey" maxlength="80" placeholder="heading"></div>
+<div class="form-field full"><label for="contentValue">Text / content</label><textarea id="contentValue" maxlength="5000"></textarea></div>
+</div>
+<div class="module-actions"><button class="primary-btn" id="saveContent" type="button">Save content</button><button class="secondary-btn" id="loadContent" type="button">Refresh content</button></div>
+<div class="module-status" id="contentStatus" role="status"></div>
+</div>
+<div class="feature-panel"><h3>Saved content</h3><div id="contentList" class="module-list"><div class="empty">Select Refresh content to load saved entries.</div></div></div>
 </section>
 <section class="panel module-section" id="settings">
-<h2>Website settings</h2><p class="label">Central settings for the site and admin systems.</p>
-<div class="feature-panel"><h3>Update a setting</h3><div class="form-grid"><div class="form-field"><label for="settingKey">Setting key</label><input id="settingKey" maxlength="100" placeholder="booking_notice"></div><div class="form-field"><label for="settingValue">Setting value</label><input id="settingValue" maxlength="1000"></div></div>
-</div><div class="module-actions"><button class="primary-btn" id="saveSetting" type="button">Save setting</button><button class="secondary-btn" id="loadSettings" type="button">Refresh settings</button></div><div class="module-status" id="settingsStatus"></div></div><div class="feature-panel"><h3>Current settings</h3><div id="settingsList" class="module-list"></div></div>
+<h2>Website settings</h2>
+<p class="label">Central settings for the site and admin systems.</p>
+<div class="feature-panel">
+<h3>Update a setting</h3>
+<div class="form-grid">
+<div class="form-field"><label for="settingKey">Setting key</label><input id="settingKey" maxlength="100" placeholder="booking_notice"></div>
+<div class="form-field"><label for="settingValue">Setting value</label><input id="settingValue" maxlength="1000"></div>
+</div>
+<div class="module-actions"><button class="primary-btn" id="saveSetting" type="button">Save setting</button><button class="secondary-btn" id="loadSettings" type="button">Refresh settings</button></div>
+<div class="module-status" id="settingsStatus" role="status"></div>
+</div>
+<div class="feature-panel"><h3>Current settings</h3><div id="settingsList" class="module-list"><div class="empty">Select Refresh settings to load current values.</div></div></div>
 </section>
 
 </main>
@@ -492,6 +522,9 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
   const heading=target==="overview"?"Overview":target==="bookings"?"Bookings":target==="portfolio"?"Portfolio management":target==="services"?"Services & pricing":target==="clients"?"Client management":target==="galleries"?"Private galleries":target==="content"?"Website content":"Website settings";
   const h=document.querySelector("main h1"); if(h)h.textContent=heading;
   if(target==="portfolio"&&lastAppliedHash!==currentHash)loadMedia();
+  if(target==="galleries"&&lastAppliedHash!==currentHash)$("loadGalleries")?.click();
+  if(target==="content"&&lastAppliedHash!==currentHash)$("loadContent")?.click();
+  if(target==="settings"&&lastAppliedHash!==currentHash)$("loadSettings")?.click();
   lastAppliedHash=currentHash;
   window.scrollTo({top:0,behavior:"auto"});
  }
