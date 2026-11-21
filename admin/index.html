@@ -53,6 +53,97 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 .module-status{font-size:11px;color:var(--muted);margin-top:10px;white-space:pre-wrap}
 @media(max-width:700px){.module-grid,.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.module-item{align-items:flex-start}.module-item img{width:64px;height:56px}}
 
+
+/* X7 Studio premium dashboard refresh */
+:root{
+ --bg:#f3f5f7;--panel:#fff;--ink:#17212b;--muted:#71808d;--line:#e4e9ed;
+ --accent:#89cff0;--accent-strong:#4ca9d5;--nav:#101820;--nav-soft:#1b2a35;
+ --shadow:0 8px 28px rgba(22,39,52,.055);--radius:15px
+}
+body{background:var(--bg);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;letter-spacing:.005em}
+.shell{grid-template-columns:252px minmax(0,1fr)}
+aside{position:sticky;top:0;height:100vh;min-height:100vh;padding:30px 18px 22px;background:linear-gradient(180deg,#111b24 0%,#0c141b 100%);gap:30px;border-right:1px solid rgba(255,255,255,.06)}
+.brand{padding:2px 12px 22px;font-size:18px;letter-spacing:.16em}
+.brand:before{content:"";display:inline-block;width:8px;height:8px;margin:0 10px 2px 0;border-radius:50%;background:var(--accent);box-shadow:0 0 15px rgba(137,207,240,.65)}
+.brand small{margin-top:7px;padding-left:19px;color:#8fa0ad;font-size:9px;letter-spacing:.23em}
+nav{gap:5px}
+nav a{position:relative;display:flex;align-items:center;min-height:43px;padding:11px 13px;border:1px solid transparent;border-radius:9px;color:#aab7c1;font-size:12px;letter-spacing:.015em;transition:background .18s ease,color .18s ease,border-color .18s ease}
+nav a:before{content:"";width:6px;height:6px;margin-right:12px;border:1px solid #71818d;border-radius:2px;transform:rotate(45deg);opacity:.8}
+nav a.active,nav a:hover{background:rgba(137,207,240,.12);border-color:rgba(137,207,240,.15);color:#fff}
+nav a.active:before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(137,207,240,.45)}
+.logout{margin-top:auto;border-color:#34434e;background:#1a2832;color:#d7e0e6;border-radius:9px}
+.logout:hover{background:#263b49}
+.note{padding:0 8px;color:#788995}
+main{max-width:1540px;padding:38px clamp(22px,4vw,62px) 60px}
+.top{margin-bottom:28px;align-items:center}
+.eyebrow{font-size:10px;letter-spacing:.2em;color:#82909b;font-weight:700}
+h1{font-size:clamp(29px,3.4vw,40px);font-weight:550;letter-spacing:-.055em;color:#15232e;margin:5px 0}
+.date{font-size:12px;color:#83919c}
+.pill{background:#eaf6fb;border:1px solid #d3edf8;color:#397c9d;font-weight:700;font-size:10px;letter-spacing:.12em;padding:9px 14px}
+.notice{border:1px solid #d8eaf2;background:linear-gradient(110deg,#f0f9fd,#fff);color:#456879;border-radius:12px;padding:15px 18px;box-shadow:0 3px 12px rgba(43,105,135,.035)}
+.grid{gap:16px;margin-bottom:24px}
+.card{position:relative;overflow:hidden;border:1px solid #e5eaee;border-radius:var(--radius);padding:21px 22px;min-height:132px;box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(22,39,52,.09)}
+.card:after{content:"";position:absolute;right:-25px;top:-30px;width:95px;height:95px;border-radius:50%;background:rgba(137,207,240,.12)}
+.label{font-size:11px;color:#7a8994;letter-spacing:.025em}
+.metric{position:relative;z-index:1;font-size:34px;font-weight:600;letter-spacing:-.06em;color:#1c2c37;margin:12px 0 3px}
+.columns{gap:18px}
+.panel{border:1px solid #e5eaee;border-radius:var(--radius);padding:23px;background:#fff;box-shadow:var(--shadow)}
+h2{font-size:16px;font-weight:650;letter-spacing:-.02em;color:#1b2b36;margin:0 0 15px}
+.booking-tools{margin:2px 0 17px}
+.view-switch{padding:3px;border-radius:8px;background:#f3f6f8;border-color:#e7edf1}
+.view-switch button{padding:7px 12px;border-radius:6px;font-size:11px}
+.view-switch button.active{background:#1b2b36;color:#fff;box-shadow:0 2px 5px rgba(0,0,0,.12)}
+.refresh,.secondary-btn{border-radius:8px;border-color:#dce4e9;color:#40515d;transition:background .15s ease,border-color .15s ease}
+.refresh:hover,.secondary-btn:hover{background:#f2f8fb;border-color:#b8dcec}
+.booking-card,.module-item{border-color:#e5eaee;border-radius:12px;box-shadow:0 3px 12px rgba(22,39,52,.035)}
+.booking-card{padding:19px}
+.booking-name{font-size:15px;color:#1b2b36}
+.booking-details{border-color:#edf0f2}
+.booking-message{background:#f6f9fa;border-color:#e9eff2;border-radius:9px;color:#40515d}
+.status{font-weight:650;letter-spacing:.02em}
+.booking-select,.form-field input,.form-field select,.form-field textarea{border-color:#dfe6ea;border-radius:8px;color:#263843;outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.booking-select:focus,.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:#78bfdf;box-shadow:0 0 0 3px rgba(137,207,240,.18)}
+.save-booking,.primary-btn{border-radius:8px;background:#1b2b36;border-color:#1b2b36;padding:9px 14px;font-weight:600;transition:background .15s ease,transform .15s ease}
+.save-booking:hover,.primary-btn:hover{background:#2b4859;transform:translateY(-1px)}
+.delete-booking{border-radius:8px}
+.empty{border-color:#dce5ea;border-radius:11px;background:#fafcfd;padding:34px 18px}
+.module-nav{gap:7px;margin-bottom:20px}
+.module-nav a{border-radius:8px;border-color:#e1e8ec;color:#53636e;padding:9px 13px;transition:all .15s ease}
+.module-nav a:hover{background:#eaf6fb;border-color:#c8e6f3;color:#286b8a}
+.module-section{border-radius:var(--radius)}
+.module-item{padding:13px}
+.module-item img{border-radius:8px}
+.module-status{font-size:11px}
+.table-wrap,.list-view{border-radius:10px}
+table{font-size:12px}
+th{background:#f7f9fa;color:#74838d;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+td{line-height:1.55}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible{outline:3px solid rgba(76,169,213,.35);outline-offset:2px}
+@media(max-width:900px){
+ .shell{grid-template-columns:210px minmax(0,1fr)}
+ aside{padding:24px 13px}
+ main{padding:28px 22px 48px}
+}
+@media(max-width:620px){
+ .shell{grid-template-columns:1fr}
+ aside{position:relative;height:auto;min-height:0;padding:15px 14px 12px;gap:12px}
+ .brand{padding:0 5px 2px;font-size:16px}
+ .brand small{display:block;padding-left:19px}
+ nav{gap:5px;padding-bottom:2px}
+ nav a{min-height:37px;padding:8px 10px;font-size:11px}
+ nav a:before{width:5px;height:5px;margin-right:8px}
+ .logout{display:none}
+ main{padding:24px 15px 40px}
+ .top{margin-bottom:22px}
+ .grid{gap:10px}
+ .card{padding:16px;min-height:112px}
+ .metric{font-size:29px}
+ .panel{padding:17px}
+ .notice{font-size:11px}
+}
+
 </style>
 </head>
 <body>
