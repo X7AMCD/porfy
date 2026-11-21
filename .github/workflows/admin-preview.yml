@@ -16,12 +16,10 @@ jobs:
       - name: Check out development branch
         uses: actions/checkout@v4
 
-      - name: Package website for safe local preview
+      - name: Package website for safe preview
         uses: actions/upload-artifact@v4
         with:
           name: x7-admin-preview
           path: .
           if-no-files-found: error
           retention-days: 5
-          exclude: |
-            .git/**
