@@ -342,6 +342,30 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
   #settings > .feature-panel:first-of-type{padding:13px;margin:8px 0 12px}
 }
 
+/* Overview: studio snapshot, recent activity and direct navigation */
+.overview-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(270px,.9fr);gap:16px;align-items:start}
+.overview-layout>.panel{min-width:0;background:#fff;border:1px solid #e1e7eb;border-radius:14px;padding:22px;box-shadow:0 12px 30px rgba(0,0,0,.16)}
+.overview-panel-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.overview-panel-heading h2{margin-bottom:4px}
+.overview-link{color:#397c9d;font-size:11px;text-decoration:none;white-space:nowrap}
+.overview-link:hover{text-decoration:underline}
+.overview-recent-list{display:grid;gap:0}
+.overview-booking{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f2}
+.overview-booking:last-child{border-bottom:0}
+.overview-booking strong{display:block;color:#1b2b36;font-size:12px;font-weight:650}
+.overview-booking small{display:block;margin-top:3px;color:#788791;font-size:11px}
+.overview-booking .status{flex:none}
+.overview-quick>h2{margin-bottom:4px}
+.overview-quick>.label{margin-bottom:12px}
+.overview-action{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f2;color:#243640;text-decoration:none}
+.overview-action:last-child{border-bottom:0}
+.overview-action strong{display:block;font-size:12px;font-weight:650}
+.overview-action small{display:block;margin-top:3px;color:#788791;font-size:11px}
+.overview-action>span:last-child{color:#4ca9d5;font-size:17px}
+.overview-action:hover strong{color:#397c9d}
+@media(max-width:900px){.overview-layout{grid-template-columns:1fr}}
+@media(max-width:620px){.overview-layout>.panel{padding:16px}.overview-panel-heading{flex-wrap:wrap}.overview-booking{align-items:flex-start}}
+
 </style>
 </head>
 <body>
@@ -370,7 +394,27 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 <div class="card"><div class="label">Active clients</div><div class="metric">—</div><div class="label">Private client accounts</div></div>
 </div>
 <div class="columns">
-<section class="panel" id="bookings"><h2>Bookings</h2><div class="booking-tools"><div class="booking-tools-left"><span class="label" id="bookingSummary">Loading booking records…</span><div class="view-switch" role="group" aria-label="Booking view"><button type="button" class="active" id="cardViewBtn" aria-pressed="true">Cards</button><button type="button" id="listViewBtn" aria-pressed="false">List</button></div></div><button class="refresh" id="refreshBookings" type="button">Refresh</button></div><div id="bookingOutput" class="empty" role="status" aria-live="polite">Connecting to bookings database…</div><p class="api-message" id="lastUpdated"></p></section>
+<div class="grid overview-metrics">
+<div class="card"><div class="label">New enquiries</div><div class="metric" id="newCount">—</div><div class="label">Awaiting review</div></div>
+<div class="card"><div class="label">Confirmed shoots</div><div class="metric" id="confirmedCount">—</div><div class="label">Confirmed bookings</div></div>
+<div class="card"><div class="label">Total bookings</div><div class="metric" id="totalBookingsCount">—</div><div class="label">All booking records</div></div>
+<div class="card"><div class="label">Portfolio collections</div><div class="metric">6</div><div class="label">Website categories</div></div>
+</div>
+<div class="overview-layout">
+<section class="panel overview-recent">
+<div class="overview-panel-heading"><div><h2>Recent bookings</h2><p class="label">A quick snapshot of the latest client activity.</p></div><a class="overview-link" href="#bookings">View all bookings →</a></div>
+<div id="overviewRecentBookings" class="overview-recent-list"><div class="empty">Loading recent activity…</div></div>
+</section>
+<section class="panel overview-quick">
+<h2>Quick access</h2>
+<p class="label">Jump straight to the areas you manage most.</p>
+<a class="overview-action" href="#bookings"><span><strong>Bookings</strong><small>Review enquiries and confirm shoots</small></span><span>→</span></a>
+<a class="overview-action" href="#portfolio"><span><strong>Portfolio</strong><small>Upload and organise photographs</small></span><span>→</span></a>
+<a class="overview-action" href="#galleries"><span><strong>Private galleries</strong><small>Manage client photo galleries</small></span><span>→</span></a>
+<a class="overview-action" href="#content"><span><strong>Website content</strong><small>Update text shown on the website</small></span><span>→</span></a>
+</section>
+</div>
+<section class="panel module-section" id="bookings"><h2>Bookings</h2><div class="booking-tools"><div class="booking-tools-left"><span class="label" id="bookingSummary">Loading booking records…</span><div class="view-switch" role="group" aria-label="Booking view"><button type="button" class="active" id="cardViewBtn" aria-pressed="true">Cards</button><button type="button" id="listViewBtn" aria-pressed="false">List</button></div></div><button class="refresh" id="refreshBookings" type="button">Refresh</button></div><div id="bookingOutput" class="empty" role="status" aria-live="polite">Connecting to bookings database…</div><p class="api-message" id="lastUpdated"></p></section>
 <section class="panel"><h2>Quick management</h2><div class="actions">
 <div class="action"><span>Manage portfolio images</span><span class="arrow">→</span></div>
 <div class="action"><span>Manage client galleries</span><span class="arrow">→</span></div>
@@ -473,6 +517,12 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
    cardViewBtn.classList.toggle("active",currentView==="cards");cardViewBtn.setAttribute("aria-pressed",String(currentView==="cards"));
    listViewBtn.classList.toggle("active",currentView==="list");listViewBtn.setAttribute("aria-pressed",String(currentView==="list"));
    newCount.textContent=rows.filter(b=>(b.status||"Pending").toLowerCase()==="pending").length;
+   const totalCount=document.getElementById("totalBookingsCount");if(totalCount)totalCount.textContent=rows.length;
+   const recent=document.getElementById("overviewRecentBookings");
+   if(recent){
+     const latest=[...rows].sort((a,b)=>(b.created_at||"").localeCompare(a.created_at||"")).slice(0,4);
+     recent.innerHTML=latest.length?latest.map(b=>{const status=b.status||"Pending";const cls=status.toLowerCase()==="confirmed"?"confirmed":status.toLowerCase()==="cancelled"?"cancelled":"";return '<div class="overview-booking"><div><strong>'+safe(b.customer_name||"New client")+'</strong><small>'+safe(b.service||"Photography")+' · '+safe(b.booking_date||"Date not set")+'</small></div><span class="status '+cls+'">'+safe(status)+'</span></div>';}).join(""):'<div class="empty">No booking activity yet. New enquiries will appear here.</div>';
+   }
    confirmedCount.textContent=rows.filter(b=>(b.status||"").toLowerCase()==="confirmed").length;
    if(!rows.length){output.className="empty";output.textContent="No bookings have been received yet.";summary.textContent="0 bookings";return;}
    const sorted=[...rows].sort((a,b)=>(b.created_at||"").localeCompare(a.created_at||""));
@@ -547,9 +597,8 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
   const target=sections.includes(hash)?hash:"overview";
   document.querySelectorAll(".module-section").forEach(el=>el.classList.toggle("active",el.id===target));
   const overviewParts=[...document.querySelector("main").children].filter(el=>!el.classList.contains("module-section"));
-  overviewParts.forEach(el=>{el.style.display=(target==="overview"||target==="bookings")?"":"none";});
-  if(target==="bookings"){const tools=document.querySelector(".module-nav");if(tools)tools.style.display="none";const quick=document.querySelector(".columns > .panel:not(#bookings)");if(quick)quick.style.display="none";}
-  else {const tools=document.querySelector(".module-nav");if(tools)tools.style.display="";const quick=document.querySelector(".columns > .panel:not(#bookings)");if(quick)quick.style.display="";}
+  overviewParts.forEach(el=>{el.style.display=target==="overview"?"":"none";});
+  
   document.querySelectorAll('aside nav a').forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+target));
   const heading=target==="overview"?"Overview":target==="bookings"?"Bookings":target==="portfolio"?"Portfolio management":target==="services"?"Services & pricing":target==="clients"?"Client management":target==="galleries"?"Private galleries":target==="content"?"Website content":"Website settings";
   const h=document.querySelector("main h1"); if(h)h.textContent=heading;
