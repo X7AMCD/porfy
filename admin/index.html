@@ -310,6 +310,38 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
  .feature-panel{padding:15px;margin:12px 0}
 }
 
+/* Keep the working controls immediately visible in these management sections */
+# galleries {}
+#galleries > .feature-panel:first-of-type,
+#content > .feature-panel:first-of-type,
+#settings > .feature-panel:first-of-type{
+  margin:10px 0 14px;
+  padding:16px 18px;
+  background:#f8fafb;
+}
+#galleries > .feature-panel:first-of-type .form-grid,
+#content > .feature-panel:first-of-type .form-grid,
+#settings > .feature-panel:first-of-type .form-grid{
+  margin-top:4px;
+  align-items:start;
+  gap:10px 14px;
+}
+#galleries > .feature-panel:first-of-type .module-actions,
+#content > .feature-panel:first-of-type .module-actions,
+#settings > .feature-panel:first-of-type .module-actions{
+  margin-top:10px;
+}
+#galleries > .feature-panel:nth-of-type(2),
+#content > .feature-panel:nth-of-type(2),
+#settings > .feature-panel:nth-of-type(2){
+  margin-top:4px;
+}
+@media(max-width:620px){
+  #galleries > .feature-panel:first-of-type,
+  #content > .feature-panel:first-of-type,
+  #settings > .feature-panel:first-of-type{padding:13px;margin:8px 0 12px}
+}
+
 </style>
 </head>
 <body>
