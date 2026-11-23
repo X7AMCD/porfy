@@ -842,30 +842,18 @@ if (
       }
       // -----------------------------------------------
       // PORTFOLIO: DISCOVER CURRENT WEBSITE IMAGES
+      // Scans the public homepage and the full portfolio page for ImageKit URLs.
+      // This is read-only: it does not modify D1 records or any website image links.
       // -----------------------------------------------
       if (
         url.pathname === "/admin/website-images" &&
         request.method === "GET"
       ) {
         try {
-          const response = await fetch(
-            "https://x7studios.co.za/preview"
-          );
-
-          if (!response.ok) {
-            throw new Error("Could not read the current website");
-          }
-
-          const html = await response.text();
-
-          const start = html.indexOf("const COLLECTIONS = [");
-          const end = html.indexOf("];", start);
-
-          if (start === -1 || end === -1) {
-            throw new Error("Could not locate the website collections");
-          }
-
-          const collectionCode = html.slice(start, end + 2);
+          const pages = [
+            { url: "https://x7studios.co.za/", label: "Homepage" },
+            { url: "https://x7studios.co.za/preview", label: "Portfolio website" }
+          ];
 
           const collectionMap = {
             images11: { name: "Portraits", slug: "portraits" },
@@ -876,82 +864,94 @@ if (
             images16: { name: "Nature", slug: "nature" }
           };
 
-          const matches = [
-            ...collectionCode.matchAll(
-              /["'](\]?https:\/\/ik\.imagekit\.io\/amcid\/[^"'\\\s]*)["']/g
-            )
-          ];
+          const discovered = new Map();
+          const scannedPages = [];
 
-          const seen = new Set();
-          const images = [];
-
-          for (const match of matches) {
-            const sourceUrl = match[1];
-            const cleanUrl = sourceUrl.replace(/^\]/, "");
-
-            if (seen.has(cleanUrl)) continue;
-            seen.add(cleanUrl);
-
-            let parsedUrl;
-
-            try {
-              parsedUrl = new URL(cleanUrl);
-            } catch {
+          for (const page of pages) {
+            const response = await fetch(page.url);
+            if (!response.ok) {
+              console.warn("Website image scan skipped", page.url, response.status);
               continue;
             }
 
-            const pathParts = parsedUrl.pathname
-              .split("/")
-              .filter(Boolean);
+            const html = await response.text();
+            scannedPages.push(page.label);
 
-            const folder = (
-              pathParts[pathParts.length - 2] || ""
-            ).toLowerCase();
+            const pattern = /https:\/\/ik\.imagekit\.io\/amcid\/[^s"'\x60<>\\)]+/g;
 
-            const collection = collectionMap[folder];
+            for (const match of html.matchAll(pattern)) {
+              const sourceUrl = match[0].replace(/[),;]+$/, "");
+              let parsedUrl;
 
-            if (!collection) continue;
+              try {
+                parsedUrl = new URL(sourceUrl);
+              } catch {
+                continue;
+              }
 
-            let fileName = pathParts[pathParts.length - 1] || "Image";
+              if (
+                parsedUrl.hostname !== "ik.imagekit.io" ||
+                !parsedUrl.pathname.startsWith("/amcid/")
+              ) continue;
 
-            try {
-              fileName = decodeURIComponent(fileName);
-            } catch {
-              // Keep the original filename if decoding fails.
+              // Ignore transformation/query-string differences when identifying the same file.
+              const uniqueKey = parsedUrl.origin + parsedUrl.pathname;
+              const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+              const folder = (pathParts[pathParts.length - 2] || "").toLowerCase();
+              const collection = collectionMap[folder];
+
+              let fileName = pathParts[pathParts.length - 1] || "Image";
+              try {
+                fileName = decodeURIComponent(fileName);
+              } catch {
+                // Retain the original filename if decoding fails.
+              }
+
+              if (discovered.has(uniqueKey)) {
+                const existing = discovered.get(uniqueKey);
+                if (!existing.source_pages.includes(page.label)) {
+                  existing.source_pages.push(page.label);
+                }
+                continue;
+              }
+
+              discovered.set(uniqueKey, {
+                url: sourceUrl,
+                file_name: fileName,
+                section: collection ? collection.name : "Homepage / Hero",
+                collection_name: collection ? collection.name : null,
+                collection_slug: collection ? collection.slug : null,
+                source: "live_website",
+                source_pages: [page.label]
+              });
             }
-
-            images.push({
-              url: cleanUrl,
-              source_url: sourceUrl,
-              file_name: fileName,
-              collection_name: collection.name,
-              collection_slug: collection.slug,
-              source: "website"
-            });
           }
+
+          const images = Array.from(discovered.values()).sort((a, b) =>
+            (a.collection_name || a.section).localeCompare(b.collection_name || b.section) ||
+            a.file_name.localeCompare(b.file_name)
+          );
 
           return json(
             {
+              success: true,
               images,
-              total: images.length
+              total: images.length,
+              pages_scanned: scannedPages
             },
             200,
             origin
           );
-
         } catch (error) {
           console.error("Website image discovery failed:", error);
-
           return json(
-            {
-              error: "Could not discover website images"
-            },
+            { error: "Could not discover images currently used on the website" },
             500,
             origin
           );
         }
       }
-      // -------------------------------------------------
+      // -----------------------------------------------
       // SERVICES: LIST
       // -------------------------------------------------
       if (url.pathname === "/admin/services" && request.method === "GET") {
