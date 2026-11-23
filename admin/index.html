@@ -399,6 +399,7 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 </div>
 <div class="feature-panel"><h3>Media library</h3><div id="portfolioLibrary" class="module-list"><div class="empty">Load media library to view uploaded images.</div></div><div class="feature-panel"><h3>Website placements</h3><p class="label">Images assigned to the hero slideshow or Selected Work section.</p><div id="portfolioPlacements" class="module-list"><div class="empty">Load placements to view current assignments.</div></div></div></div>
 </div>
+<div class="feature-panel"><h3>Currently used on website</h3><p class="label">ImageKit photographs detected in the live homepage and portfolio website. These are discovered without changing their original links.</p><div class="module-status" id="websiteImagesStatus" role="status">Refresh the library to scan current website images.</div><div id="websiteImagesList" class="module-list"><div class="empty">Website images have not been scanned yet.</div></div></div>
 </section>
 <section class="panel module-section" id="services">
 <h2>Services & pricing</h2><p class="label">Create and maintain the services and packages shown to clients. Changes are saved to the API when the matching admin endpoints are available.</p>
@@ -598,12 +599,15 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
  async function loadMedia(){
   status("portfolioStatus","Loading ImageKit media and website placements…");
   try{
-   const [d,p]=await Promise.all([request("/admin/media"),request("/admin/placements")]);
+   const [d,p,w]=await Promise.all([request("/admin/media"),request("/admin/placements"),request("/admin/website-images")]);
    const rows=d.media||d.assets||[];
    list("portfolioLibrary",rows,x=>'<div class="module-item"><img src="'+String(x.url||x.thumbnail_url||"").replace(/"/g,"&quot;")+'" alt=""><div class="grow"><strong>'+esc(x.name||x.file_name||"Image")+'</strong><small>'+esc(x.collection_slug||x.folder||"ImageKit")+'</small></div></div>');
    const placements=p.placements||[];
    list("portfolioPlacements",placements,x=>'<div class="module-item"><img src="'+esc(x.url||x.thumbnail_url||"")+'" alt=""><div class="grow"><strong>'+esc(x.placement_type==="selected_work"?"Selected Work":x.placement_type||"Placement")+'</strong><small>'+esc(x.title||x.alt_text||x.file_name||"Assigned image")+(x.is_visible===0||x.is_visible===false?" · Hidden":" · Visible")+'</small></div></div>');
-   status("portfolioStatus",rows.length+" media item(s) and "+placements.length+" placement(s) loaded.");
+   const websiteImages=w.images||[];
+   list("websiteImagesList",websiteImages,x=>'<div class="module-item"><img src="'+esc(x.url||"")+'" alt=""><div class="grow"><strong>'+esc(x.file_name||"Image")+'</strong><small>'+esc(x.section||x.collection_name||"Website image")+' · '+esc((x.source_pages||[]).join(", "))+'</small></div></div>');
+   status("websiteImagesStatus",websiteImages.length+" unique ImageKit image(s) detected across "+((w.pages_scanned||[]).length)+" website page(s).");
+   status("portfolioStatus",rows.length+" media item(s), "+placements.length+" placement(s), and "+websiteImages.length+" website image(s) detected.");
   }catch(e){status("portfolioStatus",e.message,true)}
  }
  function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
