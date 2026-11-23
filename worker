@@ -877,7 +877,7 @@ if (
             const html = await response.text();
             scannedPages.push(page.label);
 
-            const pattern = /https:\/\/ik\.imagekit\.io\/amcid\/[^s"'\x60<>\\)]+/g;
+            const pattern = /https:\/\/ik\.imagekit\.io\/amcid\/[^\s"'\x60<>\\)]+/g;
 
             for (const match of html.matchAll(pattern)) {
               const sourceUrl = match[0].replace(/[),;]+$/, "");
@@ -925,6 +925,77 @@ if (
                 source_pages: [page.label]
               });
             }
+          }
+
+          // Include images published through the database-backed portfolio API.
+          // These URLs are added to the live collections after the HTML is loaded,
+          // so they cannot be discovered by scanning page source alone.
+          try {
+            const portfolioResponse = await fetch("https://api.x7studios.co.za/portfolio");
+            if (portfolioResponse.ok) {
+              const portfolioData = await portfolioResponse.json();
+              const portfolioItems = Array.isArray(portfolioData.portfolio)
+                ? portfolioData.portfolio
+                : [];
+
+              for (const item of portfolioItems) {
+                const sourceUrl = item.image_url;
+                if (typeof sourceUrl !== "string") continue;
+
+                let parsedUrl;
+                try {
+                  parsedUrl = new URL(sourceUrl);
+                } catch {
+                  continue;
+                }
+
+                if (
+                  parsedUrl.hostname !== "ik.imagekit.io" ||
+                  !parsedUrl.pathname.startsWith("/amcid/")
+                ) continue;
+
+                const uniqueKey = parsedUrl.origin + parsedUrl.pathname;
+                const slug = String(item.collection_slug || "").toLowerCase();
+                const collectionMapBySlug = {
+                  portraits: "Portraits",
+                  "street-urban": "Street & Urban",
+                  lifestyle: "Lifestyle",
+                  "brand-product": "Brand & Product",
+                  events: "Events",
+                  nature: "Nature"
+                };
+                const collectionName = collectionMapBySlug[slug] || item.collection_name || null;
+                const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+                let fileName = pathParts[pathParts.length - 1] || "Image";
+                try {
+                  fileName = decodeURIComponent(fileName);
+                } catch {
+                  // Keep the original filename if decoding fails.
+                }
+
+                if (discovered.has(uniqueKey)) {
+                  const existing = discovered.get(uniqueKey);
+                  if (!existing.source_pages.includes("Published portfolio uploads")) {
+                    existing.source_pages.push("Published portfolio uploads");
+                  }
+                  continue;
+                }
+
+                discovered.set(uniqueKey, {
+                  url: sourceUrl,
+                  file_name: fileName,
+                  section: collectionName || "Published portfolio uploads",
+                  collection_name: collectionName,
+                  collection_slug: item.collection_slug || null,
+                  source: "live_website",
+                  source_pages: ["Published portfolio uploads"]
+                });
+              }
+            } else {
+              console.warn("Published portfolio image scan returned HTTP", portfolioResponse.status);
+            }
+          } catch (portfolioError) {
+            console.warn("Could not scan published portfolio uploads:", portfolioError);
           }
 
           const images = Array.from(discovered.values()).sort((a, b) =>
