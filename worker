@@ -843,7 +843,7 @@ if (
 
           const matches = [
             ...collectionCode.matchAll(
-              /["'](\]?https:\/\/ik\.imagekit\.io\/amcid\/[^"'\\\s]*)["']/g
+              /["']\]?(https:\/\/ik\.imagekit\.io\/amcid\/[^"'\\\s]*)["']/g
             )
           ];
 
@@ -851,8 +851,7 @@ if (
           const images = [];
 
           for (const match of matches) {
-            const sourceUrl = match[1];
-            const cleanUrl = sourceUrl.replace(/^\]/, "");
+            const cleanUrl = match[1];
 
             if (seen.has(cleanUrl)) continue;
             seen.add(cleanUrl);
@@ -887,7 +886,7 @@ if (
 
             images.push({
               url: cleanUrl,
-              source_url: sourceUrl,
+              source_url: cleanUrl,
               file_name: fileName,
               collection_name: collection.name,
               collection_slug: collection.slug,
