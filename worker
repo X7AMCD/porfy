@@ -729,8 +729,15 @@ if (
               END,
               smp.display_order ASC
           `).all();
+          const placements = (result.results || []).map(item => ({
+            ...item,
+            url: item.image_url || item.thumbnail_url || "",
+            name: item.file_name || "Image"
+          }));
           return json({
-            placements: result.results
+            success: true,
+            placements,
+            count: placements.length
           }, 200, origin);
         } catch (error) {
           console.error("Placement listing failed:", error);
@@ -791,12 +798,40 @@ if (
       ) {
         try {
           const result = await env.DB.prepare(`
-            SELECT * FROM media_assets
-            ORDER BY created_at DESC
+            SELECT
+              id,
+              imagekit_file_id,
+              image_url,
+              image_url AS url,
+              thumbnail_url,
+              file_name,
+              file_name AS name,
+              file_path,
+              file_type,
+              width,
+              height,
+              file_size,
+              alt_text,
+              uploaded_by,
+              created_at
+            FROM media_assets
+            ORDER BY created_at DESC, id DESC
             LIMIT 500
           `).all();
+
+          const media = (result.results || []).map(item => ({
+            ...item,
+            url: item.image_url || item.url || item.thumbnail_url || "",
+            thumbnail_url: item.thumbnail_url || item.image_url || "",
+            name: item.file_name || item.name || "Image",
+            collection_slug: null
+          }));
+
           return json({
-            media: result.results
+            success: true,
+            media,
+            assets: media,
+            count: media.length
           }, 200, origin);
         } catch (error) {
           console.error("Media library listing failed:", error);
