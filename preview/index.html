@@ -1653,7 +1653,7 @@ $("date").addEventListener("input", summary);
    To use real photos, put image URLs in `photos`, e.g. photos:["a.jpg","b.jpg"] and a `cover:"cover.jpg"`.
    Leave `photos` empty to show placeholder gradients based on `hue`. */
 const COLLECTIONS = [
-  { title:"Portraits",      desc:"Natural, expressive portraits in studio and on location.", hue:20,  count:9,  photos:["]https://ik.imagekit.io/amcid/Images11/01.JPG?updatedAt=1794703380334",
+  { title:"Portraits", slug:"portraits",      desc:"Natural, expressive portraits in studio and on location.", hue:20,  count:9,  photos:["]https://ik.imagekit.io/amcid/Images11/01.JPG?updatedAt=1794703380334",
 																														"https://ik.imagekit.io/amcid/Images11/02.JPG?updatedAt=1794703385740",
 																														"https://ik.imagekit.io/amcid/Images11/03.JPG?updatedAt=1794703382783",
 																														"https://ik.imagekit.io/amcid/Images11/04.JPG?updatedAt=1794703383415",
@@ -1667,7 +1667,7 @@ const COLLECTIONS = [
 																														"https://ik.imagekit.io/amcid/Images11/12.JPG?updatedAt=1794703379778",
 																														"https://ik.imagekit.io/amcid/Images11/000.JPG?updatedAt=1794703383427",
 																														"https://ik.imagekit.io/amcid/Images11/00.JPG?updatedAt=1794703380936"], cover:"011.jpg" },
-  { title:"Street & Urban", desc:"City light, texture and everyday moments.",                hue:210, count:8,  photos:["https://ik.imagekit.io/amcid/Images12/02.jpg?updatedAt=1794703378768",
+  { title:"Street & Urban", slug:"street-urban", desc:"City light, texture and everyday moments.",                hue:210, count:8,  photos:["https://ik.imagekit.io/amcid/Images12/02.jpg?updatedAt=1794703378768",
 																														"https://ik.imagekit.io/amcid/Images12/06.jpg?updatedAt=1794703373352",
 																														"https://ik.imagekit.io/amcid/Images12/04.jpg?updatedAt=1794703377491",
 																														"https://ik.imagekit.io/amcid/Images12/07.jpg?updatedAt=1794703379730",
@@ -1681,13 +1681,13 @@ const COLLECTIONS = [
 																														"https://ik.imagekit.io/amcid/Images12/17.jpg?updatedAt=1794703380978",
 																														"https://ik.imagekit.io/amcid/Images12/18.jpg?updatedAt=1794703372119",
 																														"https://ik.imagekit.io/amcid/Images12/19.jpg?updatedAt=1794703380620"], cover:"012.jpg" },
-  { title:"Lifestyle",      desc:"Candid, relaxed shoots that feel like you.",               hue:140, count:10, photos:["https://ik.imagekit.io/amcid/images13/01.JPG?updatedAt=1794703378811",
+  { title:"Lifestyle", slug:"lifestyle",      desc:"Candid, relaxed shoots that feel like you.",               hue:140, count:10, photos:["https://ik.imagekit.io/amcid/images13/01.JPG?updatedAt=1794703378811",
 																														"https://ik.imagekit.io/amcid/images13/02.JPG?updatedAt=1794703381556",
 																														"https://ik.imagekit.io/amcid/images13/03.JPG?updatedAt=1794703384829",
 																														"https://ik.imagekit.io/amcid/images13/05.JPG?updatedAt=1794703377793",
 																														"https://ik.imagekit.io/amcid/images13/06.JPG?updatedAt=1794703385381",
 																														"https://ik.imagekit.io/amcid/images13/07.JPG?updatedAt=1794703382174"], cover:"013.jpg" },
-  { title:"Brand & Product",desc:"Clean, scroll-stopping visuals for your business.",        hue:280, count:8,  photos:["https://ik.imagekit.io/amcid/Images14/01.JPG?updatedAt=1794703371466",
+  { title:"Brand & Product", slug:"brand-product",desc:"Clean, scroll-stopping visuals for your business.",        hue:280, count:8,  photos:["https://ik.imagekit.io/amcid/Images14/01.JPG?updatedAt=1794703371466",
 																														"https://ik.imagekit.io/amcid/Images14/02.JPG?updatedAt=1794703379412",
 																														"https://ik.imagekit.io/amcid/Images14/03.JPG?updatedAt=1794703382539",
 																														"https://ik.imagekit.io/amcid/Images14/04.JPG?updatedAt=1794703365415",
@@ -1697,7 +1697,7 @@ const COLLECTIONS = [
 																														"https://ik.imagekit.io/amcid/Images14/07.JPG?updatedAt=1794703380319",
 																														"https://ik.imagekit.io/amcid/Images14/08.JPG?updatedAt=1794703378173",
 																														"https://ik.imagekit.io/amcid/Images14/09.JPG?updatedAt=1794703381293"], cover:"014.jpg" },
-  { title:"Events",         desc:"Celebrations, launches and the in-between moments.",       hue:340, count:9,  photos:["https://ik.imagekit.io/amcid/Images15/01.JPG?updatedAt=1794703376640",
+  { title:"Events", slug:"events",         desc:"Celebrations, launches and the in-between moments.",       hue:340, count:9,  photos:["https://ik.imagekit.io/amcid/Images15/01.JPG?updatedAt=1794703376640",
 																														"https://ik.imagekit.io/amcid/Images15/02.JPG?updatedAt=1794703365816",
 																														"https://ik.imagekit.io/amcid/Images15/03.JPG?updatedAt=1794703375459",
 																														"https://ik.imagekit.io/amcid/Images15/05.JPG?updatedAt=1794703385120",
@@ -1708,7 +1708,7 @@ const COLLECTIONS = [
 																														"https://ik.imagekit.io/amcid/Images15/11.JPG?updatedAt=1794703370719",
 																														"https://ik.imagekit.io/amcid/Images15/13.JPG?updatedAt=1794703384476",
 																														"https://ik.imagekit.io/amcid/Images15/14.JPG?updatedAt=1794703384463"], cover:"015.jpg" },
-  { title:"Nature",         desc:"Flowers, trees and golden light outdoors.",                hue:60,  count:7,  photos:["https://ik.imagekit.io/amcid/images16/02.JPG?updatedAt=1794703381276",
+  { title:"Nature", slug:"nature",         desc:"Flowers, trees and golden light outdoors.",                hue:60,  count:7,  photos:["https://ik.imagekit.io/amcid/images16/02.JPG?updatedAt=1794703381276",
 																														"https://ik.imagekit.io/amcid/images16/03.JPG?updatedAt=1794703381851G",
 																														"https://ik.imagekit.io/amcid/images16/04.JPG?updatedAt=1794703380034",
 																														"images12/05.jpg",
@@ -1754,7 +1754,55 @@ COLLECTIONS.forEach((c, ci) => {
   getRatio(coverSrc).then(reveal);
   setTimeout(() => reveal(null), 15000);                                         // never leave a placeholder shimmering forever
   $("colls").append(b);
+  c.card = b;
 });
+
+// Add published uploads from the public portfolio API without replacing
+// the photographs already hardcoded in this page.
+(async () => {
+  try {
+    const response = await fetch("https://api.x7studios.co.za/portfolio", {
+      method: "GET",
+      headers: { "Accept": "application/json" }
+    });
+    if (!response.ok) throw new Error("Portfolio API returned HTTP " + response.status);
+
+    const data = await response.json();
+    if (!Array.isArray(data.portfolio)) return;
+
+    data.portfolio.forEach(item => {
+      const collection = COLLECTIONS.find(c => c.slug === item.collection_slug);
+      const imageUrl = item.image_url;
+      if (
+        !collection ||
+        typeof imageUrl !== "string" ||
+        !imageUrl.startsWith("https://ik.imagekit.io/")
+      ) return;
+
+      if (!collection.photos.includes(imageUrl)) {
+        collection.photos.push(imageUrl);
+      }
+    });
+
+    COLLECTIONS.forEach(collection => {
+      collection.imgs = collection.photos.length
+        ? collection.photos.map(url => bg(url))
+        : Array.from(
+            { length: collection.count },
+            (_, i) => bg("", collection.hue, i)
+          );
+
+      if (collection.card) {
+        const count = collection.card.querySelector("p");
+        if (count) count.textContent = collection.imgs.length + " photos";
+      }
+    });
+  } catch (error) {
+    // Keep the existing hardcoded portfolio working if the API is unavailable.
+    console.warn("Could not load published portfolio uploads:", error);
+  }
+})();
+
 $("colls").setAttribute("aria-busy", "true");
 /* One animator for every collections move (auto-scroll, arrows, scrollbar click, exiting a collection).
    While it runs the row is locked (class "animating") and new moves are ignored, so an animation can never be interrupted or stacked. */
