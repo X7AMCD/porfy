@@ -376,13 +376,13 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 <a class="overview-action" href="#content"><span><strong>Website content</strong><small>Update text shown on the website</small></span><span>→</span></a>
 </section>
 </div>
-<section class="panel module-section" id="bookings"><h2>Bookings</h2><div class="booking-tools"><div class="booking-tools-left"><span class="label" id="bookingSummary">Loading booking records…</span><div class="view-switch" role="group" aria-label="Booking view"><button type="button" class="active" id="cardViewBtn" aria-pressed="true">Cards</button><button type="button" id="listViewBtn" aria-pressed="false">List</button></div></div><button class="refresh" id="refreshBookings" type="button">Refresh</button></div><div id="bookingOutput" class="empty" role="status" aria-live="polite">Connecting to bookings database…</div><p class="api-message" id="lastUpdated"></p></section>
 <section class="panel"><h2>Quick management</h2><div class="actions">
 <div class="action"><span>Manage portfolio images</span><span class="arrow">→</span></div>
 <div class="action"><span>Manage client galleries</span><span class="arrow">→</span></div>
 <div class="action"><span>Website settings</span><span class="arrow">→</span></div>
 </div></section>
 </div>
+<section class="panel module-section" id="bookings"><h2>Bookings</h2><div class="booking-tools"><div class="booking-tools-left"><span class="label" id="bookingSummary">Loading booking records…</span><div class="view-switch" role="group" aria-label="Booking view"><button type="button" class="active" id="cardViewBtn" aria-pressed="true">Cards</button><button type="button" id="listViewBtn" aria-pressed="false">List</button></div></div><div style="display:flex;gap:8px;align-items:center"><a href="https://api.x7studios.co.za/admin/bookings" target="_blank" rel="noopener" style="font-size:11px;color:#397c9d;text-decoration:underline">Connect to API ↗</a><button class="refresh" id="refreshBookings" type="button">Refresh</button></div></div><div id="bookingOutput" class="empty" role="status" aria-live="polite">Connecting to bookings database…</div><p class="api-message" id="lastUpdated"></p></section>
 
 <section class="panel module-section" id="portfolio">
 <h2>Portfolio management</h2>
@@ -500,14 +500,15 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
    }).join("");
    summary.textContent=rows.length+" booking"+(rows.length===1?"":"s");
  }
+ let apiLoaded=false;
  async function load(){
    refresh.disabled=true;refresh.textContent="Loading…";summary.textContent="Loading booking records…";output.className="empty";output.textContent="Connecting to bookings database…";updated.textContent="";
    try{
      const response=await fetch(endpoint,{method:"GET",credentials:"include",headers:{Accept:"application/json"}});
      if(!response.ok)throw new Error(response.status===401||response.status===403?"Cloudflare Access needs you to sign in to the API. Open the API address in this browser, sign in, then refresh this page.":"The API returned HTTP "+response.status+".");
      const data=await response.json();if(!Array.isArray(data.bookings))throw new Error(data.error||"The API response did not contain a bookings list.");
-     render(data.bookings);updated.textContent="Last updated: "+new Date().toLocaleString();
-   }catch(error){output.className="empty";output.textContent=error.message||"Could not load bookings.";output.classList.add("error");summary.textContent="Bookings unavailable";newCount.textContent="—";confirmedCount.textContent="—";}
+     render(data.bookings);apiLoaded=true;updated.textContent="Last updated: "+new Date().toLocaleString();
+   }catch(error){apiLoaded=false;output.className="empty error";output.innerHTML='<div>'+safe(error.message||"Could not connect to the bookings API.")+'</div><p style="margin:10px 0"><a href="https://api.x7studios.co.za/admin/bookings" target="_blank" rel="noopener" style="color:#397c9d;text-decoration:underline">Open API and complete sign-in ↗</a></p><p>After the API opens and displays the bookings JSON, return here. The dashboard will retry automatically; you can also select Refresh.</p>';summary.textContent="Bookings unavailable";newCount.textContent="—";confirmedCount.textContent="—";}
    finally{refresh.disabled=false;refresh.textContent="Refresh";}
  }
  output.addEventListener("click",async event=>{
@@ -542,7 +543,9 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
  });
  cardViewBtn.addEventListener("click",()=>{currentView="cards";render(currentRows);});
  listViewBtn.addEventListener("click",()=>{currentView="list";render(currentRows);});
- refresh.addEventListener("click",load);load();
+ refresh.addEventListener("click",load);
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&!apiLoaded)load();});
+ load();
 })();
 </script>
 </div>
