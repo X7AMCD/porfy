@@ -336,6 +336,8 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 
 
 
+.services-heading-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media(max-width:620px){.services-heading-actions{width:100%}.services-heading-actions button{flex:1}}
 /* Each service is presented as its own distinct catalogue card */
 .services-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
 .service-card{min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:14px;background:#fff;border:1px solid #e1e8ec;border-radius:6px;transition:border-color .18s,box-shadow .18s}
@@ -566,7 +568,7 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
 <section class="panel module-section services-studio" id="services">
  <div class="builder-heading">
   <div><div class="builder-kicker">X7 WEBSITE STUDIO</div><h2>Services & pricing</h2><p class="label">Shape the services clients can explore and book. Manage your catalogue from one workspace.</p></div>
-  <button class="secondary-btn" id="loadServices" type="button"><span aria-hidden="true">↻</span> Refresh services</button>
+  <div class="services-heading-actions"><button class="secondary-btn" id="seedExistingServices" type="button">Add existing 4 services</button><button class="secondary-btn" id="loadServices" type="button"><span aria-hidden="true">↻</span> Refresh services</button></div>
  </div>
  <div class="services-workspace">
   <div class="builder-canvas services-editor">
@@ -849,6 +851,35 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
  }
  async function save(path,body,statusId,after){try{status(statusId,"Saving…");await request(path,{method:"POST",body:JSON.stringify(body)});status(statusId,"Saved successfully.");if(after)await after()}catch(e){status(statusId,e.message,true)}}
  $("loadServices").addEventListener("click",()=>loadModule("/admin/services","servicesList","servicesStatus","services"));
+ $("seedExistingServices").addEventListener("click",async()=>{
+ const defaults=[
+  {name:"Portrait",starting_price:1500,description:"1 hour · 1 location · 15 edited photos"},
+  {name:"Lifestyle",starting_price:2800,description:"2 hours · 2 outfits · 30 edited photos"},
+  {name:"Brand & Product",starting_price:4500,description:"Half day · styling help · 50 edited photos"},
+  {name:"Event",starting_price:6000,description:"Up to 4 hours · 100+ edited photos"}
+ ];
+ const button=$("seedExistingServices");
+ button.disabled=true;
+ try{
+  status("servicesStatus","Checking existing services…");
+  const current=await request("/admin/services");
+  const rows=current.services||current.items||[];
+  const known=new Set(rows.map(x=>String(x.name||"").trim().toLowerCase()));
+  const missing=defaults.filter(x=>!known.has(x.name.toLowerCase()));
+  if(!missing.length){
+   status("servicesStatus","All four services are already in the catalogue. No duplicates were created.");
+  }else{
+   let added=0;
+   for(const item of missing){
+    await request("/admin/services",{method:"POST",body:JSON.stringify(item)});
+    added++;
+   }
+   status("servicesStatus",added+" existing service"+(added===1?"":"s")+" added. Current prices have been preserved.");
+  }
+  await loadModule("/admin/services","servicesList","servicesStatus","services");
+ }catch(e){status("servicesStatus",e.message,true)}
+ finally{button.disabled=false}
+});
  $("saveService").addEventListener("click",()=>save("/admin/services",{name:$("serviceName").value.trim(),starting_price:Number($("servicePrice").value),description:$("serviceDescription").value.trim()},"servicesStatus",()=>$("loadServices").click()));
  $("loadClients").addEventListener("click",()=>loadModule("/admin/clients","clientsList","clientsStatus","clients"));
  $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",()=>$("loadClients").click()));
