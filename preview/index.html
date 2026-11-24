@@ -1672,7 +1672,11 @@ function refreshStylePrices() {
     const name = card.querySelector("b")?.textContent;
     const amount = styleAdjustment(name);
     const line = card.querySelector(".style-price");
-    if (line) line.textContent = amount > 0 ? \`Additional: +\${money(amount)}\` : amount < 0 ? \`Additional: −\${money(Math.abs(amount))}\` : "Included · no extra cost";
+    if (line) line.textContent = amount > 0
+      ? "Additional: +" + money(amount)
+      : amount < 0
+        ? "Additional: −" + money(Math.abs(amount))
+        : "Included · no extra cost";
   });
 }
 refreshStylePrices();
