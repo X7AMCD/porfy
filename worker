@@ -304,6 +304,40 @@ function saveMediaAsset(env, uploaded, file, altText) {
     ADMIN_EMAIL
   ).run().then(result => result.meta.last_row_id);
 }
+
+const DEFAULT_PHOTOGRAPHY_STYLES = [
+  { slug:"cinematic", name:"Cinematic", description:"Teal and orange tones, wide framing and a movie-still mood.", preview_gradient:"linear-gradient(120deg,#0e3b43,#d9822b)", display_order:1 },
+  { slug:"vivid", name:"Vivid", description:"Bold, saturated colour with crisp contrast that pops.", preview_gradient:"linear-gradient(120deg,#ff2d6f,#ffd400,#00c2ff)", display_order:2 },
+  { slug:"underexposed", name:"Underexposed", description:"Deliberately dark, moody and shadow-heavy with rich blacks.", preview_gradient:"linear-gradient(120deg,#050505,#2b2230 60%,#6b4a3a)", display_order:3 },
+  { slug:"bright-airy", name:"Bright & Airy", description:"Light, soft and clean with gentle pastels and natural light.", preview_gradient:"linear-gradient(120deg,#fff7ef,#ffe3d6,#dff1ff)", display_order:4 },
+  { slug:"film-grain", name:"Film & Grain", description:"Warm, faded colour with analogue grain and a nostalgic feel.", preview_gradient:"linear-gradient(120deg,#c9a27a,#7d5a3c 60%,#d8c6a5)", display_order:5 },
+  { slug:"black-white", name:"Black & White", description:"Timeless monochrome that focuses on shape, light and emotion.", preview_gradient:"linear-gradient(120deg,#fff,#888 50%,#000)", display_order:6 },
+  { slug:"golden-hour", name:"Golden Hour", description:"Warm sunset glow with long shadows and flattering light.", preview_gradient:"linear-gradient(120deg,#ff9a3c,#ffcf6b 55%,#c2552e)", display_order:7 },
+  { slug:"editorial", name:"Editorial", description:"Polished, high-fashion look with strong poses and clean styling.", preview_gradient:"linear-gradient(120deg,#e9e4dc,#1a1a1a)", display_order:8 }
+];
+async function ensurePhotographyStyles(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS photography_styles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      additional_price REAL NOT NULL DEFAULT 0,
+      preview_gradient TEXT NOT NULL DEFAULT '',
+      display_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+  for (const style of DEFAULT_PHOTOGRAPHY_STYLES) {
+    await env.DB.prepare(`
+      INSERT OR IGNORE INTO photography_styles
+        (slug, name, description, additional_price, preview_gradient, display_order)
+      VALUES (?, ?, ?, 0, ?, ?)
+    `).bind(style.slug, style.name, style.description, style.preview_gradient, style.display_order).run();
+  }
+}
+
 async function addToCollection(env, mediaId, collectionSlug) {
   const collection = COLLECTIONS.find(
     item => item.slug === collectionSlug
@@ -568,6 +602,25 @@ if (
     }, 500, origin);
   }
 }
+    // -------------------------------------------------
+    // PUBLIC PHOTOGRAPHY STYLES: AVAILABLE BOOKING OPTIONS
+    // -------------------------------------------------
+    if (url.pathname === "/styles" && request.method === "GET") {
+      try {
+        await ensurePhotographyStyles(env);
+        const result = await env.DB.prepare(`
+          SELECT id, slug, name, description, additional_price,
+                 preview_gradient, display_order
+          FROM photography_styles
+          ORDER BY display_order ASC, id ASC
+        `).all();
+        return json({ styles: result.results }, 200, origin);
+      } catch (error) {
+        console.error("Public photography styles failed:", error);
+        return json({ error: "Could not retrieve photography styles" }, 500, origin);
+      }
+    }
+
     // -------------------------------------------------
     // PUBLIC SERVICES: AVAILABLE SHOOT TYPES AND PRICES
     // -------------------------------------------------
@@ -1040,6 +1093,58 @@ if (
           );
         }
       }
+      // -------------------------------------------------
+      // PHOTOGRAPHY STYLES: LIST
+      // -------------------------------------------------
+      if (url.pathname === "/admin/styles" && request.method === "GET") {
+        try {
+          await ensurePhotographyStyles(env);
+          const result = await env.DB.prepare(`
+            SELECT id, slug, name, description, additional_price,
+                   preview_gradient, display_order, updated_at
+            FROM photography_styles
+            ORDER BY display_order ASC, id ASC
+          `).all();
+          return json({ styles: result.results }, 200, origin);
+        } catch (error) {
+          console.error("Photography styles listing failed:", error);
+          return json({ error: "Could not retrieve photography styles" }, 500, origin);
+        }
+      }
+      // -------------------------------------------------
+      // PHOTOGRAPHY STYLES: UPDATE NAME, DESCRIPTION AND PRICE
+      // -------------------------------------------------
+      const photographyStyleMatch = url.pathname.match(/^\\/admin\\/styles\\/(\\d+)$/);
+      if (photographyStyleMatch && request.method === "PATCH") {
+        try {
+          await ensurePhotographyStyles(env);
+          const id = Number(photographyStyleMatch[1]);
+          const body = await request.json();
+          const name = typeof body?.name === "string" ? body.name.trim().slice(0, 100) : "";
+          const description = typeof body?.description === "string" ? body.description.trim().slice(0, 2000) : "";
+          const additionalPrice = Number(body?.additional_price);
+          if (!name) return json({ error: "Style name is required" }, 400, origin);
+          if (!Number.isFinite(additionalPrice) || additionalPrice < 0) {
+            return json({ error: "Additional price must be a valid non-negative amount" }, 400, origin);
+          }
+          const existing = await env.DB.prepare("SELECT id FROM photography_styles WHERE id = ?").bind(id).first();
+          if (!existing) return json({ error: "Photography style not found" }, 404, origin);
+          await env.DB.prepare(`
+            UPDATE photography_styles
+            SET name = ?, description = ?, additional_price = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).bind(name, description, additionalPrice, id).run();
+          const style = await env.DB.prepare(`
+            SELECT id, slug, name, description, additional_price, preview_gradient, display_order, updated_at
+            FROM photography_styles WHERE id = ?
+          `).bind(id).first();
+          return json({ success: true, style }, 200, origin);
+        } catch (error) {
+          console.error("Photography style update failed:", error);
+          return json({ error: "Could not update photography style" }, 500, origin);
+        }
+      }
+
       // -----------------------------------------------
       // SERVICES: LIST
       // -------------------------------------------------
