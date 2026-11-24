@@ -569,6 +569,24 @@ if (
   }
 }
     // -------------------------------------------------
+    // PUBLIC SERVICES: AVAILABLE SHOOT TYPES AND PRICES
+    // -------------------------------------------------
+    if (url.pathname === "/services" && request.method === "GET") {
+      try {
+        const result = await env.DB.prepare(`
+          SELECT id, name, slug, description, base_price AS starting_price,
+                 currency, display_order
+          FROM services
+          WHERE is_available = 1
+          ORDER BY display_order ASC, id ASC
+        `).all();
+        return json({ services: result.results }, 200, origin);
+      } catch (error) {
+        console.error("Public service listing failed:", error);
+        return json({ error: "Could not retrieve services" }, 500, origin);
+      }
+    }
+    // -------------------------------------------------
     // ALL ADMIN ROUTES REQUIRE CLOUDFLARE ACCESS
     // -------------------------------------------------
     if (url.pathname.startsWith("/admin/")) {
@@ -1106,6 +1124,42 @@ if (
         } catch (error) {
           console.error("Service creation failed:", error);
           return json({ error: "Could not create service" }, 500, origin);
+        }
+      }
+      // -------------------------------------------------
+      // SERVICES: UPDATE DESCRIPTION AND BASE PRICE
+      // -------------------------------------------------
+      const serviceMatch = url.pathname.match(/^\/admin\/services\/(\d+)$/);
+      if (serviceMatch && request.method === "PATCH") {
+        try {
+          const id = Number(serviceMatch[1]);
+          const body = await request.json();
+          const existing = await env.DB.prepare(
+            "SELECT id FROM services WHERE id = ?"
+          ).bind(id).first();
+          if (!existing) return json({ error: "Service not found" }, 404, origin);
+          if (typeof body.description !== "string") {
+            return json({ error: "A description is required" }, 400, origin);
+          }
+          const price = Number(body.starting_price);
+          if (!Number.isFinite(price) || price < 0) {
+            return json({ error: "Starting price must be a valid non-negative number" }, 400, origin);
+          }
+          await env.DB.prepare(`
+            UPDATE services
+            SET description = ?, base_price = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).bind(body.description.trim().slice(0, 5000), price, id).run();
+          const service = await env.DB.prepare(`
+            SELECT id, name, slug, description, base_price AS starting_price,
+                   currency, duration_minutes, is_available, display_order,
+                   created_at, updated_at
+            FROM services WHERE id = ?
+          `).bind(id).first();
+          return json({ success: true, service }, 200, origin);
+        } catch (error) {
+          console.error("Service update failed:", error);
+          return json({ error: "Could not update service" }, 500, origin);
         }
       }
       // -------------------------------------------------
