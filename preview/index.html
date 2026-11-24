@@ -1581,29 +1581,88 @@ function drawSlots() {
 drawSlots();
 
 
-/* Photography styles: name, description, preview gradient + filter */
-const STYLES = [
-  { n:"Cinematic",     d:"Teal and orange tones, wide framing and a movie-still mood.",   g:"linear-gradient(120deg,#0e3b43,#d9822b)" },
-  { n:"Vivid",         d:"Bold, saturated colour with crisp contrast that pops.",          g:"linear-gradient(120deg,#ff2d6f,#ffd400,#00c2ff)" },
-  { n:"Underexposed",  d:"Deliberately dark, moody and shadow-heavy with rich blacks.",    g:"linear-gradient(120deg,#050505,#2b2230 60%,#6b4a3a)" },
-  { n:"Bright & Airy", d:"Light, soft and clean with gentle pastels and natural light.",   g:"linear-gradient(120deg,#fff7ef,#ffe3d6,#dff1ff)" },
-  { n:"Film & Grain",  d:"Warm, faded colour with analogue grain and a nostalgic feel.",   g:"linear-gradient(120deg,#c9a27a,#7d5a3c 60%,#d8c6a5)" },
-  { n:"Black & White", d:"Timeless monochrome that focuses on shape, light and emotion.",  g:"linear-gradient(120deg,#fff,#888 50%,#000)" },
-  { n:"Golden Hour",   d:"Warm sunset glow with long shadows and flattering light.",       g:"linear-gradient(120deg,#ff9a3c,#ffcf6b 55%,#c2552e)" },
-  { n:"Editorial",     d:"Polished, high-fashion look with strong poses and clean styling.", g:"linear-gradient(120deg,#e9e4dc,#1a1a1a)" }
+/* Photography styles are loaded from the X7 Studios catalogue.
+   The original eight remain as a fallback if the API is temporarily unavailable. */
+let STYLES = [
+  { n:"Cinematic", d:"Teal and orange tones, wide framing and a movie-still mood.", g:"linear-gradient(120deg,#0e3b43,#d9822b)" },
+  { n:"Vivid", d:"Bold, saturated colour with crisp contrast that pops.", g:"linear-gradient(120deg,#ff2d6f,#ffd400,#00c2ff)" },
+  { n:"Underexposed", d:"Deliberately dark, moody and shadow-heavy with rich blacks.", g:"linear-gradient(120deg,#050505,#2b2230 60%,#6b4a3a)" },
+  { n:"Bright & Airy", d:"Light, soft and clean with gentle pastels and natural light.", g:"linear-gradient(120deg,#fff7ef,#ffe3d6,#dff1ff)" },
+  { n:"Film & Grain", d:"Warm, faded colour with analogue grain and a nostalgic feel.", g:"linear-gradient(120deg,#c9a27a,#7d5a3c 60%,#d8c6a5)" },
+  { n:"Black & White", d:"Timeless monochrome that focuses on shape, light and emotion.", g:"linear-gradient(120deg,#fff,#888 50%,#000)" },
+  { n:"Golden Hour", d:"Warm sunset glow with long shadows and flattering light.", g:"linear-gradient(120deg,#ff9a3c,#ffcf6b 55%,#c2552e)" },
+  { n:"Editorial", d:"Polished, high-fashion look with strong poses and clean styling.", g:"linear-gradient(120deg,#e9e4dc,#1a1a1a)" }
 ];
-state.style = null;
-STYLES.forEach(s => {
-  const b = document.createElement("button"); b.type = "button"; b.className = "style-card";
-  b.innerHTML = `<div class="pv" style="background:${s.g}"></div><div class="tx"><b>${s.n}</b><span>${s.d}</span><span class="style-price"></span></div>`;
-  b.onclick = () => { state.style = s.n; [...$("styles").children].forEach(x => x.classList.toggle("on", x === b)); summary(); };
-  $("styles").append(b);
-});
+const STYLE_ADDITIONAL_PRICES = {};
+function renderPhotographyStyles() {
+  const container = $("styles");
+  container.innerHTML = "";
+  STYLES.forEach(style => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "style-card";
+    const preview = document.createElement("div");
+    preview.className = "pv";
+    preview.style.background = style.g || "linear-gradient(120deg,#edf1f3,#cbd5da)";
+    const copy = document.createElement("div");
+    copy.className = "tx";
+    const name = document.createElement("b");
+    name.textContent = style.n;
+    const description = document.createElement("span");
+    description.textContent = style.d;
+    const price = document.createElement("span");
+    price.className = "style-price";
+    copy.append(name, description, price);
+    card.append(preview, copy);
+    card.onclick = () => {
+      state.style = style.n;
+      [...container.children].forEach(item => item.classList.toggle("on", item === card));
+      summary();
+    };
+    container.append(card);
+  });
+  if (state.style) {
+    const selected = [...container.children].find(card => card.querySelector("b")?.textContent === state.style);
+    if (selected) selected.classList.add("on");
+  }
+  refreshStylePrices();
+}
+async function loadPhotographyStyleCatalogue() {
+  try {
+    const response = await fetch("https://api.x7studios.co.za/styles", { method:"GET", cache:"no-store" });
+    if (!response.ok) throw new Error("Photography styles unavailable");
+    const data = await response.json();
+    if (!Array.isArray(data.styles) || !data.styles.length) throw new Error("No photography styles returned");
+    const previous = state.style;
+    STYLES = data.styles.map(style => ({
+      id: Number(style.id),
+      slug: String(style.slug || ""),
+      n: String(style.name || "").trim(),
+      d: String(style.description || ""),
+      g: String(style.preview_gradient || "")
+    })).filter(style => style.n);
+    Object.keys(STYLE_ADDITIONAL_PRICES).forEach(key => delete STYLE_ADDITIONAL_PRICES[key]);
+    data.styles.forEach(style => {
+      STYLE_ADDITIONAL_PRICES[String(style.name)] = Number(style.additional_price) || 0;
+    });
+    if (previous && !STYLES.some(style => style.n === previous)) state.style = null;
+    renderPhotographyStyles();
+    summary();
+  } catch (error) {
+    console.warn("Using fallback photography styles:", error);
+  }
+}
+renderPhotographyStyles();
+loadPhotographyStyleCatalogue();
 document.querySelector(".sl").onclick = () => $("styles").scrollBy({ left:-440, behavior:"smooth" });
-document.querySelector(".sr").onclick = () => $("styles").scrollBy({ left: 440, behavior:"smooth" });
+document.querySelector(".sr").onclick = () => $("styles").scrollBy({ left:440, behavior:"smooth" });
 
 function styleAdjustment(style = state.style) {
-  return style ? (Number(STYLE_PRICE_ADJUSTMENTS[style]) || 0) : 0;
+  if (!style) return 0;
+  if (Object.prototype.hasOwnProperty.call(STYLE_ADDITIONAL_PRICES, style)) {
+    return Number(STYLE_ADDITIONAL_PRICES[style]) || 0;
+  }
+  return Number(STYLE_PRICE_ADJUSTMENTS[style]) || 0;
 }
 function totalPrice() {
   return state.type ? SHOOTS[state.type] + styleAdjustment() : 0;
