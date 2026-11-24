@@ -496,22 +496,52 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
 
 
 /* Services / photography styles catalogue switch */
-.catalogue-switch{display:inline-flex;gap:4px;padding:4px;background:#edf2f5;border:1px solid #dfe7eb;border-radius:5px;margin:0 0 16px}
-.catalogue-switch button{border:1px solid transparent;background:transparent;color:#64737d;border-radius:3px;padding:9px 15px;font:inherit;font-size:11px;font-weight:650;cursor:pointer}
-.catalogue-switch button.active{background:#fff;border-color:#dce5ea;color:#203743;box-shadow:0 1px 3px rgba(20,40,50,.06)}
+.catalogue-switch{display:inline-flex;gap:5px;padding:5px;background:#edf2f5;border:1px solid #dfe7eb;border-radius:8px;margin:0 0 20px}
+.catalogue-switch button{border:1px solid transparent;background:transparent;color:#64737d;border-radius:5px;padding:10px 17px;font:inherit;font-size:12px;font-weight:650;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.catalogue-switch button.active{background:#fff;border-color:#dce5ea;color:#203743;box-shadow:0 2px 6px rgba(20,40,50,.07)}
 .catalogue-pane[hidden]{display:none!important}
-.styles-admin-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.style-admin-card{min-width:0;background:#fff;border:1px solid #e1e8ec;border-radius:5px;padding:13px;display:grid;gap:9px}
-.style-admin-card-top{display:flex;align-items:center;gap:10px}
-.style-admin-swatch{width:42px;height:42px;flex:0 0 42px;border:1px solid #e5e9eb;border-radius:4px}
-.style-admin-card-top strong{font-size:11px;color:#2c414e}
-.style-admin-fields{display:grid;gap:8px}
-.style-admin-fields label{display:grid;gap:4px;font-size:9px;color:#75838c}
-.style-admin-fields input,.style-admin-fields textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid #dfe7eb;border-radius:4px;background:#fbfcfd;padding:8px;font:inherit;font-size:10px;color:#31434d}
-.style-admin-fields textarea{min-height:62px;resize:vertical;line-height:1.5}
-.style-admin-save{justify-self:start}
-@media(max-width:620px){.styles-admin-list{grid-template-columns:1fr}.catalogue-switch{width:100%}.catalogue-switch button{flex:1;padding:9px 7px}}
-
+.photography-styles-workspace{color:#20323d}
+.styles-page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:8px 2px 24px;border-bottom:1px solid #e8edf0}
+.styles-page-heading{max-width:690px}
+.styles-eyebrow{display:block;color:#6796aa;font-size:9px;font-weight:800;letter-spacing:.19em}
+.styles-page-heading h2{margin:8px 0 7px;font-size:27px;line-height:1.15;letter-spacing:-.035em;color:#1d303b}
+.styles-page-heading p{margin:0;color:#778791;font-size:12px;line-height:1.7}
+.styles-refresh{white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.styles-overview{margin:22px 0 30px;padding:22px 25px;display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid #dfe9ed;border-radius:12px;background:linear-gradient(115deg,#f4f8fa 0%,#f8fafb 55%,#eef5f7 100%)}
+.styles-overview-copy{display:grid;gap:7px}
+.styles-overview-label{font-size:9px;font-weight:800;letter-spacing:.16em;color:#7193a2}
+.styles-overview-copy strong{font-size:18px;letter-spacing:-.02em;color:#263b46}
+.styles-overview-copy>span:last-child{font-size:11px;color:#788892;line-height:1.5}
+.styles-total{min-width:100px;padding-left:24px;border-left:1px solid #d8e3e8;display:grid;gap:3px}
+.styles-total strong{font-size:32px;line-height:1;color:#274a5b;font-weight:750;font-variant-numeric:tabular-nums}
+.styles-total span{font-size:8px;letter-spacing:.13em;font-weight:800;color:#7b8d96}
+.styles-list-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:13px}
+.styles-list-heading h3{margin:5px 0 0;font-size:17px;color:#263a45}
+.styles-price-note{font-size:10px;color:#84919a}
+.styles-admin-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.style-admin-card{min-width:0;position:relative;overflow:hidden;background:#fff;border:1px solid #e2e9ed;border-radius:10px;padding:17px;display:grid;gap:13px;box-shadow:0 2px 8px rgba(24,49,62,.035)}
+.style-admin-card-top{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid #edf1f3}
+.style-admin-swatch{width:56px;height:56px;flex:0 0 56px;border:1px solid rgba(27,48,60,.12);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.style-admin-card-top strong{display:block;font-size:9px;letter-spacing:.15em;color:#79909b}
+.style-admin-card-top .label{margin-top:4px;font-size:10px;color:#89969d}
+.style-admin-fields{display:grid;grid-template-columns:1fr;gap:11px}
+.style-admin-fields label{display:grid;gap:6px;font-size:10px;font-weight:700;color:#52646e}
+.style-admin-fields input,.style-admin-fields textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid #dfe7eb;border-radius:6px;background:#fbfcfd;padding:10px 11px;font:inherit;font-size:12px;font-weight:450;color:#2b3f49;outline:none;transition:border-color .18s,box-shadow .18s}
+.style-admin-fields input:focus,.style-admin-fields textarea:focus{border-color:#78a9bd;box-shadow:0 0 0 3px rgba(92,151,176,.12);background:#fff}
+.style-admin-fields textarea{min-height:76px;resize:vertical;line-height:1.55}
+.style-admin-fields label:last-child input{max-width:220px;font-variant-numeric:tabular-nums}
+.style-admin-save{justify-self:start;min-width:112px}
+.styles-loading{grid-column:1/-1;min-height:180px;display:grid;align-content:center;justify-items:center;gap:9px;border:1px dashed #d8e3e8;border-radius:10px;background:#f9fbfc;color:#71838d;text-align:center}
+.styles-loading-mark{width:36px;height:36px;display:grid;place-items:center;border-radius:9px;background:#e8f1f5;color:#47778c;font-size:12px;font-weight:850;letter-spacing:-.08em}
+.styles-loading strong{font-size:12px;color:#405660}
+.styles-loading>span:last-child{font-size:10px}
+.styles-footer{display:flex;align-items:flex-start;gap:11px;margin-top:18px;padding:14px 16px;border:1px solid #e2eaee;border-radius:8px;background:#f8fafb}
+.styles-footer-dot{width:8px;height:8px;flex:0 0 8px;margin-top:4px;border-radius:50%;background:#68a28b;box-shadow:0 0 0 4px #e8f3ed}
+.styles-footer>div{display:grid;gap:4px}
+.styles-footer strong{font-size:11px;font-weight:700;color:#3e5965}
+.styles-footer>div>span{font-size:10px;color:#85939b;line-height:1.5}
+@media(max-width:760px){.styles-admin-list{grid-template-columns:1fr}.styles-page-header{flex-direction:column}.styles-refresh{align-self:stretch;justify-content:center}.styles-overview{padding:17px}.styles-total{min-width:80px;padding-left:16px}}
+@media(max-width:520px){.catalogue-switch{display:flex;width:100%}.catalogue-switch button{flex:1;padding:10px 7px}.styles-page-heading h2{font-size:23px}.styles-overview{align-items:flex-start}.styles-overview-copy strong{font-size:15px}.styles-total strong{font-size:27px}.styles-list-heading{align-items:flex-start;flex-direction:column;gap:6px}.style-admin-card{padding:14px}}
 </style>
 </head>
 <body>
@@ -622,18 +652,24 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
   </div>
 
  </div>
- <div class="catalogue-pane" id="stylesPane" hidden>
-  <div class="builder-heading">
-   <div><div class="builder-kicker">X7 WEBSITE STUDIO</div><h2>Photography styles</h2><p class="label">All eight styles are included by default. Set a separate optional additional amount for each style.</p></div>
-   <button class="secondary-btn" id="loadStyles" type="button">↻ Refresh styles</button>
+ <div class="catalogue-pane photography-styles-workspace" id="stylesPane" hidden>
+  <header class="styles-page-header">
+   <div class="styles-page-heading">
+    <span class="styles-eyebrow">X7 WEBSITE STUDIO / BOOKING OPTIONS</span>
+    <h2>Photography styles</h2>
+    <p>Manage the looks clients can choose when they book a session. Your changes are reflected in the live booking options.</p>
+   </div>
+   <button class="secondary-btn styles-refresh" id="loadStyles" type="button"><span aria-hidden="true">↻</span> Refresh styles</button>
+  </header>
+  <div class="styles-overview">
+   <div class="styles-overview-copy"><span class="styles-overview-label">YOUR STYLE COLLECTION</span><strong>One signature. Eight ways to see it.</strong><span>Keep every style available. Add an optional surcharge only when needed.</span></div>
+   <div class="styles-total"><strong id="stylesCount">8</strong><span>AVAILABLE STYLES</span></div>
   </div>
-  <div class="builder-canvas services-catalogue">
-   <div class="builder-canvas-top"><div><span class="builder-live-dot"></span>Saved photography styles <small>LIVE BOOKING OPTIONS</small></div><span id="stylesCount" class="services-canvas-note">8 STYLES</span></div>
-   <div id="stylesList" class="styles-admin-list"><div class="empty">Select Refresh styles to load the saved styles.</div></div>
-   <div class="module-status" id="stylesStatus" role="status">Additional prices are set to R0 until you change them.</div>
-  </div>
+  <div class="styles-list-heading"><div><span class="styles-eyebrow">THE COLLECTION</span><h3>Choose and customise</h3></div><span class="styles-price-note">Prices in South African rand (ZAR)</span></div>
+  <div id="stylesList" class="styles-admin-list"><div class="styles-loading"><span class="styles-loading-mark">X7</span><strong>Loading your photography styles</strong><span>Connecting to your saved booking options…</span></div></div>
+  <div class="styles-footer"><span class="styles-footer-dot"></span><div><strong id="stylesStatus" role="status">Additional prices are R0 until you change them.</strong><span>Save each style individually. R0 means included in the base session price.</span></div></div>
  </div>
-</section>
+ </section>
 <section class="panel module-section" id="clients">
 <h2>Client management</h2><p class="label">Client records can be linked to bookings and private galleries.</p>
 <div class="feature-panel"><h3>Add a client</h3><div class="form-grid"><div class="form-field"><label for="clientName">Client name</label><input id="clientName" maxlength="120"></div><div class="form-field"><label for="clientEmail">Email</label><input id="clientEmail" type="email" maxlength="180"></div><div class="form-field"><label for="clientPhone">Phone</label><input id="clientPhone" maxlength="40"></div><div class="form-field"><label for="clientNotes">Notes</label><input id="clientNotes" maxlength="500"></div></div>
@@ -974,7 +1010,7 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
    const rows=Array.isArray(data.styles)?data.styles:[];
    $("stylesCount").textContent=rows.length+" STYLE"+(rows.length===1?"":"S");
    if(!rows.length){target.innerHTML='<div class="empty">No photography styles were returned.</div>';stylesLoaded=true;return;}
-   target.innerHTML=rows.map((x,i)=>'<article class="style-admin-card" data-style-id="'+Number(x.id)+'"><div class="style-admin-card-top"><span class="style-admin-swatch" style="background:'+esc(x.preview_gradient||"#edf1f3")+'"></span><div><strong>STYLE '+String(i+1).padStart(2,"0")+'</strong><div class="label">'+esc(x.slug||"")+'</div></div></div><div class="style-admin-fields"><label>Style name<input class="style-name" maxlength="100" value="'+esc(x.name||"")+'"></label><label>Description<textarea class="style-description" maxlength="2000">'+esc(x.description||"")+'</textarea></label><label>Additional price (ZAR)<input class="style-price" type="number" min="0" step="1" value="'+Number(x.additional_price||0)+'"></label></div><button class="secondary-btn style-admin-save" type="button">Save style</button></article>').join("");
+   target.innerHTML=rows.map((x,i)=>'<article class="style-admin-card" data-style-id="'+Number(x.id)+'"><div class="style-admin-card-top"><span class="style-admin-swatch" style="background:'+esc(x.preview_gradient||"#edf1f3")+'"></span><div><strong>STYLE '+String(i+1).padStart(2,"0")+'</strong><div class="label">'+esc(x.slug||"")+'</div></div></div><div class="style-admin-fields"><label>Display name<input class="style-name" maxlength="100" value="'+esc(x.name||"")+'" placeholder="Name shown to clients"></label><label>Style description<textarea class="style-description" maxlength="2000" placeholder="Describe the look clients can expect">'+esc(x.description||"")+'</textarea></label><label>Additional price (ZAR)<input class="style-price" type="number" min="0" step="1" value="'+Number(x.additional_price||0)+'"></label></div><button class="secondary-btn style-admin-save" type="button">Save changes</button></article>').join("");
    stylesLoaded=true;status("stylesStatus",rows.length+" photography styles loaded. R0 means included at no extra cost.");
   }catch(error){status("stylesStatus",error.message,true)}
   finally{button.disabled=false}
