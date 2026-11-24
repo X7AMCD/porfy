@@ -359,6 +359,16 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 .builder-inspector-image{width:100%;height:auto;aspect-ratio:auto;object-fit:contain;max-height:none;background:#f1f4f5}
 @media(max-width:720px){.builder-tree-title{font-size:8px;letter-spacing:.08em}.builder-nav small{white-space:normal}}
 
+/* Pinterest-style masonry gallery: compact spacing, natural image heights */
+.builder-preview{display:block;columns:3;column-gap:6px;padding:8px;min-height:260px}
+.builder-photo{display:inline-block;width:100%;margin:0 0 6px;break-inside:avoid;vertical-align:top;border:0;border-radius:3px;background:#edf1f3}
+.builder-photo img{width:100%;height:auto;display:block;object-fit:contain}
+.builder-photo-meta{padding:5px 6px;font-size:8px}
+.builder-photo-meta strong{font-size:9px}
+.builder-photo.selected{outline:2px solid #89cff0;outline-offset:-2px}
+@media(max-width:900px){.builder-preview{columns:3}}
+@media(max-width:720px){.builder-preview{columns:2;column-gap:5px;padding:6px}.builder-photo{margin-bottom:5px}}
+
 </style>
 </head>
 <body>
