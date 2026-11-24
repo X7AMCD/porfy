@@ -335,6 +335,30 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 @media(max-width:620px){.overview-layout>.panel{padding:16px}.overview-panel-heading{flex-wrap:wrap}.overview-booking{align-items:flex-start}}
 
 
+
+/* Each service is presented as its own distinct catalogue card */
+.services-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+.service-card{min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:14px;background:#fff;border:1px solid #e1e8ec;border-radius:6px;transition:border-color .18s,box-shadow .18s}
+.service-card:hover{border-color:#b9ddeb;box-shadow:0 5px 16px rgba(30,65,82,.05)}
+.service-card-top,.service-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.service-index{font-size:8px;font-weight:750;letter-spacing:.13em;color:#9aa6ad}
+.service-availability{font-size:8px;font-weight:650;padding:4px 7px;border-radius:3px}
+.service-availability.is-available{background:#eaf5ef;color:#438363}
+.service-availability.is-unavailable{background:#f1f2f3;color:#7d858a}
+.service-card-main{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:20px 0 17px}
+.service-card-copy{min-width:0}
+.service-card-copy h4{font-size:13px;line-height:1.35;color:#263943;margin:0 0 6px;overflow-wrap:anywhere}
+.service-card-copy p{font-size:9px;line-height:1.55;color:#85929a;margin:0;overflow-wrap:anywhere}
+.service-price{flex:0 0 auto;text-align:right}
+.service-price small{display:block;font-size:7px;letter-spacing:.1em;color:#9aa6ad;margin-bottom:4px}
+.service-price strong{font-size:15px;letter-spacing:-.03em;color:#2b5367;white-space:nowrap}
+.service-card-footer{padding-top:9px;border-top:1px solid #edf0f2;font-size:8px;color:#929da4}
+.services-empty{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;color:#87949b}
+.services-empty-mark{width:30px;height:30px;border:1px solid #dce7ec;border-radius:50%;display:grid;place-items:center;font-size:17px;color:#6e9db2;margin-bottom:10px}
+.services-empty strong{font-size:11px;color:#52636d;margin-bottom:5px}
+.services-empty small{max-width:260px;font-size:9px;line-height:1.5}
+@media(max-width:620px){.services-list{grid-template-columns:1fr}.service-card-main{padding:15px 0}.service-price strong{font-size:14px}}
+
 /* Services & pricing — matching the Portfolio Studio visual language */
 .services-studio>.builder-heading{margin-bottom:18px}
 .services-studio .builder-heading h2{font-size:21px}
@@ -799,8 +823,29 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
   }catch(e){status("portfolioStatus",e.message,true)}finally{btn.disabled=false}
  });
  async function loadModule(path,listId,statusId,itemsKey){
-  status(statusId,"Loading…");try{const d=await request(path);const rows=d[itemsKey]||d.items||[];list(listId,rows,x=>'<div class="module-item"><div class="grow"><strong>'+esc(x.name||x.title||x.email||x.key||"Record")+'</strong><small>'+esc(x.description||x.email||x.value||x.status||"")+'</small></div></div>');status(statusId,rows.length+" record(s) loaded.");}
-  catch(e){status(statusId,e.message,true)}
+  status(statusId,"Loading…");
+  try{
+   const d=await request(path);
+   const rows=d[itemsKey]||d.items||[];
+   if(itemsKey==="services"){
+    const target=$(listId);
+    const count=$("servicesCount");
+    if(count)count.textContent=rows.length+" SERVICE"+(rows.length===1?"":"S");
+    if(!rows.length){
+     target.innerHTML='<div class="services-empty"><span class="services-empty-mark">＋</span><strong>No services added yet</strong><small>Your services will appear here as individual cards, each with its own pricing and details.</small></div>';
+    }else{
+     target.innerHTML=rows.map((x,i)=>{
+      const price=Number(x.starting_price??x.base_price??0);
+      const packages=Array.isArray(x.packages)?x.packages:[];
+      const available=x.is_available===0||x.is_available===false?false:true;
+      return '<article class="service-card"><div class="service-card-top"><span class="service-index">SERVICE '+String(i+1).padStart(2,"0")+'</span><span class="service-availability '+(available?'is-available':'is-unavailable')+'">'+(available?'Available':'Unavailable')+'</span></div><div class="service-card-main"><div class="service-card-copy"><h4>'+esc(x.name||"Untitled service")+'</h4><p>'+esc(x.description||"No description added yet.")+'</p></div><div class="service-price"><small>STARTING FROM</small><strong>R'+price.toLocaleString("en-ZA")+'</strong></div></div><div class="service-card-footer"><span>'+packages.length+' package'+(packages.length===1?'':'s')+'</span><span>Display order · '+esc(x.display_order??i+1)+'</span></div></article>';
+     }).join("");
+    }
+   }else{
+    list(listId,rows,x=>'<div class="module-item"><div class="grow"><strong>'+esc(x.name||x.title||x.email||x.key||"Record")+'</strong><small>'+esc(x.description||x.email||x.value||x.status||"")+'</small></div></div>');
+   }
+   status(statusId,rows.length+" record(s) loaded.");
+  }catch(e){status(statusId,e.message,true)}
  }
  async function save(path,body,statusId,after){try{status(statusId,"Saving…");await request(path,{method:"POST",body:JSON.stringify(body)});status(statusId,"Saved successfully.");if(after)await after()}catch(e){status(statusId,e.message,true)}}
  $("loadServices").addEventListener("click",()=>loadModule("/admin/services","servicesList","servicesStatus","services"));
