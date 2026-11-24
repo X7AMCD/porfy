@@ -1114,7 +1114,7 @@ if (
       // -------------------------------------------------
       // PHOTOGRAPHY STYLES: UPDATE NAME, DESCRIPTION AND PRICE
       // -------------------------------------------------
-      const photographyStyleMatch = url.pathname.match(/^\\/admin\\/styles\\/(\\d+)$/);
+            const photographyStyleMatch = url.pathname.match(/^\/admin\/styles\/(\d+)$/);
       if (photographyStyleMatch && request.method === "PATCH") {
         try {
           await ensurePhotographyStyles(env);
