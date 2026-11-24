@@ -329,12 +329,17 @@ async function ensurePhotographyStyles(env) {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
-  for (const style of DEFAULT_PHOTOGRAPHY_STYLES) {
-    await env.DB.prepare(`
-      INSERT OR IGNORE INTO photography_styles
-        (slug, name, description, additional_price, preview_gradient, display_order)
-      VALUES (?, ?, ?, 0, ?, ?)
-    `).bind(style.slug, style.name, style.description, style.preview_gradient, style.display_order).run();
+  const existing = await env.DB.prepare(
+    "SELECT COUNT(*) AS total FROM photography_styles"
+  ).first();
+  if (Number(existing?.total || 0) === 0) {
+    for (const style of DEFAULT_PHOTOGRAPHY_STYLES) {
+      await env.DB.prepare(`
+        INSERT OR IGNORE INTO photography_styles
+          (slug, name, description, additional_price, preview_gradient, display_order)
+        VALUES (?, ?, ?, 0, ?, ?)
+      `).bind(style.slug, style.name, style.description, style.preview_gradient, style.display_order).run();
+    }
   }
 }
 
