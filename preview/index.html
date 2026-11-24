@@ -1670,9 +1670,9 @@ function totalPrice() {
 function refreshStylePrices() {
   [...$("styles").children].forEach(card => {
     const name = card.querySelector("b")?.textContent;
-    const amount = Number(STYLE_PRICE_ADJUSTMENTS[name]) || 0;
+    const amount = styleAdjustment(name);
     const line = card.querySelector(".style-price");
-    if (line) line.textContent = amount > 0 ? `Style adjustment: +${money(amount)}` : amount < 0 ? `Style adjustment: −${money(Math.abs(amount))}` : "No style surcharge";
+    if (line) line.textContent = amount > 0 ? \`Additional: +\${money(amount)}\` : amount < 0 ? \`Additional: −\${money(Math.abs(amount))}\` : "Included · no extra cost";
   });
 }
 refreshStylePrices();
