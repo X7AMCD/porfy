@@ -334,6 +334,30 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 @media(max-width:900px){.overview-layout{grid-template-columns:1fr}}
 @media(max-width:620px){.overview-layout>.panel{padding:16px}.overview-panel-heading{flex-wrap:wrap}.overview-booking{align-items:flex-start}}
 
+
+/* Services & pricing — matching the Portfolio Studio visual language */
+.services-studio>.builder-heading{margin-bottom:18px}
+.services-studio .builder-heading h2{font-size:21px}
+.services-studio .builder-heading>.secondary-btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.services-workspace{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:12px;align-items:start}
+.services-editor,.services-catalogue{min-width:0}
+.services-editor{background:#f5f7f8}
+.services-catalogue{background:#f5f7f8}
+.services-form-panel{margin:0!important;background:#fff;border:1px solid #e2e8eb;border-radius:5px;padding:17px}
+.services-form-panel h3{font-size:13px}
+.services-form-panel>.label{font-size:10px;line-height:1.5;margin-bottom:15px}
+.services-form-panel .form-field label{font-size:10px;color:#71808d}
+.services-form-panel .form-field input,.services-form-panel .form-field textarea{border:1px solid #dfe7eb;border-radius:5px;background:#fbfcfd;padding:10px 11px;font-size:11px}
+.services-form-panel .form-field input:focus,.services-form-panel .form-field textarea:focus{outline:2px solid #cceaf7;border-color:#89cff0}
+.services-form-panel .primary-btn{border-radius:5px;background:#172832;border-color:#172832;padding:10px 16px;font-size:11px}
+.services-canvas-note{font-size:8px;letter-spacing:.1em;color:#87949b;font-weight:700}
+.services-list{margin-top:0;gap:8px}
+.services-list .module-item{border:1px solid #e1e8ec;border-radius:5px;background:#fff;padding:13px}
+.services-list .module-item strong{font-size:11px;color:#2b3b45}
+.services-list .module-item small{font-size:9px;line-height:1.5;color:#87949b}
+@media(max-width:850px){.services-workspace{grid-template-columns:1fr}}
+@media(max-width:620px){.services-studio>.builder-heading{gap:12px}.services-studio>.builder-heading>.secondary-btn{align-self:stretch;justify-content:center}.services-editor,.services-catalogue{padding:8px}.services-form-panel{padding:14px}.services-form-panel .form-grid{grid-template-columns:1fr}.services-form-panel .form-field.full{grid-column:auto}}
+
 /* Visual website-builder portfolio workspace */
 .builder-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px}.builder-kicker{font-size:9px;letter-spacing:.2em;font-weight:700;color:#679bb4;margin-bottom:7px}.builder-heading h2{font-size:21px;margin:0 0 5px}.builder-heading .label{margin:0;max-width:620px;line-height:1.5}
 .builder-workspace{display:grid;grid-template-columns:205px minmax(0,1fr) 225px;gap:12px;align-items:start}.builder-tree,.builder-inspector{background:#f8fafb;border:1px solid #e1e8ec;border-radius:7px;padding:12px;min-width:0}.builder-tree-title,.builder-inspector-title,.builder-tree-group{font-size:9px;letter-spacing:.14em;font-weight:750;color:#82919a;padding:7px 8px}.builder-tree-group{padding-top:18px;color:#9aa5ac}
@@ -515,13 +539,30 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
   <div class="builder-inspector"><div class="builder-inspector-title">IMAGE DETAILS</div><div id="builderInspector"><div class="builder-inspector-empty">Select a photograph in the preview to inspect it.</div></div></div>
  </div><div id="websiteImagesList" hidden></div>
 </section>
-<section class="panel module-section" id="services">
-<h2>Services & pricing</h2><p class="label">Create and maintain the services and packages shown to clients. Changes are saved to the API when the matching admin endpoints are available.</p>
-<div class="feature-panel"><h3>Add a service</h3><div class="form-grid">
-<div class="form-field"><label for="serviceName">Service name</label><input id="serviceName" maxlength="100" placeholder="Portrait photography"></div>
-<div class="form-field"><label for="servicePrice">Starting price (ZAR)</label><input id="servicePrice" type="number" min="0" step="1" placeholder="1500"></div>
-<div class="form-field full"><label for="serviceDescription">Description</label><textarea id="serviceDescription" maxlength="1000"></textarea></div>
-</div><div class="module-actions"><button class="primary-btn" id="saveService" type="button">Save service</button><button class="secondary-btn" id="loadServices" type="button">Refresh services</button></div><div class="module-status" id="servicesStatus"></div></div><div class="feature-panel"><h3>Saved services</h3><div id="servicesList" class="module-list"><div class="empty">Select Refresh services to load saved services.</div></div></div>
+<section class="panel module-section services-studio" id="services">
+ <div class="builder-heading">
+  <div><div class="builder-kicker">X7 WEBSITE STUDIO</div><h2>Services & pricing</h2><p class="label">Shape the services clients can explore and book. Manage your catalogue from one workspace.</p></div>
+  <button class="secondary-btn" id="loadServices" type="button"><span aria-hidden="true">↻</span> Refresh services</button>
+ </div>
+ <div class="services-workspace">
+  <div class="builder-canvas services-editor">
+   <div class="builder-canvas-top"><div><span class="builder-live-dot"></span>Service editor <small>CATALOGUE SETUP</small></div><span class="services-canvas-note">NEW ENTRY</span></div>
+   <div class="feature-panel services-form-panel">
+    <h3>Add a service</h3><p class="label">Start with the service name, its base price and a short description.</p>
+    <div class="form-grid">
+     <div class="form-field"><label for="serviceName">Service name</label><input id="serviceName" maxlength="100" placeholder="Portrait photography"></div>
+     <div class="form-field"><label for="servicePrice">Starting price (ZAR)</label><input id="servicePrice" type="number" min="0" step="1" placeholder="1500"></div>
+     <div class="form-field full"><label for="serviceDescription">Description</label><textarea id="serviceDescription" maxlength="1000" placeholder="Describe what clients can expect from this service."></textarea></div>
+    </div>
+    <div class="module-actions"><button class="primary-btn" id="saveService" type="button">Save service</button></div>
+    <div class="module-status" id="servicesStatus" role="status"></div>
+   </div>
+  </div>
+  <div class="builder-canvas services-catalogue">
+   <div class="builder-canvas-top"><div><span class="builder-live-dot"></span>Saved services <small>LIVE CATALOGUE</small></div><span id="servicesCount" class="services-canvas-note">— SERVICES</span></div>
+   <div id="servicesList" class="module-list services-list"><div class="empty">Select Refresh services to load saved services.</div></div>
+  </div>
+ </div>
 </section>
 <section class="panel module-section" id="clients">
 <h2>Client management</h2><p class="label">Client records can be linked to bookings and private galleries.</p>
