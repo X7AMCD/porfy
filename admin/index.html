@@ -951,9 +951,16 @@ aside nav a .nav-label{font-size:10px;font-weight:500}
  const servicesTab=$("servicesTab"),stylesTab=$("stylesTab");
  function setCataloguePane(which){
   const services=which==="services";
-  $("servicesPane").hidden=!services;$("stylesPane").hidden=services;
-  servicesTab.classList.toggle("active",services);stylesTab.classList.toggle("active",!services);
-  servicesTab.setAttribute("aria-selected",String(services));stylesTab.setAttribute("aria-selected",String(!services));
+  const servicesPane=$("servicesPane"),stylesPane=$("stylesPane");
+  // Explicitly control both the hidden attribute and display state.
+  servicesPane.hidden=!services;
+  stylesPane.hidden=services;
+  servicesPane.style.display=services?"block":"none";
+  stylesPane.style.display=services?"none":"block";
+  servicesTab.classList.toggle("active",services);
+  stylesTab.classList.toggle("active",!services);
+  servicesTab.setAttribute("aria-selected",String(services));
+  stylesTab.setAttribute("aria-selected",String(!services));
   if(!services&&!stylesLoaded)loadPhotographyStyles();
  }
  servicesTab.addEventListener("click",()=>setCataloguePane("services"));
