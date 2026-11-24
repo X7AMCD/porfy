@@ -1385,17 +1385,57 @@ const money = n => "R" + n.toLocaleString("en-ZA");
 /* Taken slots live in this browser only. For real bookings use a backend (see notes). */
 const taken = () => { try { return JSON.parse(localStorage.getItem("taken") || "{}"); } catch { return {}; } };
 
-/* Shoot type buttons */
-Object.keys(SHOOTS).forEach(t => {
-  const b = document.createElement("button"); b.type = "button"; b.textContent = t;
-  b.onclick = () => pickType(t);
-  $("types").append(b);
-  const k = document.createElement("button"); k.type = "button"; k.className = "pkg"; k.dataset.type = t; k.setAttribute("aria-pressed", "false");
-  k.innerHTML = `<span class="pt"></span><span class="price"></span><span class="pd"></span>`;
-  k.children[0].textContent = t; k.children[1].textContent = money(SHOOTS[t]); k.children[2].textContent = SHOOT_INFO[t] || "";
-  k.onclick = () => pickType(t);
-  $("packages").append(k);
-});
+/* Shoot types are loaded from the X7 Studios service catalogue.
+   The original values above remain as a fallback if the API is temporarily unavailable. */
+function renderShootTypes() {
+  $("types").innerHTML = "";
+  $("packages").innerHTML = "";
+  Object.keys(SHOOTS).forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = t;
+    b.onclick = () => pickType(t);
+    $("types").append(b);
+    const k = document.createElement("button");
+    k.type = "button";
+    k.className = "pkg";
+    k.dataset.type = t;
+    k.setAttribute("aria-pressed", "false");
+    k.innerHTML = `<span class="pt"></span><span class="price"></span><span class="pd"></span>`;
+    k.children[0].textContent = t;
+    k.children[1].textContent = money(SHOOTS[t]);
+    k.children[2].textContent = SHOOT_INFO[t] || "";
+    k.onclick = () => pickType(t);
+    $("packages").append(k);
+  });
+}
+async function loadShootCatalogue() {
+  try {
+    const response = await fetch("https://api.x7studios.co.za/services", { method:"GET", cache:"no-store" });
+    if (!response.ok) throw new Error("Service catalogue unavailable");
+    const data = await response.json();
+    const services = Array.isArray(data.services) ? data.services : [];
+    if (!services.length) return;
+    Object.keys(SHOOTS).forEach(name => delete SHOOTS[name]);
+    Object.keys(SHOOT_INFO).forEach(name => delete SHOOT_INFO[name]);
+    services.forEach(service => {
+      const name = String(service.name || "").trim();
+      const price = Number(service.starting_price);
+      if (!name || !Number.isFinite(price) || price < 0) return;
+      SHOOTS[name] = price;
+      SHOOT_INFO[name] = String(service.description || "");
+    });
+    if (!Object.keys(SHOOTS).length) throw new Error("No valid services returned");
+    if (state.type && !Object.prototype.hasOwnProperty.call(SHOOTS,state.type)) state.type = null;
+    renderShootTypes();
+    if (state.type) pickType(state.type);
+    else summary();
+  } catch (error) {
+    console.warn("Using fallback shoot catalogue:", error);
+  }
+}
+renderShootTypes();
+loadShootCatalogue();
 document.querySelector(".pl").onclick = () => $("packages").scrollBy({ left:-244, behavior:"smooth" });
 document.querySelector(".pr").onclick = () => $("packages").scrollBy({ left: 244, behavior:"smooth" });
 function pickType(t) {                                          // one choice, shown on both the panels and the buttons in the form
