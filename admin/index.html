@@ -344,6 +344,21 @@ aside nav a.active .nav-icon,aside nav a.active .nav-label{color:var(--accent)}
 @media(max-width:1150px){.builder-workspace{grid-template-columns:185px minmax(0,1fr)}.builder-inspector{grid-column:1/-1;position:static}.builder-inspector #builderInspector{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px}.builder-inspector-image{grid-row:span 5;margin:0}.builder-inspector-title{grid-column:1/-1}}
 @media(max-width:720px){.builder-workspace{grid-template-columns:1fr}.builder-tree{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.builder-tree-title,.builder-tree-group{grid-column:1/-1}.builder-nav{margin:0}.builder-inspector{grid-column:auto}.builder-preview{grid-template-columns:repeat(2,minmax(0,1fr));min-height:220px}.builder-heading{align-items:flex-start;flex-direction:column}.builder-canvas{padding:8px}}
 
+/* Layout corrections: keep sidebar labels inside their column and preserve source image proportions */
+.builder-tree{min-width:0;overflow:hidden}
+.builder-tree-title{font-size:8px;letter-spacing:.09em;white-space:normal;overflow-wrap:anywhere;line-height:1.45;padding-left:7px;padding-right:7px}
+.builder-nav{min-width:0;gap:7px;padding-left:6px;padding-right:6px}
+.builder-nav>span:nth-child(2){min-width:0}
+.builder-nav strong,.builder-nav small{white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+.builder-nav b{flex:0 0 auto}
+.builder-preview{grid-auto-rows:min-content;align-items:start}
+.builder-photo{height:auto;aspect-ratio:auto;display:flex;flex-direction:column;align-self:start;overflow:hidden}
+.builder-photo img{width:100%;height:auto;aspect-ratio:auto;object-fit:contain;display:block;flex:0 0 auto}
+.builder-photo:hover img{transform:none}
+.builder-photo-meta{position:static;display:block;padding:7px;background:#182832;color:#fff;line-height:1.35}
+.builder-inspector-image{width:100%;height:auto;aspect-ratio:auto;object-fit:contain;max-height:none;background:#f1f4f5}
+@media(max-width:720px){.builder-tree-title{font-size:8px;letter-spacing:.08em}.builder-nav small{white-space:normal}}
+
 </style>
 </head>
 <body>
