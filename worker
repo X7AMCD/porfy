@@ -250,11 +250,11 @@ function imageKitAuthorization(env) {
   }
   return `Basic ${btoa(`${env.IMAGEKIT_PRIVATE_KEY}:`)}`;
 }
-async function uploadToImageKit(env, file) {
+async function uploadToImageKit(env, file, folder = "portfolio") {
   const form = new FormData();
   form.append("file", file, file.name);
   form.append("fileName", file.name);
-  form.append("folder", `${IMAGEKIT_FOLDER}/portfolio`);
+  form.append("folder", `${IMAGEKIT_FOLDER}/${folder}`);
   form.append("useUniqueFileName", "true");
   const response = await fetch(IMAGEKIT_UPLOAD_URL, {
     method: "POST",
@@ -326,6 +326,16 @@ async function ensurePhotographyStyles(env) {
       preview_gradient TEXT NOT NULL DEFAULT '',
       display_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS photography_style_images (
+      style_id INTEGER PRIMARY KEY,
+      imagekit_file_id TEXT,
+      image_url TEXT NOT NULL,
+      thumbnail_url TEXT,
+      file_name TEXT,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
@@ -614,9 +624,11 @@ if (
       try {
         await ensurePhotographyStyles(env);
         const result = await env.DB.prepare(`
-          SELECT id, slug, name, description, additional_price,
-                 preview_gradient, display_order
-          FROM photography_styles
+          SELECT s.id, s.slug, s.name, s.description, s.additional_price,
+                 s.preview_gradient, s.display_order,
+                 si.image_url, si.thumbnail_url
+          FROM photography_styles s
+          LEFT JOIN photography_style_images si ON si.style_id = s.id
           ORDER BY display_order ASC, id ASC
         `).all();
         return json({ styles: result.results }, 200, origin);
@@ -1105,15 +1117,59 @@ if (
         try {
           await ensurePhotographyStyles(env);
           const result = await env.DB.prepare(`
-            SELECT id, slug, name, description, additional_price,
-                   preview_gradient, display_order, updated_at
-            FROM photography_styles
+            SELECT s.id, s.slug, s.name, s.description, s.additional_price,
+                   s.preview_gradient, s.display_order, s.updated_at,
+                   si.image_url, si.thumbnail_url, si.file_name
+            FROM photography_styles s
+            LEFT JOIN photography_style_images si ON si.style_id = s.id
             ORDER BY display_order ASC, id ASC
           `).all();
           return json({ styles: result.results }, 200, origin);
         } catch (error) {
           console.error("Photography styles listing failed:", error);
           return json({ error: "Could not retrieve photography styles" }, 500, origin);
+        }
+      }
+      // -------------------------------------------------
+      // PHOTOGRAPHY STYLE IMAGE: UPLOAD / REPLACE
+      // -------------------------------------------------
+      const photographyStyleImageMatch = url.pathname.match(/^\/admin\/styles\/(\d+)\/image$/);
+      if (photographyStyleImageMatch && request.method === "POST") {
+        try {
+          await ensurePhotographyStyles(env);
+          const id = Number(photographyStyleImageMatch[1]);
+          const existing = await env.DB.prepare("SELECT id FROM photography_styles WHERE id = ?").bind(id).first();
+          if (!existing) return json({ error: "Photography style not found" }, 404, origin);
+          const formData = await request.formData();
+          const file = formData.get("file");
+          if (!file || typeof file === "string") return json({ error: "Please select an image to upload" }, 400, origin);
+          if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) return json({ error: "Use a JPG, PNG, WebP or AVIF image" }, 400, origin);
+          if (file.size <= 0) return json({ error: "The selected image is empty" }, 400, origin);
+          if (file.size > MAX_IMAGE_SIZE) return json({ error: "Images must be 20 MB or smaller" }, 400, origin);
+          const uploaded = await uploadToImageKit(env, file, "photography-styles");
+          await env.DB.prepare(`
+            INSERT INTO photography_style_images
+              (style_id, imagekit_file_id, image_url, thumbnail_url, file_name, updated_at)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(style_id) DO UPDATE SET
+              imagekit_file_id = excluded.imagekit_file_id,
+              image_url = excluded.image_url,
+              thumbnail_url = excluded.thumbnail_url,
+              file_name = excluded.file_name,
+              updated_at = CURRENT_TIMESTAMP
+          `).bind(id, uploaded.fileId || null, uploaded.url, uploaded.thumbnailUrl || null, uploaded.name || file.name).run();
+          const style = await env.DB.prepare(`
+            SELECT s.id, s.slug, s.name, s.description, s.additional_price,
+                   s.preview_gradient, s.display_order, si.image_url,
+                   si.thumbnail_url, si.file_name, si.updated_at
+            FROM photography_styles s
+            LEFT JOIN photography_style_images si ON si.style_id = s.id
+            WHERE s.id = ?
+          `).bind(id).first();
+          return json({ success: true, style }, 200, origin);
+        } catch (error) {
+          console.error("Photography style image upload failed:", error);
+          return json({ error: error.message || "Could not upload photography style image" }, 500, origin);
         }
       }
       // -------------------------------------------------
