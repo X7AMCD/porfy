@@ -2718,14 +2718,21 @@ addEventListener("scroll", () => {
   if(!response.ok)return;
   const data=await response.json(),map=new Map((data.settings||[]).map(s=>{try{const u=new URL(s.image_key);return[u.origin+u.pathname,s]}catch{return[s.image_key,s]}}));
   const key=src=>{try{const u=new URL(src,location.href);return u.origin+u.pathname}catch{return src}};
-  document.querySelectorAll("img[src]").forEach(img=>{
+  const apply=img=>{
+   if(!(img instanceof HTMLImageElement))return;
    const setting=map.get(key(img.currentSrc||img.src));if(!setting)return;
    img.style.objectFit=setting.fit==="original"?"contain":setting.fit||"cover";
    img.style.objectPosition=(setting.position_x??50)+"% "+(setting.position_y??50)+"%";
    img.style.filter="brightness("+(setting.brightness??100)+"%) contrast("+(setting.contrast??100)+"%) saturate("+(setting.saturation??100)+"%)";
    img.style.transform="scale("+(setting.zoom??1)+") rotate("+(setting.rotation??0)+"deg)";
    img.style.transformOrigin="center";
-  });
+   if(setting.aspect_ratio&&setting.aspect_ratio!=="original")img.style.aspectRatio=setting.aspect_ratio;
+  };
+  document.querySelectorAll("img[src]").forEach(apply);
+  new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{
+   if(node instanceof HTMLImageElement)apply(node);
+   else if(node.querySelectorAll)node.querySelectorAll("img[src]").forEach(apply);
+  }))).observe(document.documentElement,{childList:true,subtree:true});
  }catch(error){console.warn("X7 image settings unavailable",error)}
 })();
 </script>
