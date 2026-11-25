@@ -315,6 +315,29 @@ const DEFAULT_PHOTOGRAPHY_STYLES = [
   { slug:"golden-hour", name:"Golden Hour", description:"Warm sunset glow with long shadows and flattering light.", preview_gradient:"linear-gradient(120deg,#ff9a3c,#ffcf6b 55%,#c2552e)", display_order:7 },
   { slug:"editorial", name:"Editorial", description:"Polished, high-fashion look with strong poses and clean styling.", preview_gradient:"linear-gradient(120deg,#e9e4dc,#1a1a1a)", display_order:8 }
 ];
+async function ensureServiceImages(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS service_images (
+      service_id INTEGER PRIMARY KEY,
+      imagekit_file_id TEXT,
+      image_url TEXT NOT NULL,
+      thumbnail_url TEXT,
+      file_name TEXT,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+}
+async function deleteImageKitFile(env, fileId) {
+  if (!fileId) return;
+  const response = await fetch(`https://api.imagekit.io/v1/files/${encodeURIComponent(fileId)}`, {
+    method: "DELETE",
+    headers: { "Authorization": imageKitAuthorization(env) }
+  });
+  if (!response.ok && response.status !== 404) {
+    const detail = await response.text().catch(() => "");
+    throw new Error("ImageKit could not delete the image" + (detail ? ": " + detail : ""));
+  }
+}
 async function ensurePhotographyStyles(env) {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS photography_styles (
@@ -643,12 +666,14 @@ if (
     // -------------------------------------------------
     if (url.pathname === "/services" && request.method === "GET") {
       try {
+        await ensureServiceImages(env);
         const result = await env.DB.prepare(`
-          SELECT id, name, slug, description, base_price AS starting_price,
-                 currency, display_order
-          FROM services
-          WHERE is_available = 1
-          ORDER BY display_order ASC, id ASC
+          SELECT s.id, s.name, s.slug, s.description, s.base_price AS starting_price,
+                 s.currency, s.display_order, si.image_url, si.thumbnail_url
+          FROM services s
+          LEFT JOIN service_images si ON si.service_id = s.id
+          WHERE s.is_available = 1
+          ORDER BY s.display_order ASC, s.id ASC
         `).all();
         return json({ services: result.results }, 200, origin);
       } catch (error) {
@@ -1207,25 +1232,71 @@ if (
       }
 
       // -----------------------------------------------
+      // -------------------------------------------------
+      // SERVICE IMAGES: UPLOAD / REMOVE
+      // -------------------------------------------------
+      const serviceImageMatch = url.pathname.match(/^\/admin\/services\/(\d+)\/image$/);
+      if (serviceImageMatch && request.method === "POST") {
+        try {
+          await ensureServiceImages(env);
+          const id = Number(serviceImageMatch[1]);
+          const service = await env.DB.prepare("SELECT id FROM services WHERE id = ?").bind(id).first();
+          if (!service) return json({ error: "Service not found" }, 404, origin);
+          const formData = await request.formData();
+          const file = formData.get("file");
+          if (!file || typeof file === "string") return json({ error: "Please select an image" }, 400, origin);
+          if (!ALLOWED_IMAGE_TYPES.includes(file.type)) return json({ error: "Choose a JPG, PNG, WebP or AVIF image" }, 400, origin);
+          if (!file.size || file.size > MAX_IMAGE_SIZE) return json({ error: "Images must be non-empty and 20 MB or smaller" }, 400, origin);
+          const uploaded = await uploadToImageKit(env, file, "services");
+          const previous = await env.DB.prepare("SELECT imagekit_file_id FROM service_images WHERE service_id = ?").bind(id).first();
+          await env.DB.prepare(`
+            INSERT INTO service_images (service_id, imagekit_file_id, image_url, thumbnail_url, file_name, updated_at)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(service_id) DO UPDATE SET
+              imagekit_file_id = excluded.imagekit_file_id,
+              image_url = excluded.image_url,
+              thumbnail_url = excluded.thumbnail_url,
+              file_name = excluded.file_name,
+              updated_at = CURRENT_TIMESTAMP
+          `).bind(id, uploaded.fileId, uploaded.url, uploaded.thumbnailUrl || null, uploaded.name || file.name).run();
+          if (previous?.imagekit_file_id && previous.imagekit_file_id !== uploaded.fileId) {
+            try { await deleteImageKitFile(env, previous.imagekit_file_id); }
+            catch (cleanupError) { console.error("Previous service image cleanup failed:", cleanupError); }
+          }
+          return json({ success: true, image_url: uploaded.url, thumbnail_url: uploaded.thumbnailUrl || null }, 200, origin);
+        } catch (error) {
+          console.error("Service image upload failed:", error);
+          return json({ error: error.message || "Could not upload service image" }, 500, origin);
+        }
+      }
+      if (serviceImageMatch && request.method === "DELETE") {
+        try {
+          await ensureServiceImages(env);
+          const id = Number(serviceImageMatch[1]);
+          const existing = await env.DB.prepare("SELECT imagekit_file_id FROM service_images WHERE service_id = ?").bind(id).first();
+          if (!existing) return json({ error: "This service has no image to remove" }, 404, origin);
+          if (existing.imagekit_file_id) await deleteImageKitFile(env, existing.imagekit_file_id);
+          await env.DB.prepare("DELETE FROM service_images WHERE service_id = ?").bind(id).run();
+          return json({ success: true, message: "Service image removed" }, 200, origin);
+        } catch (error) {
+          console.error("Service image removal failed:", error);
+          return json({ error: error.message || "Could not remove service image" }, 500, origin);
+        }
+      }
       // SERVICES: LIST
       // -------------------------------------------------
       if (url.pathname === "/admin/services" && request.method === "GET") {
         try {
+          await ensureServiceImages(env);
           const result = await env.DB.prepare(`
-            SELECT
-              id,
-              name,
-              slug,
-              description,
-              base_price AS starting_price,
-              currency,
-              duration_minutes,
-              is_available,
-              display_order,
-              created_at,
-              updated_at
-            FROM services
-            ORDER BY display_order ASC, id ASC
+            SELECT s.id, s.name, s.slug, s.description,
+                   s.base_price AS starting_price, s.currency,
+                   s.duration_minutes, s.is_available, s.display_order,
+                   s.created_at, s.updated_at,
+                   si.image_url, si.thumbnail_url, si.imagekit_file_id, si.file_name
+            FROM services s
+            LEFT JOIN service_images si ON si.service_id = s.id
+            ORDER BY s.display_order ASC, s.id ASC
           `).all();
           const services = await Promise.all(result.results.map(async service => {
             const packages = await env.DB.prepare(`
