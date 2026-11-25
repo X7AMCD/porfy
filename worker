@@ -1511,7 +1511,7 @@ if (
       if (url.pathname === "/admin/clients" && request.method === "GET") {
         try {
           const result = await env.DB.prepare(`
-            SELECT id, full_name AS name, email, phone, notes, created_at, updated_at
+            SELECT id, full_name AS name, email, phone, notes, archived_at, created_at, updated_at
             FROM clients
             ORDER BY full_name COLLATE NOCASE ASC, id ASC
           `).all();
@@ -1551,6 +1551,92 @@ if (
         } catch (error) {
           console.error("Client creation failed:", error);
           return json({ error: "Could not create client" }, 500, origin);
+        }
+      }
+      // -------------------------------------------------
+      // CLIENTS: PROFILE, BOOKING HISTORY, GALLERIES, UPDATE / ARCHIVE
+      // -------------------------------------------------
+      const clientMatch = url.pathname.match(/^\/admin\/clients\/([1-9]\\d*)$/);
+      if (clientMatch) {
+        const clientId = Number(clientMatch[1]);
+        try {
+          // Preserve previous email addresses so historical bookings remain linked
+          // when a client's contact email is updated.
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS client_email_aliases (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              client_id INTEGER NOT NULL,
+              email TEXT NOT NULL COLLATE NOCASE,
+              created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE(client_id, email)
+            )
+          `).run();
+          const client = await env.DB.prepare(`
+            SELECT id, full_name AS name, email, phone, notes, archived_at, created_at, updated_at
+            FROM clients WHERE id = ?
+          `).bind(clientId).first();
+          if (!client) return json({ error: "Client not found" }, 404, origin);
+
+          if (request.method === "GET") {
+            const bookings = await env.DB.prepare(`
+              SELECT b.*
+              FROM bookings b
+              WHERE lower(trim(b.email)) = lower(trim(?))
+                 OR EXISTS (
+                   SELECT 1 FROM client_email_aliases cea
+                   WHERE cea.client_id = ? AND lower(trim(cea.email)) = lower(trim(b.email))
+                 )
+              ORDER BY b.created_at DESC, b.id DESC
+            `).bind(client.email, clientId).all();
+            const galleries = await env.DB.prepare(`
+              SELECT g.id, g.client_id, g.title, g.description, g.is_active,
+                     g.expires_at, g.created_at, g.updated_at,
+                     (SELECT COUNT(*) FROM gallery_items gi WHERE gi.gallery_id = g.id) AS item_count
+              FROM client_galleries g
+              WHERE g.client_id = ?
+              ORDER BY g.created_at DESC, g.id DESC
+            `).bind(clientId).all();
+            return json({ client, bookings: bookings.results, galleries: galleries.results }, 200, origin);
+          }
+
+          if (request.method === "PATCH") {
+            const body = await request.json();
+            const name = typeof body?.name === "string" ? body.name.trim().slice(0, 200) : client.name;
+            const email = typeof body?.email === "string" ? body.email.trim().toLowerCase().slice(0, 254) : client.email;
+            const phone = typeof body?.phone === "string" ? body.phone.trim().slice(0, 50) : (client.phone || "");
+            const notes = typeof body?.notes === "string" ? body.notes.trim().slice(0, 5000) : (client.notes || "");
+            if (!name) return json({ error: "Client name is required" }, 400, origin);
+            if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+              return json({ error: "A valid client email address is required" }, 400, origin);
+            }
+            const duplicate = await env.DB.prepare(
+              "SELECT id FROM clients WHERE email = ? COLLATE NOCASE AND id <> ?"
+            ).bind(email, clientId).first();
+            if (duplicate) return json({ error: "Another client already uses this email address" }, 409, origin);
+            if (email.toLowerCase() !== String(client.email).toLowerCase()) {
+              await env.DB.prepare(`
+                INSERT OR IGNORE INTO client_email_aliases (client_id, email) VALUES (?, ?)
+              `).bind(clientId, client.email).run();
+            }
+            const archivedAt = body?.archived === true
+              ? (client.archived_at || new Date().toISOString())
+              : body?.archived === false ? null : client.archived_at;
+            await env.DB.prepare(`
+              UPDATE clients
+              SET full_name = ?, email = ?, phone = ?, notes = ?, archived_at = ?,
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE id = ?
+            `).bind(name, email, phone || null, notes || null, archivedAt, clientId).run();
+            const updated = await env.DB.prepare(`
+              SELECT id, full_name AS name, email, phone, notes, archived_at, created_at, updated_at
+              FROM clients WHERE id = ?
+            `).bind(clientId).first();
+            return json({ success: true, client: updated }, 200, origin);
+          }
+          return json({ error: "Method not allowed" }, 405, origin);
+        } catch (error) {
+          console.error("Client profile operation failed:", error);
+          return json({ error: "Could not process this client request" }, 500, origin);
         }
       }
       // -------------------------------------------------
