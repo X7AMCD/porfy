@@ -338,6 +338,17 @@ async function deleteImageKitFile(env, fileId) {
     throw new Error("ImageKit could not delete the image" + (detail ? ": " + detail : ""));
   }
 }
+async function ensureImageDisplaySettings(env) {
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS image_display_settings (
+      image_key TEXT PRIMARY KEY, fit TEXT NOT NULL DEFAULT 'cover',
+      position_x INTEGER NOT NULL DEFAULT 50, position_y INTEGER NOT NULL DEFAULT 50,
+      zoom REAL NOT NULL DEFAULT 1, brightness REAL NOT NULL DEFAULT 100,
+      contrast REAL NOT NULL DEFAULT 100, saturation REAL NOT NULL DEFAULT 100,
+      rotation INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+}
 async function ensurePhotographyStyles(env) {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS photography_styles (
@@ -682,6 +693,16 @@ if (
       }
     }
     // -------------------------------------------------
+    if (url.pathname === "/image-settings" && request.method === "GET") {
+      try {
+        await ensureImageDisplaySettings(env);
+        const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation FROM image_display_settings").all();
+        return json({ settings: result.results || [] }, 200, origin);
+      } catch (error) {
+        console.error("Public image settings load failed:", error);
+        return json({ error: "Could not load image display settings" }, 500, origin);
+      }
+    }
     // ALL ADMIN ROUTES REQUIRE CLOUDFLARE ACCESS
     // -------------------------------------------------
     if (url.pathname.startsWith("/admin/")) {
@@ -691,6 +712,42 @@ if (
         }, 401, origin);
       }
       // -----------------------------------------------
+      if (url.pathname === "/admin/image-settings" && request.method === "GET") {
+        try {
+          await ensureImageDisplaySettings(env);
+          const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation FROM image_display_settings").all();
+          return json({ settings: result.results || [] }, 200, origin);
+        } catch (error) {
+          console.error("Admin image settings listing failed:", error);
+          return json({ error: "Could not retrieve image display settings" }, 500, origin);
+        }
+      }
+      if (url.pathname === "/admin/image-settings" && request.method === "PATCH") {
+        try {
+          await ensureImageDisplaySettings(env);
+          const body = await request.json();
+          const imageKey = String(body.image_key || "").trim();
+          if (!imageKey || imageKey.length > 2048 || !/^https:\/\/ik\.imagekit\.io\//i.test(imageKey)) return json({ error: "A valid ImageKit image URL is required" }, 400, origin);
+          const allowedFits = ["cover", "contain", "fill", "original"];
+          const clamp = (v, min, max, fallback) => { const n=Number(v); return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback; };
+          const fit = allowedFits.includes(body.fit) ? body.fit : "cover";
+          const px = Math.round(clamp(body.position_x,0,100,50)), py = Math.round(clamp(body.position_y,0,100,50));
+          const zoom=clamp(body.zoom,1,3,1), brightness=clamp(body.brightness,50,150,100);
+          const contrast=clamp(body.contrast,50,150,100), saturation=clamp(body.saturation,0,200,100);
+          const rotation=((Math.round(clamp(body.rotation,-270,270,0))%360)+360)%360;
+          await env.DB.prepare(`INSERT INTO image_display_settings
+            (image_key,fit,position_x,position_y,zoom,brightness,contrast,saturation,rotation,updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+            ON CONFLICT(image_key) DO UPDATE SET fit=excluded.fit,position_x=excluded.position_x,
+            position_y=excluded.position_y,zoom=excluded.zoom,brightness=excluded.brightness,
+            contrast=excluded.contrast,saturation=excluded.saturation,rotation=excluded.rotation,
+            updated_at=CURRENT_TIMESTAMP`).bind(imageKey,fit,px,py,zoom,brightness,contrast,saturation,rotation).run();
+          return json({ success:true, settings:{image_key:imageKey,fit,position_x:px,position_y:py,zoom,brightness,contrast,saturation,rotation} },200,origin);
+        } catch (error) {
+          console.error("Admin image settings save failed:", error);
+          return json({ error:error.message||"Could not save image adjustments" },500,origin);
+        }
+      }
       // PORTFOLIO: UPLOAD IMAGE
       // -----------------------------------------------
       if (
