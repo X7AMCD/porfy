@@ -345,7 +345,7 @@ async function ensureImageDisplaySettings(env) {
       position_x INTEGER NOT NULL DEFAULT 50, position_y INTEGER NOT NULL DEFAULT 50,
       zoom REAL NOT NULL DEFAULT 1, brightness REAL NOT NULL DEFAULT 100,
       contrast REAL NOT NULL DEFAULT 100, saturation REAL NOT NULL DEFAULT 100,
-      rotation INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      rotation INTEGER NOT NULL DEFAULT 0, aspect_ratio TEXT NOT NULL DEFAULT 'original', updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
 }
@@ -696,7 +696,7 @@ if (
     if (url.pathname === "/image-settings" && request.method === "GET") {
       try {
         await ensureImageDisplaySettings(env);
-        const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation FROM image_display_settings").all();
+        const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation, aspect_ratio FROM image_display_settings").all();
         return json({ settings: result.results || [] }, 200, origin);
       } catch (error) {
         console.error("Public image settings load failed:", error);
@@ -715,7 +715,7 @@ if (
       if (url.pathname === "/admin/image-settings" && request.method === "GET") {
         try {
           await ensureImageDisplaySettings(env);
-          const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation FROM image_display_settings").all();
+          const result = await env.DB.prepare("SELECT image_key, fit, position_x, position_y, zoom, brightness, contrast, saturation, rotation, aspect_ratio FROM image_display_settings").all();
           return json({ settings: result.results || [] }, 200, origin);
         } catch (error) {
           console.error("Admin image settings listing failed:", error);
@@ -735,14 +735,15 @@ if (
           const zoom=clamp(body.zoom,1,3,1), brightness=clamp(body.brightness,50,150,100);
           const contrast=clamp(body.contrast,50,150,100), saturation=clamp(body.saturation,0,200,100);
           const rotation=((Math.round(clamp(body.rotation,-270,270,0))%360)+360)%360;
+          const aspect_ratio = ["original","1 / 1","4 / 5","16 / 9"].includes(body.aspect_ratio) ? body.aspect_ratio : "original";
           await env.DB.prepare(`INSERT INTO image_display_settings
-            (image_key,fit,position_x,position_y,zoom,brightness,contrast,saturation,rotation,updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+            (image_key,fit,position_x,position_y,zoom,brightness,contrast,saturation,rotation,aspect_ratio,updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
             ON CONFLICT(image_key) DO UPDATE SET fit=excluded.fit,position_x=excluded.position_x,
             position_y=excluded.position_y,zoom=excluded.zoom,brightness=excluded.brightness,
-            contrast=excluded.contrast,saturation=excluded.saturation,rotation=excluded.rotation,
-            updated_at=CURRENT_TIMESTAMP`).bind(imageKey,fit,px,py,zoom,brightness,contrast,saturation,rotation).run();
-          return json({ success:true, settings:{image_key:imageKey,fit,position_x:px,position_y:py,zoom,brightness,contrast,saturation,rotation} },200,origin);
+            contrast=excluded.contrast,saturation=excluded.saturation,rotation=excluded.rotation,aspect_ratio=excluded.aspect_ratio,
+            updated_at=CURRENT_TIMESTAMP`).bind(imageKey,fit,px,py,zoom,brightness,contrast,saturation,rotation,aspect_ratio).run();
+          return json({ success:true, settings:{image_key:imageKey,fit,position_x:px,position_y:py,zoom,brightness,contrast,saturation,rotation,aspect_ratio} },200,origin);
         } catch (error) {
           console.error("Admin image settings save failed:", error);
           return json({ error:error.message||"Could not save image adjustments" },500,origin);
