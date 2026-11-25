@@ -450,6 +450,40 @@ async function addToPlacement(env, mediaId, placementType, details) {
 }
 
 // -----------------------------------------------------
+// CLIENT PROFILE SYNCHRONISATION
+// -----------------------------------------------------
+async function syncClientFromBooking(env, booking) {
+  const name = String(booking.customer_name || "").trim().slice(0, 200);
+  const email = String(booking.email || "").trim().toLowerCase().slice(0, 254);
+  const phone = typeof booking.phone === "string" ? booking.phone.trim().slice(0, 50) : "";
+  if (!name || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return;
+
+  const existing = await env.DB.prepare(
+    "SELECT id FROM clients WHERE email = ? COLLATE NOCASE ORDER BY id ASC LIMIT 1"
+  ).bind(email).first();
+
+  if (existing) {
+    // Keep manually maintained profile details; only fill a missing phone number.
+    if (phone) {
+      await env.DB.prepare(`
+        UPDATE clients
+        SET phone = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND (phone IS NULL OR trim(phone) = '')
+      `).bind(phone, existing.id).run();
+    }
+    return;
+  }
+
+  await env.DB.prepare(`
+    INSERT INTO clients (full_name, email, phone, notes)
+    SELECT ?, ?, ?, NULL
+    WHERE NOT EXISTS (
+      SELECT 1 FROM clients WHERE email = ? COLLATE NOCASE
+    )
+  `).bind(name, email, phone || null, email).run();
+}
+
+// -----------------------------------------------------
 // MAIN API
 // -----------------------------------------------------
 export default {
@@ -526,6 +560,13 @@ export default {
             : null
         ).run();
         const bookingId = result.meta.last_row_id;
+        // Keep the client directory in sync without making booking submission
+        // depend on the secondary client-profile update.
+        try {
+          await syncClientFromBooking(env, { customer_name, email, phone });
+        } catch (clientSyncError) {
+          console.error("Booking-to-client sync failed:", clientSyncError);
+        }
         const ownerContent = `
           <h2>New booking received</h2>
           <p>A new booking request has been submitted to x7studio.</p>
@@ -1510,6 +1551,30 @@ if (
       // -------------------------------------------------
       if (url.pathname === "/admin/clients" && request.method === "GET") {
         try {
+          // Backfill profiles for customers who booked before client sync existed.
+          // One profile is created per email; the most recent booking supplies
+          // the initial name and phone. Existing profiles are never overwritten.
+          await env.DB.prepare(`
+            INSERT INTO clients (full_name, email, phone, notes)
+            SELECT b.customer_name, lower(trim(b.email)), b.phone, NULL
+            FROM bookings b
+            WHERE b.customer_name IS NOT NULL
+              AND trim(b.customer_name) <> ''
+              AND b.email IS NOT NULL
+              AND instr(trim(b.email), '@') > 1
+              AND instr(substr(trim(b.email), instr(trim(b.email), '@') + 1), '.') > 1
+              AND b.id = (
+                SELECT b2.id
+                FROM bookings b2
+                WHERE lower(trim(b2.email)) = lower(trim(b.email))
+                ORDER BY b2.created_at DESC, b2.id DESC
+                LIMIT 1
+              )
+              AND NOT EXISTS (
+                SELECT 1 FROM clients c
+                WHERE lower(trim(c.email)) = lower(trim(b.email))
+              )
+          `).run();
           const result = await env.DB.prepare(`
             SELECT id, full_name AS name, email, phone, notes, archived_at, created_at, updated_at
             FROM clients
