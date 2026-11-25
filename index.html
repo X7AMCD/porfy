@@ -412,5 +412,24 @@ h1{margin:0;color:#f4f4f2;font-size:clamp(42px,9vw,76px);line-height:.98;font-we
  buildBoard();reset();
 })();
 </script>
+<script>
+/* Apply saved X7 Studios image presentation settings without modifying originals. */
+(async function(){
+ try{
+  const response=await fetch("https://api.x7studios.co.za/image-settings",{cache:"no-store"});
+  if(!response.ok)return;
+  const data=await response.json(),map=new Map((data.settings||[]).map(s=>{try{const u=new URL(s.image_key);return[u.origin+u.pathname,s]}catch{return[s.image_key,s]}}));
+  const key=src=>{try{const u=new URL(src,location.href);return u.origin+u.pathname}catch{return src}};
+  document.querySelectorAll("img[src]").forEach(img=>{
+   const setting=map.get(key(img.currentSrc||img.src));if(!setting)return;
+   img.style.objectFit=setting.fit==="original"?"contain":setting.fit||"cover";
+   img.style.objectPosition=(setting.position_x??50)+"% "+(setting.position_y??50)+"%";
+   img.style.filter="brightness("+(setting.brightness??100)+"%) contrast("+(setting.contrast??100)+"%) saturate("+(setting.saturation??100)+"%)";
+   img.style.transform="scale("+(setting.zoom??1)+") rotate("+(setting.rotation??0)+"deg)";
+   img.style.transformOrigin="center";
+  });
+ }catch(error){console.warn("X7 image settings unavailable",error)}
+})();
+</script>
 </body>
 </html>
