@@ -51,6 +51,19 @@ h2{font-size:16px;font-weight:500;margin:0 0 16px}
 .module-item img{width:76px;height:62px;object-fit:cover;border-radius:5px;background:#eee}
 .module-item .grow{flex:1;min-width:0}.module-item strong{display:block;font-size:12px}.module-item small{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
 .module-status{font-size:11px;color:var(--muted);margin-top:10px;white-space:pre-wrap}
+.client-directory-head,.client-profile-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.client-search{width:min(100%,280px);border:1px solid #dfe6ea;border-radius:8px;padding:10px 12px;font:inherit;font-size:12px;background:#fff}
+.client-row-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.client-row-actions button{font:inherit;font-size:11px;padding:6px 10px}
+.client-archived{font-size:10px;color:#9a5b32;background:#fbf1e8;border:1px solid #f0dfd0;border-radius:20px;padding:3px 8px}
+.client-profile-kicker{font-size:9px;letter-spacing:.16em;color:#81909a;font-weight:700}
+.client-profile-heading h3{margin:5px 0 12px}
+.client-related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.client-related-grid>div{min-width:0}.client-related-grid h3{margin:0 0 10px}
+.client-related-item{padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.client-related-item strong{display:block;font-size:12px}.client-related-item small{display:block;color:var(--muted);font-size:11px;margin-top:4px;white-space:pre-line;overflow-wrap:anywhere}
+@media(max-width:700px){.client-related-grid{grid-template-columns:1fr}.client-search{width:100%}}
+
 @media(max-width:700px){.module-grid,.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.module-item{align-items:flex-start}.module-item img{width:64px;height:56px}}
 
 
@@ -714,9 +727,15 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
  </div>
  </section>
 <section class="panel module-section" id="clients">
-<h2>Client management</h2><p class="label">Client records can be linked to bookings and private galleries.</p>
+<h2>Client management</h2><p class="label">Manage client profiles, booking history and private galleries. Archived clients remain in your records.</p>
 <div class="feature-panel"><h3>Add a client</h3><div class="form-grid"><div class="form-field"><label for="clientName">Client name</label><input id="clientName" maxlength="120"></div><div class="form-field"><label for="clientEmail">Email</label><input id="clientEmail" type="email" maxlength="180"></div><div class="form-field"><label for="clientPhone">Phone</label><input id="clientPhone" maxlength="40"></div><div class="form-field"><label for="clientNotes">Notes</label><input id="clientNotes" maxlength="500"></div></div>
-<div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><button class="secondary-btn" id="loadClients" type="button">Refresh clients</button></div><div class="module-status" id="clientsStatus"></div></div><div class="feature-panel"><h3>Client directory</h3><div id="clientsList" class="module-list"><div class="empty">Select Refresh clients to load the client directory.</div></div></div>
+<div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><button class="secondary-btn" id="loadClients" type="button">Refresh clients</button></div><div class="module-status" id="clientsStatus"></div></div>
+<div class="feature-panel"><div class="client-directory-head"><div><h3>Client directory</h3><p class="label">Search by name, email or phone.</p></div><input id="clientSearch" class="client-search" type="search" placeholder="Search clients…" aria-label="Search clients"></div><div id="clientsList" class="module-list"><div class="empty">Select Refresh clients to load the client directory.</div></div></div>
+<div class="feature-panel" id="clientProfilePanel" hidden><div class="client-profile-heading"><div><span class="client-profile-kicker">CLIENT PROFILE</span><h3 id="clientProfileTitle">Client details</h3></div><button type="button" class="secondary-btn" id="closeClientProfile">Close</button></div>
+<div class="form-grid"><div class="form-field"><label for="editClientName">Client name</label><input id="editClientName" maxlength="200"></div><div class="form-field"><label for="editClientEmail">Email</label><input id="editClientEmail" type="email" maxlength="254"></div><div class="form-field"><label for="editClientPhone">Phone</label><input id="editClientPhone" maxlength="50"></div><div class="form-field full"><label for="editClientNotes">Notes</label><textarea id="editClientNotes" maxlength="5000"></textarea></div></div>
+<div class="module-actions"><button type="button" class="primary-btn" id="updateClient">Save profile</button><button type="button" class="secondary-btn" id="toggleClientArchive">Archive client</button></div><div class="module-status" id="clientProfileStatus"></div>
+<div class="client-related-grid"><div><h3>Booking history</h3><div id="clientBookings" class="module-list"><div class="empty">Loading bookings…</div></div></div><div><h3>Private galleries</h3><div id="clientGalleries" class="module-list"><div class="empty">Loading galleries…</div></div></div></div>
+</div>
 </section>
 <section class="panel module-section" id="galleries">
 <h2>Private client galleries</h2>
@@ -1200,8 +1219,50 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
   finally{button.disabled=false;button.textContent="Save style"}
  });
 
- $("loadClients").addEventListener("click",()=>loadModule("/admin/clients","clientsList","clientsStatus","clients"));
- $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",()=>$("loadClients").click()));
+ let cachedClients = [];
+ let activeClientId = null;
+ function renderClients(){
+  const query=$("clientSearch").value.trim().toLowerCase();
+  const rows=cachedClients.filter(c=>[c.name,c.email,c.phone].some(v=>String(v||"").toLowerCase().includes(query)));
+  if(!rows.length){$("clientsList").innerHTML='<div class="empty">'+(query?'No clients match your search.':'No clients have been added yet.')+'</div>';return}
+  $("clientsList").innerHTML=rows.map(c=>'<article class="module-item"><div class="grow"><strong>'+esc(c.name)+' '+(c.archived_at?'<span class="client-archived">Archived</span>':'')+'</strong><small>'+esc(c.email)+(c.phone?' · '+esc(c.phone):'')+'</small><div class="client-row-actions"><button type="button" class="secondary-btn" data-client-view="'+Number(c.id)+'">View profile</button></div></div></article>').join('');
+ }
+ async function loadClients(){
+  status("clientsStatus","Loading clients…");
+  try{const d=await request("/admin/clients");cachedClients=d.clients||[];renderClients();status("clientsStatus",cachedClients.length+" client(s) loaded.");}
+  catch(e){status("clientsStatus",e.message,true)}
+ }
+ async function openClientProfile(id){
+  activeClientId=Number(id);$("clientProfilePanel").hidden=false;
+  $("clientProfileTitle").textContent="Loading client…";$("clientBookings").innerHTML='<div class="empty">Loading bookings…</div>';$("clientGalleries").innerHTML='<div class="empty">Loading galleries…</div>';
+  try{
+   const d=await request("/admin/clients/"+encodeURIComponent(activeClientId));const c=d.client;
+   $("clientProfileTitle").textContent=c.name;$("editClientName").value=c.name||"";$("editClientEmail").value=c.email||"";$("editClientPhone").value=c.phone||"";$("editClientNotes").value=c.notes||"";
+   $("toggleClientArchive").textContent=c.archived_at?"Restore client":"Archive client";
+   const bookings=d.bookings||[],galleries=d.galleries||[];
+   $("clientBookings").innerHTML=bookings.length?bookings.map(b=>'<div class="client-related-item"><strong>'+esc(b.service||"Booking")+' · '+esc(b.status)+'</strong><small>'+esc(b.booking_date||"Date not set")+' at '+esc(b.booking_time||"Time not set")+'<br>'+esc(b.email||"")+(b.message?'<br>'+esc(b.message):'')+'</small></div>').join(""):'<div class="empty">No bookings linked to this client yet.</div>';
+   $("clientGalleries").innerHTML=galleries.length?galleries.map(g=>'<div class="client-related-item"><strong>'+esc(g.title)+'</strong><small>'+Number(g.item_count||0)+' image(s) · '+(g.is_active?'Active':'Inactive')+(g.expires_at?' · Expires '+esc(g.expires_at):'')+'</small></div>').join(""):'<div class="empty">No private galleries linked to this client.</div>';
+   status("clientProfileStatus",bookings.length+" booking(s) · "+galleries.length+" gallery/galleries.");
+   $("clientProfilePanel").scrollIntoView({behavior:"smooth",block:"start"});
+  }catch(e){$("clientProfileTitle").textContent="Could not load client";status("clientProfileStatus",e.message,true)}
+ }
+ $("loadClients").addEventListener("click",loadClients);
+ $("clientSearch").addEventListener("input",renderClients);
+ $("clientsList").addEventListener("click",event=>{const view=event.target.closest("[data-client-view]");if(view)openClientProfile(view.dataset.clientView)});
+ $("closeClientProfile").addEventListener("click",()=>{$("clientProfilePanel").hidden=true;activeClientId=null});
+ $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",async()=>{ $("clientName").value="";$("clientEmail").value="";$("clientPhone").value="";$("clientNotes").value="";await loadClients();}));
+ $("updateClient").addEventListener("click",async()=>{
+  if(!activeClientId)return;const button=$("updateClient");button.disabled=true;status("clientProfileStatus","Saving profile…");
+  try{await request("/admin/clients/"+encodeURIComponent(activeClientId),{method:"PATCH",body:JSON.stringify({name:$("editClientName").value.trim(),email:$("editClientEmail").value.trim(),phone:$("editClientPhone").value.trim(),notes:$("editClientNotes").value.trim()})});status("clientProfileStatus","Client profile saved. Booking history remains linked, including previous email addresses.");await loadClients();await openClientProfile(activeClientId);}
+  catch(e){status("clientProfileStatus",e.message,true)}finally{button.disabled=false}
+ });
+ $("toggleClientArchive").addEventListener("click",async()=>{
+  if(!activeClientId)return;const c=cachedClients.find(x=>Number(x.id)===activeClientId);const restore=!!c?.archived_at;
+  if(!restore&&!confirm("Archive this client? Their bookings and galleries will be retained. You can restore the client later."))return;
+  const button=$("toggleClientArchive");button.disabled=true;status("clientProfileStatus",restore?"Restoring client…":"Archiving client…");
+  try{await request("/admin/clients/"+encodeURIComponent(activeClientId),{method:"PATCH",body:JSON.stringify({archived:!restore})});await loadClients();await openClientProfile(activeClientId);status("clientProfileStatus",restore?"Client restored.":"Client archived. Existing bookings and galleries were retained.");}
+  catch(e){status("clientProfileStatus",e.message,true)}finally{button.disabled=false}
+ });
  $("loadGalleries").addEventListener("click",()=>loadModule("/admin/galleries","galleriesList","galleriesStatus","galleries"));
  $("createGallery").addEventListener("click",()=>save("/admin/galleries",{client_id:Number($("galleryClient").value),title:$("galleryTitle").value.trim(),expires_at:$("galleryExpiry").value,password:$("galleryPassword").value},"galleriesStatus",()=>$("loadGalleries").click()));
  $("loadContent").addEventListener("click",()=>loadModule("/admin/content","contentList","contentStatus","content"));
