@@ -998,3 +998,56 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
   servicesPane.hidden=!services;
   stylesPane.hidden=services;
   servicesPane.style.display=services?"block":"none";
+  stylesPane.style.display=services?"none":"block";
+  servicesTab.classList.toggle("active",services);
+  stylesTab.classList.toggle("active",!services);
+  servicesTab.setAttribute("aria-selected",String(services));
+  stylesTab.setAttribute("aria-selected",String(!services));
+  if(!services&&!stylesLoaded)loadPhotographyStyles();
+ }
+ servicesTab.addEventListener("click",()=>setCataloguePane("services"));
+ stylesTab.addEventListener("click",()=>setCataloguePane("styles"));
+ let stylesLoaded=false;
+ async function loadPhotographyStyles(){
+  const target=$("stylesList"),button=$("loadStyles");button.disabled=true;
+  status("stylesStatus","Loading photography styles…");
+  try{
+   const data=await request("/admin/styles");
+   const rows=Array.isArray(data.styles)?data.styles:[];
+   $("stylesCount").textContent=rows.length+" STYLE"+(rows.length===1?"":"S");
+   if(!rows.length){target.innerHTML='<div class="empty">No photography styles were returned.</div>';stylesLoaded=true;return;}
+   target.innerHTML=rows.map((x,i)=>'<article class="style-admin-card" data-style-id="'+Number(x.id)+'"><div class="style-admin-card-top"><span class="style-admin-swatch" style="background:'+esc(x.preview_gradient||"#edf1f3")+'"></span><div><strong>STYLE '+String(i+1).padStart(2,"0")+'</strong><div class="label">'+esc(x.slug||"")+'</div></div></div><div class="style-admin-fields"><label>Display name<input class="style-name" maxlength="100" value="'+esc(x.name||"")+'" placeholder="Name shown to clients"></label><label>Style description<textarea class="style-description" maxlength="2000" placeholder="Describe the look clients can expect">'+esc(x.description||"")+'</textarea></label><label>Additional price (ZAR)<input class="style-price" type="number" min="0" step="1" value="'+Number(x.additional_price||0)+'"></label></div><button class="secondary-btn style-admin-save" type="button">Save changes</button></article>').join("");
+   stylesLoaded=true;status("stylesStatus",rows.length+" photography styles loaded. R0 means included at no extra cost.");
+  }catch(error){status("stylesStatus",error.message,true)}
+  finally{button.disabled=false}
+ }
+ $("loadStyles").addEventListener("click",loadPhotographyStyles);
+ $("stylesList").addEventListener("click",async event=>{
+  const button=event.target.closest(".style-admin-save");if(!button)return;
+  const card=button.closest(".style-admin-card"),id=card?.dataset.styleId;if(!id)return;
+  const name=card.querySelector(".style-name").value.trim();
+  const description=card.querySelector(".style-description").value.trim();
+  const additional_price=Number(card.querySelector(".style-price").value);
+  if(!name){status("stylesStatus","Every style needs a name.",true);return}
+  if(!Number.isFinite(additional_price)||additional_price<0){status("stylesStatus","Additional price must be zero or more.",true);return}
+  button.disabled=true;button.textContent="Saving…";
+  try{
+   await request("/admin/styles/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({name,description,additional_price})});
+   status("stylesStatus","Style saved. The public booking page will use the updated name, description and additional price.");
+   await loadPhotographyStyles();
+  }catch(error){status("stylesStatus",error.message,true)}
+  finally{button.disabled=false;button.textContent="Save style"}
+ });
+
+ $("loadClients").addEventListener("click",()=>loadModule("/admin/clients","clientsList","clientsStatus","clients"));
+ $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",()=>$("loadClients").click()));
+ $("loadGalleries").addEventListener("click",()=>loadModule("/admin/galleries","galleriesList","galleriesStatus","galleries"));
+ $("createGallery").addEventListener("click",()=>save("/admin/galleries",{client_id:Number($("galleryClient").value),title:$("galleryTitle").value.trim(),expires_at:$("galleryExpiry").value,password:$("galleryPassword").value},"galleriesStatus",()=>$("loadGalleries").click()));
+ $("loadContent").addEventListener("click",()=>loadModule("/admin/content","contentList","contentStatus","content"));
+ $("saveContent").addEventListener("click",()=>save("/admin/content",{section:$("contentSection").value.trim(),content_key:$("contentKey").value.trim(),value:$("contentValue").value},"contentStatus",()=>$("loadContent").click()));
+ $("loadSettings").addEventListener("click",()=>loadModule("/admin/settings","settingsList","settingsStatus","settings"));
+ $("saveSetting").addEventListener("click",()=>save("/admin/settings",{key:$("settingKey").value.trim(),value:$("settingValue").value},"settingsStatus",()=>$("loadSettings").click()));
+})();
+</script>
+</body>
+</html>
