@@ -254,6 +254,9 @@ textarea { min-height:100px; resize:vertical; }
 .style-card:hover { transform:translateY(-3px); border-color:#aaa; }
 .style-card.on { border-color:var(--ink); box-shadow:0 6px 18px rgba(0,0,0,.15); }
 .style-card .pv { height:110px; }
+.style-card .pv{position:relative;overflow:hidden;background-color:var(--line)}
+.style-card .pv img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.style-card .pv img[hidden]{display:none}
 .style-card .tx { padding:12px 14px 14px; }
 .style-card b { display:block; font-size:15px; letter-spacing:-.02em; margin-bottom:4px; }
 .style-card span { display:block; font-size:12px; font-weight:600; line-height:1.4; color:var(--muted); }
@@ -1603,7 +1606,18 @@ function renderPhotographyStyles() {
     card.className = "style-card";
     const preview = document.createElement("div");
     preview.className = "pv";
+    // Keep the configured gradient visible behind the image as a graceful fallback.
     preview.style.background = style.g || "linear-gradient(120deg,#edf1f3,#cbd5da)";
+    const imageUrl = String(style.thumbnail_url || style.image_url || "").trim();
+    if (imageUrl) {
+      const image = document.createElement("img");
+      image.alt = style.n + " photography style";
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.onerror = () => image.remove();
+      image.src = imageUrl;
+      preview.append(image);
+    }
     const copy = document.createElement("div");
     copy.className = "tx";
     const name = document.createElement("b");
@@ -1639,7 +1653,9 @@ async function loadPhotographyStyleCatalogue() {
       slug: String(style.slug || ""),
       n: String(style.name || "").trim(),
       d: String(style.description || ""),
-      g: String(style.preview_gradient || "")
+      g: String(style.preview_gradient || ""),
+      image_url: String(style.image_url || ""),
+      thumbnail_url: String(style.thumbnail_url || "")
     })).filter(style => style.n);
     Object.keys(STYLE_ADDITIONAL_PRICES).forEach(key => delete STYLE_ADDITIONAL_PRICES[key]);
     data.styles.forEach(style => {
