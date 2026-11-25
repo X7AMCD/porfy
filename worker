@@ -860,6 +860,22 @@ if (
         }
       }
       // -----------------------------------------------
+      // PORTFOLIO: REMOVE AN IMAGE FROM ITS COLLECTION
+      // -----------------------------------------------
+      const portfolioItemDeleteMatch = url.pathname.match(/^\/admin\/portfolio\/(\d+)$/);
+      if (portfolioItemDeleteMatch && request.method === "DELETE") {
+        try {
+          const id = Number(portfolioItemDeleteMatch[1]);
+          const existing = await env.DB.prepare("SELECT id FROM portfolio_items WHERE id = ?").bind(id).first();
+          if (!existing) return json({ error: "Portfolio image not found" }, 404, origin);
+          await env.DB.prepare("DELETE FROM portfolio_items WHERE id = ?").bind(id).run();
+          return json({ success: true, message: "Image removed from portfolio collection" }, 200, origin);
+        } catch (error) {
+          console.error("Portfolio image removal failed:", error);
+          return json({ error: error.message || "Could not remove image from portfolio" }, 500, origin);
+        }
+      }
+      // -----------------------------------------------
       // PORTFOLIO: LIST IMAGES
       // -----------------------------------------------
       if (
@@ -1195,6 +1211,21 @@ if (
         } catch (error) {
           console.error("Photography style image upload failed:", error);
           return json({ error: error.message || "Could not upload photography style image" }, 500, origin);
+        }
+      }
+      if (photographyStyleImageMatch && request.method === "DELETE") {
+        try {
+          await ensurePhotographyStyles(env);
+          const id = Number(photographyStyleImageMatch[1]);
+          const existing = await env.DB.prepare("SELECT style_id FROM photography_style_images WHERE style_id = ?").bind(id).first();
+          if (!existing) return json({ error: "This photography style has no image to remove" }, 404, origin);
+          // Detach the image from this style only. Keep the ImageKit original because
+          // it may also be referenced by a static website section or another feature.
+          await env.DB.prepare("DELETE FROM photography_style_images WHERE style_id = ?").bind(id).run();
+          return json({ success: true, message: "Photography style image removed" }, 200, origin);
+        } catch (error) {
+          console.error("Photography style image removal failed:", error);
+          return json({ error: error.message || "Could not remove photography style image" }, 500, origin);
         }
       }
       // -------------------------------------------------
