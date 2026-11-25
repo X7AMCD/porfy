@@ -549,6 +549,13 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
 .x7-image-preview-caption{padding:14px 16px;display:grid;gap:3px}
 .x7-image-preview-caption strong{font-size:13px;color:#263843}
 .x7-image-preview-caption small{font-size:10px;color:#82919a}
+.x7-style-public-preview{width:210px;max-width:calc(100vw - 44px);overflow:hidden;background:#fff;border:2px solid #dfe5e9;border-radius:14px;color:#202a30;font-family:inherit}
+.x7-style-public-image{height:110px;background:#edf1f3;overflow:hidden}
+.x7-style-public-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.x7-style-public-copy{padding:12px 14px 14px;display:grid;gap:5px}
+.x7-style-public-copy strong{font-size:15px;letter-spacing:-.02em}
+.x7-style-public-copy span{font-size:12px;line-height:1.4;color:#77838b;max-height:4.2em;overflow:hidden}
+.x7-style-public-copy small{font-size:11px;font-weight:700;color:#405660}
 @media(max-width:650px){.style-image-editor{grid-template-columns:88px minmax(0,1fr)}.style-image-preview{width:88px;height:72px}}
 .style-admin-swatch{width:56px;height:56px;flex:0 0 56px;border:1px solid rgba(27,48,60,.12);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
 .style-admin-card-top strong{display:block;font-size:9px;letter-spacing:.15em;color:#79909b}
@@ -931,6 +938,7 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
    }catch(e){status("portfolioStatus",e.message,true);$("builderPreview").innerHTML='<div class="builder-empty">Could not load website images. Select Refresh website to try again.</div>'}
   }
   function showImagePreview(src,title,subtitle){if(!src)return;let modal=document.getElementById("x7ImagePreview");if(!modal){modal=document.createElement("div");modal.id="x7ImagePreview";modal.className="x7-image-preview-modal";modal.innerHTML='<div class="x7-image-preview-panel" role="dialog" aria-modal="true" aria-label="Image preview"><button type="button" class="x7-image-preview-close" aria-label="Close preview">×</button><div class="x7-image-preview-media"><img alt=""></div><div class="x7-image-preview-caption"><strong></strong><small></small></div></div>';document.body.appendChild(modal);modal.addEventListener("click",e=>{if(e.target===modal||e.target.closest(".x7-image-preview-close"))modal.hidden=true})}modal.querySelector("img").src=src;modal.querySelector(".x7-image-preview-caption strong").textContent=title||"Image preview";modal.querySelector(".x7-image-preview-caption small").textContent=subtitle||"Preview";modal.hidden=false}
+  function showStyleCardPreview(src,name,description,price){if(!src)return;let modal=document.getElementById("x7ImagePreview");if(!modal){showImagePreview(src,name,"");modal=document.getElementById("x7ImagePreview")}modal.querySelector(".x7-image-preview-panel").innerHTML='<button type="button" class="x7-image-preview-close" aria-label="Close preview">×</button><div class="x7-style-public-preview"><div class="x7-style-public-image"><img alt=""></div><div class="x7-style-public-copy"><strong></strong><span></span><small></small></div></div>';modal.querySelector(".x7-style-public-image img").src=src;modal.querySelector(".x7-style-public-copy strong").textContent=name;modal.querySelector(".x7-style-public-copy span").textContent=description||"Style description shown to clients";modal.querySelector(".x7-style-public-copy small").textContent=price>0?"Additional R"+price.toLocaleString("en-ZA"):"Included at no extra cost";modal.querySelector(".x7-image-preview-close").addEventListener("click",()=>modal.hidden=true);modal.hidden=false}
   function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
  $("refreshPortfolio").addEventListener("click",loadMedia);
  $("uploadPortfolio").addEventListener("click",async()=>{
@@ -1096,6 +1104,7 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
   if(!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)){status("stylesStatus","Choose a JPG, PNG, WebP or AVIF image.",true);input.value="";return}
   if(file.size>20*1024*1024){status("stylesStatus","Images must be 20 MB or smaller.",true);input.value="";return}
   preview.src=URL.createObjectURL(file);preview.hidden=false;
+  const previewButton=card.querySelector(".style-image-preview-btn");if(previewButton)previewButton.disabled=false;
   card.querySelector(".style-image-controls strong").textContent=file.name;
   upload.disabled=false;choose.textContent="Change image";
   status("stylesStatus","Image selected. Upload it to save the change.");
@@ -1104,7 +1113,7 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
   const choose=event.target.closest(".style-image-choose");
   if(choose){choose.closest(".style-admin-card")?.querySelector(".style-image-file")?.click();return}
   const preview=event.target.closest(".style-image-preview-btn");
-  if(preview){const card=preview.closest(".style-admin-card"),img=card?.querySelector(".style-image-preview");if(img?.src)showImagePreview(img.src,card.querySelector(".style-name")?.value||"Photography style", "Public booking card · image crop");return}
+  if(preview){const card=preview.closest(".style-admin-card"),img=card?.querySelector(".style-image-preview");if(img?.src)showStyleCardPreview(img.src,card.querySelector(".style-name")?.value||"Photography style",card.querySelector(".style-description")?.value||"",Number(card.querySelector(".style-price")?.value||0));return}
   const remove=event.target.closest(".style-image-remove");
   if(remove){
    const card=remove.closest(".style-admin-card"),id=card?.dataset.styleId;if(!id||!confirm("Remove this image from the photography style? The original uploaded file will be retained in ImageKit so shared website links are not broken."))return;
