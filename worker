@@ -977,6 +977,22 @@ if (
         }
       }
       // -----------------------------------------------
+      // Remove a media record and its managed associations without deleting the ImageKit original.
+      const mediaDeleteMatch = url.pathname.match(/^\\/admin\\/media\\/(\\d+)$/);
+      if (mediaDeleteMatch && request.method === "DELETE") {
+        try {
+          const id = Number(mediaDeleteMatch[1]);
+          const existing = await env.DB.prepare("SELECT id FROM media_assets WHERE id = ?").bind(id).first();
+          if (!existing) return json({ error: "Media item not found" }, 404, origin);
+          await env.DB.prepare("DELETE FROM portfolio_items WHERE media_id = ?").bind(id).run();
+          await env.DB.prepare("DELETE FROM site_media_placements WHERE media_id = ?").bind(id).run();
+          await env.DB.prepare("DELETE FROM media_assets WHERE id = ?").bind(id).run();
+          return json({ success: true, message: "Media record and managed placements removed. ImageKit original retained." }, 200, origin);
+        } catch (error) {
+          console.error("Media library removal failed:", error);
+          return json({ error: error.message || "Could not remove media item" }, 500, origin);
+        }
+      }
       // PORTFOLIO: LIST MEDIA LIBRARY
       // -----------------------------------------------
       if (
