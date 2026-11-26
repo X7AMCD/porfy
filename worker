@@ -958,7 +958,7 @@ if (
             }
 
             if (item.type === "link" && !/^(https?:\/\/|mailto:|tel:)/i.test(item.value)) return json({ error: "Link destination is invalid" }, 400, origin);
-            edits.push({ selector: item.selector, type: item.type, value: item.value });
+            edits.push(item.type === "style" ? { selector: item.selector, type: item.type, styles: item.styles } : { selector: item.selector, type: item.type, value: item.value });
           }
           const encoded = JSON.stringify(edits);
           if (action === "save") {
