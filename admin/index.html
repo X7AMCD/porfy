@@ -603,6 +603,27 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
 
 /* Shared image upload and drag/drop controls */
 .x7-upload-dropzone{border:1px dashed #9bb9c8;border-radius:10px;background:#f7fbfd;padding:15px;text-align:center;color:#526b78;font-size:11px;line-height:1.6;transition:background .15s,border-color .15s}.x7-upload-dropzone strong{display:block;color:#294451;font-size:12px}.x7-upload-dropzone.is-dragging{border-color:#398db0;background:#eaf7fc;box-shadow:inset 0 0 0 1px #398db0}.x7-upload-dropzone small{display:block;color:#81939d}.x7-upload-preview{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.x7-upload-preview img{width:58px;height:58px;object-fit:cover;border-radius:6px;border:1px solid #dce6eb}
+
+/* Website publishing history and client communication workspace */
+.builder-history{margin:0 0 18px;padding:16px;background:#fff;border:1px solid #e1e8ec;border-radius:10px}
+.builder-history-head,.client-comms-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.builder-history h3,.client-comms h3{margin:0 0 5px;font-size:14px;color:#263b46}
+.builder-history p,.client-comms p{margin:0;color:#82919a;font-size:11px}
+.builder-history-list,.client-comms-list,.client-followups-list{display:grid;gap:8px;margin-top:12px}
+.builder-version-row,.client-comms-row,.client-followup-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:11px;border:1px solid #e8edf0;border-radius:7px;background:#fbfcfd}
+.builder-version-row strong,.client-comms-row strong,.client-followup-row strong{display:block;font-size:11px;color:#344852}
+.builder-version-row small,.client-comms-row small,.client-followup-row small{display:block;margin-top:3px;font-size:10px;color:#84929a;line-height:1.5;overflow-wrap:anywhere}
+.client-comms{margin-top:20px;padding-top:18px;border-top:1px solid #e8edf0}
+.client-comms-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:14px}
+.client-comms-form{display:grid;gap:9px;padding:13px;border:1px solid #e4eaed;border-radius:8px;background:#fbfcfd}
+.client-comms-form label{display:grid;gap:5px;font-size:10px;font-weight:650;color:#61727c}
+.client-comms-form input,.client-comms-form select,.client-comms-form textarea{width:100%;min-width:0;border:1px solid #dce4e8;border-radius:5px;background:#fff;padding:9px;font:inherit;font-size:11px;color:#263943}
+.client-comms-form textarea{min-height:95px;resize:vertical}
+.client-comms-row .message-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#586a74;margin-top:6px}
+.client-status-pill{display:inline-block;padding:3px 7px;border-radius:20px;background:#edf3f6;color:#526b79;font-size:9px;font-weight:700;text-transform:uppercase}
+.client-followup-actions{display:flex;gap:6px;align-items:center}
+@media(max-width:760px){.client-comms-grid{grid-template-columns:1fr}.builder-version-row,.client-comms-row,.client-followup-row{flex-direction:column}}
+
 </style>
 
 <style id="x7-custom-select-styles">
@@ -678,6 +699,12 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
 
 <section class="panel module-section" id="portfolio">
  <div class="builder-heading"><div><div class="builder-kicker">X7 WEBSITE STUDIO</div><h2>Portfolio builder</h2><p class="label">Explore your website visually. Choose a page or collection to see the photographs used there.</p></div><button class="secondary-btn" id="refreshPortfolio" type="button"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg><span>Refresh website</span></button></div>
+ 
+ <div class="builder-history" id="builderVersionHistory">
+  <div class="builder-history-head"><div><h3>Website publishing history</h3><p>Review saved publications and restore a previous version. Restoring also saves the current version first.</p></div><button type="button" class="secondary-btn" id="refreshBuilderVersions">Refresh history</button></div>
+  <div class="module-status" id="builderVersionsStatus" role="status">Load publishing history to view available restore points.</div>
+  <div class="builder-history-list" id="builderVersionsList"><div class="empty">No versions loaded.</div></div>
+ </div>
  <div class="builder-workspace">
   <div class="builder-tree" aria-label="Website sections">
    <div class="builder-tree-title">WEBSITE STRUCTURE</div>
@@ -764,6 +791,35 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
 <div class="form-grid"><div class="form-field"><label for="editClientName">Client name</label><input id="editClientName" maxlength="200"></div><div class="form-field"><label for="editClientEmail">Email</label><input id="editClientEmail" type="email" maxlength="254"></div><div class="form-field"><label for="editClientPhone">Phone</label><input id="editClientPhone" maxlength="50"></div><div class="form-field full"><label for="editClientNotes">Notes</label><textarea id="editClientNotes" maxlength="5000"></textarea></div></div>
 <div class="module-actions"><button type="button" class="primary-btn" id="updateClient">Save profile</button><button type="button" class="secondary-btn" id="toggleClientArchive">Archive client</button></div><div class="module-status" id="clientProfileStatus"></div>
 <div class="client-related-grid"><div><h3>Booking history</h3><div id="clientBookings" class="module-list"><div class="empty">Loading bookings…</div></div></div><div><h3>Private galleries</h3><div id="clientGalleries" class="module-list"><div class="empty">Loading galleries…</div></div></div></div>
+
+<div class="client-comms" id="clientCommunications">
+ <div class="client-comms-head"><div><h3>Client communication</h3><p>Internal notes, sent emails and scheduled follow-ups in one history.</p></div><button type="button" class="secondary-btn" id="refreshClientComms">Refresh history</button></div>
+ <div class="client-comms-grid">
+  <div>
+   <h4 style="font-size:11px;margin:0 0 8px;color:#536873">Communication history</h4>
+   <div id="clientCommsList" class="client-comms-list"><div class="empty">Open a client profile to load communication history.</div></div>
+  </div>
+  <div style="display:grid;gap:12px;align-content:start">
+   <div class="client-comms-form">
+    <strong style="font-size:11px;color:#344852">Write a note or email</strong>
+    <label>Message type<select id="clientCommsChannel"><option value="note">Internal note (not sent)</option><option value="email">Email client</option></select></label>
+    <label>Subject (for email)<input id="clientCommsSubject" maxlength="250" placeholder="A message from x7studio"></label>
+    <label>Message<textarea id="clientCommsBody" maxlength="10000" placeholder="Write your message…"></textarea></label>
+    <button type="button" class="primary-btn" id="sendClientComms">Save note</button>
+    <div class="module-status" id="clientCommsStatus" role="status"></div>
+   </div>
+   <div class="client-comms-form">
+    <strong style="font-size:11px;color:#344852">Schedule an email follow-up</strong>
+    <label>Send date and time<input id="clientFollowupWhen" type="datetime-local"></label>
+    <label>Subject<input id="clientFollowupSubject" maxlength="250" value="A follow-up from x7studio"></label>
+    <label>Message<textarea id="clientFollowupBody" maxlength="10000" placeholder="Write the follow-up email…"></textarea></label>
+    <button type="button" class="primary-btn" id="scheduleClientFollowup">Schedule follow-up</button>
+    <div class="module-status" id="clientFollowupStatus" role="status"></div>
+   </div>
+  </div>
+ </div>
+ <div style="margin-top:16px"><h4 style="font-size:11px;margin:0 0 8px;color:#536873">Scheduled follow-ups</h4><div id="clientFollowupsList" class="client-followups-list"><div class="empty">No follow-ups loaded.</div></div></div>
+</div>
 </div>
 </section>
 <section class="panel module-section gallery-workspace" id="galleries">
@@ -952,6 +1008,25 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
  function previewFiles(target,files){if(!target)return;target.innerHTML="";for(const file of files.slice(0,12)){const img=document.createElement("img");img.alt=file.name;img.title=file.name;img.src=URL.createObjectURL(file);target.appendChild(img)}}
  function bindDropZone(zone,input,getStatus){if(!zone||zone.dataset.dropBound)return;zone.dataset.dropBound="1";zone.addEventListener("click",()=>input?.click());zone.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();input?.click()}});["dragenter","dragover"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.add("is-dragging")}));["dragleave","dragend"].forEach(type=>zone.addEventListener(type,e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove("is-dragging")}));zone.addEventListener("drop",e=>{e.preventDefault();zone.classList.remove("is-dragging");const checked=validImageFiles(e.dataTransfer?.files||[]);if(checked.errors.length)getStatus?.(checked.errors.join(" · "),true);if(checked.valid.length)assignFiles(input,checked.valid)})}
  function list(id,rows,render){const el=$(id);if(!el)return;el.innerHTML=rows&&rows.length?rows.map(render).join(""):'<div class="empty">Nothing to show yet.</div>'}
+
+  async function loadBuilderVersions(){
+   status("builderVersionsStatus","Loading publishing history…");
+   try{
+    const d=await request("/admin/website-builder/versions");
+    const rows=d.versions||[];
+    $("builderVersionsList").innerHTML=rows.length?rows.map(v=>'<div class="builder-version-row"><div><strong>'+esc(v.version_label||"Website version")+' <span class="client-status-pill">'+esc(v.action||"saved")+'</span></strong><small>'+esc(new Date(String(v.created_at||"").replace(" ","T")+"Z").toLocaleString("en-ZA"))+' · '+Number(v.content_size||0).toLocaleString()+" bytes"+(v.created_by?' · '+esc(v.created_by):"")+'</small></div><button type="button" class="secondary-btn" data-builder-restore="'+Number(v.id)+'">Restore this version</button></div>').join(""):'<div class="empty">No published versions are available yet. Publish a website-builder draft to create the first restore point.</div>';
+    status("builderVersionsStatus",rows.length+" saved version(s) available. The newest 50 are retained.");
+   }catch(e){status("builderVersionsStatus",e.message,true)}
+  }
+  $("refreshBuilderVersions")?.addEventListener("click",loadBuilderVersions);
+  $("builderVersionsList")?.addEventListener("click",async e=>{
+   const b=e.target.closest("[data-builder-restore]");if(!b)return;
+   if(!confirm("Restore this website version? The currently published version will be saved as a restore point before the change."))return;
+   b.disabled=true;b.textContent="Restoring…";
+   try{await request("/admin/website-builder/restore",{method:"POST",body:JSON.stringify({version_id:Number(b.dataset.builderRestore)})});status("builderVersionsStatus","Website version restored. Refresh the public website to verify the result.");await loadBuilderVersions();}
+   catch(err){status("builderVersionsStatus",err.message,true);b.disabled=false;b.textContent="Restore this version"}
+  });
+
  let builderImages=[],builderPlacements=[],builderSelected=null,builderSection="all";
   const builderSections={all:"All website images",hero:"Homepage · Hero slideshow","selected-work":"Homepage · Selected Work",portraits:"Portraits","street-urban":"Street & Urban",lifestyle:"Lifestyle","brand-product":"Brand & Product",events:"Events",nature:"Nature",library:"Image library"};
   function builderUrl(x){return x.url||x.image_url||x.thumbnail_url||""}
@@ -1285,9 +1360,49 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
    $("clientBookings").innerHTML=bookings.length?bookings.map(b=>'<div class="client-related-item"><strong>'+esc(b.service||"Booking")+' · '+esc(b.status)+'</strong><small>'+esc(b.booking_date||"Date not set")+' at '+esc(b.booking_time||"Time not set")+'<br>'+esc(b.email||"")+(b.message?'<br>'+esc(b.message):'')+'</small></div>').join(""):'<div class="empty">No bookings linked to this client yet.</div>';
    $("clientGalleries").innerHTML=galleries.length?galleries.map(g=>'<div class="client-related-item"><strong>'+esc(g.title)+'</strong><small>'+Number(g.item_count||0)+' image(s) · '+(g.is_active?'Active':'Inactive')+(g.expires_at?' · Expires '+esc(g.expires_at):'')+'</small></div>').join(""):'<div class="empty">No private galleries linked to this client.</div>';
    status("clientProfileStatus",bookings.length+" booking(s) · "+galleries.length+" gallery/galleries.");
+   await loadClientCommunications();
    $("clientProfilePanel").scrollIntoView({behavior:"smooth",block:"start"});
   }catch(e){$("clientProfileTitle").textContent="Could not load client";status("clientProfileStatus",e.message,true)}
  }
+
+ async function loadClientCommunications(){
+  if(!activeClientId)return;
+  $("clientCommsList").innerHTML='<div class="empty">Loading communication history…</div>';
+  $("clientFollowupsList").innerHTML='<div class="empty">Loading scheduled follow-ups…</div>';
+  try{
+   const [c,f]=await Promise.all([request("/admin/clients/"+encodeURIComponent(activeClientId)+"/communications"),request("/admin/clients/"+encodeURIComponent(activeClientId)+"/followups")]);
+   const rows=c.communications||[],followups=f.followups||[];
+   $("clientCommsList").innerHTML=rows.length?rows.map(x=>'<article class="client-comms-row"><div><strong>'+esc(x.subject|| (x.channel==="note"?"Internal note":"Email"))+' <span class="client-status-pill">'+esc(x.channel||"message")+' · '+esc(x.status||"recorded")+'</span></strong><small>'+esc(x.direction||"internal")+' · '+esc(x.created_at||"")+(x.created_by?' · '+esc(x.created_by):"")+'</small><div class="message-body">'+esc(x.body||"")+'</div>'+(x.error?'<small style="color:#a33232">Delivery issue: '+esc(x.error)+'</small>':"")+'</div></article>').join(""):'<div class="empty">No communication history yet. Notes and emails will appear here.</div>';
+   $("clientFollowupsList").innerHTML=followups.length?followups.map(x=>'<article class="client-followup-row"><div><strong>'+esc(x.subject||"Follow-up")+' <span class="client-status-pill">'+esc(x.status||"scheduled")+'</span></strong><small>Scheduled: '+esc(x.scheduled_for||"")+(x.sent_at?' · Sent: '+esc(x.sent_at):"")+'</small><div class="message-body">'+esc(x.body||"")+'</div>'+(x.error?'<small style="color:#a33232">'+esc(x.error)+'</small>':"")+'</div>'+(x.status==="scheduled"?'<div class="client-followup-actions"><button type="button" class="secondary-btn" data-followup-cancel="'+Number(x.id)+'">Cancel</button></div>':"")+'</article>').join(""):'<div class="empty">No scheduled follow-ups.</div>';
+  }catch(e){$("clientCommsList").innerHTML='<div class="empty">'+esc(e.message)+'</div>';$("clientFollowupsList").innerHTML='<div class="empty">Could not load follow-ups.</div>'}
+ }
+ $("refreshClientComms")?.addEventListener("click",loadClientCommunications);
+ $("sendClientComms")?.addEventListener("click",async()=>{
+  if(!activeClientId)return;
+  const b=$("sendClientComms"),channel=$("clientCommsChannel").value,body=$("clientCommsBody").value.trim();
+  if(!body){status("clientCommsStatus","Write a message first.",true);return}
+  b.disabled=true;b.textContent=channel==="email"?"Sending…":"Saving…";
+  try{await request("/admin/clients/"+encodeURIComponent(activeClientId)+"/communications",{method:"POST",body:JSON.stringify({channel,subject:$("clientCommsSubject").value.trim(),body})});$("clientCommsBody").value="";status("clientCommsStatus",channel==="email"?"Email sent and recorded in the communication history.":"Internal note saved.");await loadClientCommunications();}
+  catch(e){status("clientCommsStatus",e.message,true);await loadClientCommunications()}
+  finally{b.disabled=false;b.textContent=channel==="email"?"Send email":"Save note"}
+ });
+ $("clientCommsChannel")?.addEventListener("change",e=>{$("sendClientComms").textContent=e.target.value==="email"?"Send email":"Save note"});
+ $("scheduleClientFollowup")?.addEventListener("click",async()=>{
+  if(!activeClientId)return;
+  const b=$("scheduleClientFollowup"),when=$("clientFollowupWhen").value,body=$("clientFollowupBody").value.trim();
+  if(!when||!body){status("clientFollowupStatus","Choose a future date and time and write the email.",true);return}
+  b.disabled=true;b.textContent="Scheduling…";
+  try{await request("/admin/clients/"+encodeURIComponent(activeClientId)+"/followups",{method:"POST",body:JSON.stringify({scheduled_for:new Date(when).toISOString(),subject:$("clientFollowupSubject").value.trim(),body})});$("clientFollowupBody").value="";$("clientFollowupWhen").value="";status("clientFollowupStatus","Follow-up scheduled. Cloudflare's scheduled trigger will send it at the selected time.");await loadClientCommunications();}
+  catch(e){status("clientFollowupStatus",e.message,true)}
+  finally{b.disabled=false;b.textContent="Schedule follow-up"}
+ });
+ $("clientFollowupsList")?.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-followup-cancel]");if(!b||!confirm("Cancel this scheduled email follow-up?"))return;
+  b.disabled=true;
+  try{await request("/admin/followups/"+encodeURIComponent(b.dataset.followupCancel),{method:"PATCH",body:JSON.stringify({action:"cancel"})});status("clientFollowupStatus","Scheduled follow-up cancelled.");await loadClientCommunications();}
+  catch(err){status("clientFollowupStatus",err.message,true);b.disabled=false}
+ });
+
  $("loadClients").addEventListener("click",loadClients);
  $("clientSearch").addEventListener("input",renderClients);
  $("clientsList").addEventListener("click",event=>{const view=event.target.closest("[data-client-view]");if(view)openClientProfile(view.dataset.clientView)});
