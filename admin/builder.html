@@ -87,6 +87,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
+  const stable=el.getAttribute("data-x7-builder-key");if(stable)return '[data-x7-builder-key="'+stable+'"]';
   const parts=[];let node=el;
   while(node&&node.nodeType===1&&node!==frame.contentDocument.body){
    if(node.id&&/^[A-Za-z][A-Za-z0-9_-]*$/.test(node.id))return "#"+node.id;
@@ -154,6 +155,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   try{
    const doc=frame.contentDocument;if(!doc||!doc.body)throw new Error("Website preview is not available");
    frameReady=true;
+   doc.querySelectorAll("*").forEach((el,i)=>el.setAttribute("data-x7-builder-key","x7-node-"+(i+1)));
    doc.querySelectorAll("body *").forEach(el=>{if(kindOf(el)||["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(el.tagName)){el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;}});
    const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
    doc.addEventListener("dragstart",e=>{const el=e.target.closest("[data-x7-builder-draggable]");if(!el)return;dragged=el;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","x7-element");});
