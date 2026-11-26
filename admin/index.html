@@ -798,7 +798,7 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
 <div class="builder-heading"><div><div class="builder-kicker">BOOKING MANAGEMENT</div><h2>Availability calendar</h2><p class="label">Block dates when you are unavailable. Each block applies to the entire day.</p></div><button class="secondary-btn" id="calendarRefresh" type="button">Refresh calendar</button></div>
 <div class="feature-panel"><div style="display:flex;align-items:center;justify-content:center;gap:12px"><button class="secondary-btn" id="calendarPrev" type="button">←</button><h3 id="calendarMonth" style="margin:0;min-width:150px;text-align:center"></h3><button class="secondary-btn" id="calendarNext" type="button">→</button></div><div id="availabilityCalendar" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:18px"></div><div class="module-status" id="calendarStatus" role="status"></div></div>
 <div class="feature-panel"><h3>Block an entire day</h3><div class="form-grid"><div class="form-field"><label for="unavailableDate">Date</label><input id="unavailableDate" type="date" required></div><div class="form-field"><label for="unavailableReason">Reason (optional)</label><input id="unavailableReason" maxlength="160" placeholder="e.g. Personal commitment"></div></div><div class="module-actions"><button class="primary-btn" id="blockDate" type="button">Mark date unavailable</button></div></div>
-<div class="feature-panel"><h3>Limited availability</h3><p class="label">Mark a full day as limited when you can accept only a small number of additional bookings. These dates remain selectable by clients.</p><div class="form-grid"><div class="form-field"><label for="limitedDate">Date</label><input id="limitedDate" type="date" required></div><div class="form-field"><label for="limitedReason">Reason (optional)</label><input id="limitedReason" maxlength="160" placeholder="e.g. One remaining session"></div></div><div class="module-actions"><button class="primary-btn" id="markLimitedDate" type="button">Mark date limited</button></div><div id="limitedDateList" class="module-list"></div></div>
+<div class="feature-panel"><h3>Limited availability</h3><p class="label">Mark a full day as limited when you can accept only a small number of additional bookings. These dates remain selectable by clients.</p><div class="form-grid"><div class="form-field"><label for="limitedDate">Date</label><input id="limitedDate" type="date" required></div><div class="form-field"><label for="limitedReason">Reason (optional)</label><input id="limitedReason" maxlength="160" placeholder="e.g. One remaining session"></div></div><div class="module-actions"><button class="primary-btn" id="markLimitedDate" type="button">Mark date limited</button></div><div class="form-field"><label>Block specific time slots on this date</label><div class="form-grid" id="limitedTimeOptions" style="grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px"><label><input type="checkbox" value="08:00"> 08:00</label><label><input type="checkbox" value="10:00"> 10:00</label><label><input type="checkbox" value="12:00"> 12:00</label><label><input type="checkbox" value="14:00"> 14:00</label><label><input type="checkbox" value="16:00"> 16:00</label></div><p class="label">Selected times will be unavailable to clients. Leave other times open.</p><div class="module-actions"><button class="primary-btn" id="saveLimitedTimes" type="button">Save blocked times</button></div></div><div id="limitedDateList" class="module-list"></div><div id="limitedTimeList" class="module-list"></div></div>
 <div class="feature-panel"><h3>Unavailable dates</h3><div id="unavailableDateList" class="module-list"></div></div>
 <div class="feature-panel"><h3>Bookings this month</h3><div id="calendarBookings" class="module-list"></div></div>
 </section>
@@ -1354,6 +1354,49 @@ function render(){const y=month.getFullYear(),m=month.getMonth(),first=new Date(
 async function load(){$("calendarStatus").textContent="Loading…";try{const [d,l,b]=await Promise.all([req("/admin/unavailable-dates"),req("/admin/limited-dates"),req("/admin/bookings")]);dates=d.dates||[];limitedDates=l.dates||[];bookings=b.bookings||[];render();$("calendarStatus").textContent="Calendar updated."}catch(e){$("calendarStatus").textContent=e.message}}
 window.x7LoadAvailabilityCalendar=load;$("calendarPrev").onclick=()=>{month.setMonth(month.getMonth()-1);render()};$("calendarNext").onclick=()=>{month.setMonth(month.getMonth()+1);render()};$("calendarRefresh").onclick=load;$("blockDate").onclick=async()=>{const date=$("unavailableDate").value,reason=$("unavailableReason").value.trim();if(!date){$("calendarStatus").textContent="Choose a date first.";return}try{await req("/admin/unavailable-dates",{method:"POST",body:JSON.stringify({date,reason})});$("unavailableDate").value="";$("unavailableReason").value="";await load()}catch(e){$("calendarStatus").textContent=e.message}};$("markLimitedDate").onclick=async()=>{const date=$("limitedDate").value,reason=$("limitedReason").value.trim();if(!date){$("calendarStatus").textContent="Choose a date to mark as limited.";return}try{await req("/admin/limited-dates",{method:"POST",body:JSON.stringify({date,reason})});$("limitedDate").value="";$("limitedReason").value="";await load()}catch(e){$("calendarStatus").textContent=e.message}};grid.onclick=e=>{const b=e.target.closest("[data-day]");if(b){$("unavailableDate").value=b.dataset.day;$("limitedDate").value=b.dataset.day}};$("unavailableDateList").onclick=async e=>{const b=e.target.closest("[data-unblock]");if(!b)return;if(!confirm("Restore availability for "+b.dataset.unblock+"?"))return;try{await req("/admin/unavailable-dates/"+b.dataset.unblock,{method:"DELETE"});await load()}catch(err){$("calendarStatus").textContent=err.message}};$("limitedDateList").onclick=async e=>{const b=e.target.closest("[data-unlimit]");if(!b)return;if(!confirm("Remove limited status for "+b.dataset.unlimit+"?"))return;try{await req("/admin/limited-dates/"+b.dataset.unlimit,{method:"DELETE"});await load()}catch(err){$("calendarStatus").textContent=err.message}};load()})();</script>
 
+<script id="x7-manual-time-blocks">
+(()=>{
+ const api="https://api.x7studios.co.za", $=id=>document.getElementById(id);
+ const dateInput=$("limitedDate"), options=$("limitedTimeOptions"), list=$("limitedTimeList"), status=$("calendarStatus");
+ if(!dateInput||!options||!list)return;
+ const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ async function request(path,opt={}) {
+  const response=await fetch(api+path,{credentials:"include",headers:{"Content-Type":"application/json","Accept":"application/json"},...opt});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.error||"Could not update time availability");
+  return data;
+ }
+ async function refresh() {
+  try {
+   const data=await request("/admin/limited-time-slots");
+   const slots=data.slots||[];
+   list.innerHTML=slots.map(x=>'<div class="module-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><strong>'+safe(x.date)+'</strong><small style="display:block">'+safe(x.time)+' blocked</small></span><button class="secondary-btn" data-remove-time="'+safe(x.date)+'|'+safe(x.time)+'">Restore time</button></div>').join("")||'<div class="empty">No manually blocked times.</div>';
+   const selected=new Set(slots.filter(x=>x.date===dateInput.value).map(x=>x.time));
+   options.querySelectorAll("input").forEach(input=>input.checked=selected.has(input.value));
+  } catch(error) { status.textContent=error.message; }
+ }
+ $("saveLimitedTimes").addEventListener("click",async()=>{
+  const date=dateInput.value, selected=[...options.querySelectorAll("input:checked")].map(x=>x.value);
+  if(!date){status.textContent="Choose a date first.";return}
+  try {
+   const data=await request("/admin/limited-time-slots?date="+encodeURIComponent(date));
+   const existing=new Set((data.slots||[]).map(x=>x.time));
+   for(const time of selected)if(!existing.has(time))await request("/admin/limited-time-slots",{method:"POST",body:JSON.stringify({date,time})});
+   for(const time of existing)if(!selected.includes(time))await request("/admin/limited-time-slots?date="+encodeURIComponent(date)+"&time="+encodeURIComponent(time),{method:"DELETE"});
+   status.textContent="Blocked time slots saved.";await refresh();
+  } catch(error) {status.textContent=error.message}
+ });
+ list.addEventListener("click",async e=>{
+  const button=e.target.closest("[data-remove-time]");if(!button)return;
+  const [date,time]=button.dataset.removeTime.split("|");
+  try{await request("/admin/limited-time-slots?date="+encodeURIComponent(date)+"&time="+encodeURIComponent(time),{method:"DELETE"});await refresh();status.textContent="Time restored."}catch(error){status.textContent=error.message}
+ });
+ dateInput.addEventListener("change",refresh);
+ const calendar=$("availabilityCalendar");
+ if(calendar)calendar.addEventListener("click",e=>{const day=e.target.closest("[data-day]");if(day){dateInput.value=day.dataset.day;refresh()}});
+ refresh();
+})();
+</script>
 
 <script id="x7-custom-select-script">
 (()=>{
