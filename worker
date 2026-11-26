@@ -842,12 +842,12 @@ if (
         try {
           await env.DB.prepare("CREATE TABLE IF NOT EXISTS unavailable_dates (date TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
           const body = await request.json(), date = String(body?.date || "").trim(), reason = typeof body?.reason === "string" ? body.reason.trim().slice(0,160) : "";
-          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !Number.isFinite(Date.parse(date+"T00:00:00Z")) || new Date(date+"T00:00:00Z").toISOString().slice(0,10)!==date) return json({ error: "Enter a valid date" }, 400, origin);
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date+"T00:00:00Z")) || new Date(date+"T00:00:00Z").toISOString().slice(0,10)!==date) return json({ error: "Enter a valid date" }, 400, origin);
           await env.DB.prepare("INSERT INTO unavailable_dates (date, reason) VALUES (?, ?) ON CONFLICT(date) DO UPDATE SET reason=excluded.reason").bind(date,reason).run();
           return json({ success:true,date,reason },200,origin);
         } catch (error) { console.error("Unavailable date save failed:",error); return json({ error:"Could not mark date unavailable" },500,origin); }
       }
-      const blockedDateMatch=url.pathname.match(/^\\/admin\\/unavailable-dates\\/(\\d{4}-\\d{2}-\\d{2})$/);
+      const blockedDateMatch=url.pathname.match(/^\/admin\/unavailable-dates\/(\d{4}-\d{2}-\d{2})$/);
       if(blockedDateMatch&&request.method==="DELETE"){
         try{await env.DB.prepare("DELETE FROM unavailable_dates WHERE date=?").bind(blockedDateMatch[1]).run();return json({success:true,date:blockedDateMatch[1]},200,origin)}
         catch(error){console.error("Unavailable date removal failed:",error);return json({error:"Could not restore availability"},500,origin)}
