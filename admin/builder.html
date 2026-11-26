@@ -29,7 +29,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 .selected{padding:10px;background:#f4f8fa;border:1px solid #e1e9ed;border-radius:5px;font-size:11px;overflow-wrap:anywhere}
 .history{display:flex;gap:7px;margin-top:10px}.history button{flex:1}
 .warning{font-size:10px;color:#8b6a35;line-height:1.6;margin-top:15px}
-@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
+.design-tabs{display:flex;gap:5px;margin:15px 0 12px;border-bottom:1px solid var(--line);padding-bottom:9px}.design-tabs button{flex:1;padding:8px 5px;font-size:10px}.design-tabs button.active{background:#eaf7fc;border-color:#a8d9ed;color:#15506a}.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.design-grid .field{min-width:0}.design-grid input,.design-grid select{min-width:0;width:100%;height:36px}.design-grid input[type=color]{padding:3px;height:38px}.design-note{font-size:10px;color:var(--muted);line-height:1.6;margin:8px 0}.panel-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:#81939d;margin:15px 0 4px}@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
 @media(max-width:520px){.topbar{height:auto;min-height:60px;padding:12px;align-items:flex-start;flex-direction:column}.workspace{min-height:0}.stage{padding:10px}.canvas{padding:5px;min-height:440px}iframe{height:65vh;min-height:440px}.canvas.mobile iframe{width:360px}}
 </style>
 </head>
@@ -41,9 +41,20 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <div class="status" id="status" role="status">Loading website and saved draft…</div>
 <h2>Selected element</h2><div class="selected" id="selected">Nothing selected. Click a text item, image or link in the website preview.</div>
 <div id="editor" hidden>
-<div class="field"><label for="elementValue" id="valueLabel">Content</label><textarea id="elementValue"></textarea></div>
-<div class="row"><button id="applyBtn" class="primary">Apply to preview</button><button id="resetElementBtn">Reset selection</button></div>
-</div>
+<div class="design-tabs"><button type="button" class="active" data-tab="content">Content</button><button type="button" data-tab="design">Design</button></div>
+<div id="contentTab"><div class="field"><label for="elementValue" id="valueLabel">Content</label><textarea id="elementValue"></textarea></div><div class="row"><button id="applyBtn" class="primary">Apply content</button></div></div>
+<div id="designTab" hidden>
+<p class="design-note">Fine-tune the selected element. Switch Desktop, Tablet or Mobile above to customise each screen size independently.</p>
+<div class="panel-label">TYPOGRAPHY</div><div class="design-grid">
+<div class="field"><label>Text colour</label><input type="color" data-style="color" value="#172832"></div><div class="field"><label>Font family</label><select data-style="fontFamily"><option value="">Theme default</option><option value="Arial, sans-serif">Arial</option><option value="Georgia, serif">Georgia</option><option value="'Helvetica Neue', sans-serif">Helvetica</option><option value="monospace">Monospace</option></select></div>
+<div class="field"><label>Font size</label><input data-style="fontSize" placeholder="32px"></div><div class="field"><label>Font weight</label><select data-style="fontWeight"><option value="">Theme default</option><option value="300">Light</option><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semibold</option><option value="700">Bold</option><option value="800">Extra bold</option></select></div>
+<div class="field"><label>Line height</label><input data-style="lineHeight" placeholder="1.4"></div><div class="field"><label>Letter spacing</label><input data-style="letterSpacing" placeholder="1px"></div>
+<div class="field"><label>Alignment</label><select data-style="textAlign"><option value="">Theme default</option><option value="left">Left</option><option value="center">Centre</option><option value="right">Right</option><option value="justify">Justify</option></select></div><div class="field"><label>Text transform</label><select data-style="textTransform"><option value="">Theme default</option><option value="none">Normal</option><option value="uppercase">Uppercase</option><option value="lowercase">Lowercase</option><option value="capitalize">Capitalize</option></select></div></div>
+<div class="panel-label">COLOURS & BACKGROUND</div><div class="design-grid"><div class="field"><label>Background colour</label><input type="color" data-style="backgroundColor" value="#ffffff"></div><div class="field"><label>Opacity (0–1)</label><input data-style="opacity" placeholder="1"></div><div class="field" style="grid-column:1/-1"><label>Background image URL (HTTPS)</label><input data-style="backgroundImage" placeholder="https://…"></div></div>
+<div class="panel-label">SIZE & SPACING</div><div class="design-grid"><div class="field"><label>Width</label><input data-style="width" placeholder="100%"></div><div class="field"><label>Maximum width</label><input data-style="maxWidth" placeholder="1200px"></div><div class="field"><label>Minimum height</label><input data-style="minHeight" placeholder="420px"></div><div class="field"><label>Padding</label><input data-style="padding" placeholder="40px 24px"></div><div class="field"><label>Top margin</label><input data-style="marginTop" placeholder="24px"></div><div class="field"><label>Bottom margin</label><input data-style="marginBottom" placeholder="24px"></div></div>
+<div class="panel-label">BORDERS & IMAGE PRESENTATION</div><div class="design-grid"><div class="field"><label>Corner radius</label><input data-style="borderRadius" placeholder="12px"></div><div class="field"><label>Border width</label><input data-style="borderWidth" placeholder="1px"></div><div class="field"><label>Border colour</label><input type="color" data-style="borderColor" value="#dfe7eb"></div><div class="field"><label>Border style</label><select data-style="borderStyle"><option value="">Theme default</option><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option><option value="none">None</option></select></div><div class="field"><label>Image fit</label><select data-style="objectFit"><option value="">Theme default</option><option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Fill</option><option value="none">Original</option></select></div><div class="field"><label>Visibility</label><select data-style="display"><option value="">Theme default</option><option value="none">Hide element</option><option value="block">Show element</option></select></div></div>
+<div class="field"><label>Box shadow</label><input data-style="boxShadow" placeholder="0 8px 24px rgba(0,0,0,.12)"></div><div class="row"><button id="applyDesignBtn" class="primary">Apply design</button><button id="clearDesignBtn">Clear design</button></div></div>
+<div class="row" style="margin-top:12px"><button id="resetElementBtn">Reset selected element</button></div></div>
 <h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
 <div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
 <p class="warning">The builder currently edits text, images and links only. Booking forms, calendars, galleries, navigation structure and layout styling are protected from accidental edits.</p>
@@ -52,7 +63,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 (()=> {
  const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
- let patches=[],published=[],history=[],future=[],active=null,frameReady=false;
+ let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop";
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
@@ -68,9 +79,11 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   return "body > "+parts.join(" > ");
  }
  function kindOf(el){
+  if(!el||["SCRIPT","STYLE","NOSCRIPT","SVG","PATH","BUTTON","INPUT","SELECT","TEXTAREA","FORM"].includes(el.tagName))return null;
   if(el.tagName==="IMG")return "image";
   if(el.tagName==="A"&&el.children.length===0)return "link";
-  if(el.children.length===0&&el.textContent.trim()&&!["SCRIPT","STYLE","NOSCRIPT","SVG","PATH"].includes(el.tagName))return "text";
+  if(el.children.length===0&&el.textContent.trim())return "text";
+  if(["SECTION","HEADER","FOOTER","MAIN","ARTICLE"].includes(el.tagName))return "design";
   return null;
  }
  function markSelection(el){
@@ -78,10 +91,12 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   active={selector:selectorFor(el),type:kind,element:el};
   frame.contentDocument.querySelectorAll("[data-x7-builder-selected]").forEach(x=>{x.removeAttribute("data-x7-builder-selected")});
   el.setAttribute("data-x7-builder-selected","true");
-  const val=kind==="image"?el.getAttribute("src")||"":kind==="link"?el.getAttribute("href")||"":el.textContent;
+  const val=kind==="image"?el.getAttribute("src")||"":kind==="link"?el.getAttribute("href")||"":kind==="text"?el.textContent:"";
   selected.textContent=kind.toUpperCase()+" · "+el.tagName.toLowerCase()+" · "+active.selector;
   valueLabel.textContent=kind==="image"?"Image URL":kind==="link"?"Link destination":"Text content";
-  value.value=val;editor.hidden=false;
+  value.value=val;document.getElementById("contentTab").hidden=kind==="design";
+  document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===(kind==="design"?"design":"content")));
+  document.getElementById("designTab").hidden=false;editor.hidden=false;loadDesignControls();
  }
  function applyPatch(p,record=true){
   const doc=frame.contentDocument;if(!doc)return;
@@ -89,7 +104,22 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   if(p.type==="text"&&el.children.length===0)el.textContent=p.value;
   else if(p.type==="image"&&el.tagName==="IMG")el.src=p.value;
   else if(p.type==="link"&&el.tagName==="A")el.href=p.value;
+  else if(p.type==="style"&&p.styles){Object.entries(p.styles[deviceMode]||{}).forEach(([key,val])=>{const css=key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());if(key==="backgroundImage")el.style.backgroundImage=val?"url("+JSON.stringify(val)+")":"";else if(val==="")el.style.removeProperty(css);else el.style.setProperty(css,val)})}
   if(record){history.push(clone(patches));if(history.length>60)history.shift();future=[];patches=patches.filter(x=>!(x.selector===p.selector&&x.type===p.type));patches.push(clone(p));updateHistory()}
+ }
+ function loadDesignControls(){
+  const p=patches.find(x=>x.selector===active?.selector&&x.type==="style"),styles=p?.styles?.[deviceMode]||{};
+  document.querySelectorAll("[data-style]").forEach(input=>{const v=styles[input.dataset.style]??"";if(input.type==="color"&&v&&!/^#[0-9a-f]{6}$/i.test(v))return;input.value=v||""});
+ }
+ function collectDesign(){
+  if(!active)return;const p=patches.find(x=>x.selector===active.selector&&x.type==="style"),styles=clone(p?.styles||{}),current={};
+  document.querySelectorAll("[data-style]").forEach(input=>{if(input.value.trim())current[input.dataset.style]=input.value.trim()});
+  styles[deviceMode]=current;applyPatch({selector:active.selector,type:"style",styles});setStatus("Design updated for "+deviceMode+". Save draft to keep this change.");
+ }
+ function validateDesign(){
+  const safe=/^[a-zA-Z0-9#(),.%\\s"'_-]+$/;
+  for(const input of document.querySelectorAll("[data-style]")){const v=input.value.trim(),key=input.dataset.style;if(!v)continue;if(key==="backgroundImage"){if(!/^https:\\/\\//i.test(v)){setStatus("Background image must use HTTPS.",true);return false}}else if(!safe.test(v)){setStatus("Invalid design value for "+key+".",true);return false}}
+  return true;
  }
  function updateHistory(){document.getElementById("undoBtn").disabled=!history.length;document.getElementById("redoBtn").disabled=!future.length}
  function bindFrame(){
@@ -110,10 +140,13 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  async function request(method,body){const r=await fetch(API,{method,headers:{"Content-Type":"application/json"},credentials:"include",body:body?JSON.stringify(body):undefined,cache:"no-store"});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Request failed ("+r.status+")");return data}
  async function load(){try{const d=await request("GET");patches=Array.isArray(d.draft)?d.draft:[];published=Array.isArray(d.published)?d.published:[];if(frameReady){published.forEach(p=>applyPatch(p,false));patches.forEach(p=>applyPatch(p,false));}setStatus("Draft loaded · "+patches.length+" saved edit(s).")}catch(e){setStatus("Could not load saved draft: "+e.message,true)}}
  document.getElementById("applyBtn").addEventListener("click",()=>{
-  if(!active)return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
-  if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&!["https:","http:"].includes(u.protocol))throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
+  if(!active||active.type==="design")return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
+  if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&u.protocol!=="https:")throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
   applyPatch({selector:active.selector,type:active.type,value:v});setStatus("Preview updated. Save draft to keep this change.");
  });
+ document.getElementById("applyDesignBtn").addEventListener("click",()=>{if(validateDesign())collectDesign()});
+ document.getElementById("clearDesignBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>!(p.selector===active.selector&&p.type==="style"));future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Design overrides cleared from this draft.")});
+ document.querySelectorAll("[data-tab]").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===tab));document.getElementById("contentTab").hidden=tab.dataset.tab!=="content";document.getElementById("designTab").hidden=tab.dataset.tab!=="design"}));
  document.getElementById("resetElementBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>!(p.selector===active.selector&&p.type===active.type));future=[];updateHistory();if(active.element)active.element.removeAttribute("data-x7-builder-selected");active=null;editor.hidden=true;frame.contentWindow.location.reload();setStatus("Element edit removed from this draft. Preview reloaded.")});
  document.getElementById("saveBtn").addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"save",draft:patches});setStatus("Draft saved successfully. It is not yet public.")}catch(err){setStatus("Draft save failed: "+err.message,true)}finally{b.disabled=false}});
  document.getElementById("publishBtn").addEventListener("click",async e=>{if(!confirm("Publish these changes to the live X7 Studios website?"))return;const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"publish",draft:patches});published=clone(patches);patches=[];frame.contentWindow.location.reload();setStatus("Published. The live website will display these changes.")}catch(err){setStatus("Publish failed: "+err.message,true)}finally{b.disabled=false}});
@@ -121,7 +154,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  document.getElementById("redoBtn").addEventListener("click",()=>{if(!future.length)return;history.push(clone(patches));patches=future.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Redo applied. Reloading preview…")});
  document.getElementById("reloadBtn").addEventListener("click",()=>frame.contentWindow.location.reload());
  document.getElementById("discardBtn").addEventListener("click",async()=>{if(!confirm("Discard all saved draft edits? Published changes will remain live."))return;try{await request("POST",{action:"discard"});patches=[];history=[];future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Draft discarded. Published content is unchanged.")}catch(e){setStatus("Could not discard draft: "+e.message,true)}});
- document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");if(b.dataset.device!=="desktop")canvas.classList.add(b.dataset.device)}));
+ document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");deviceMode=b.dataset.device;if(deviceMode!=="desktop")canvas.classList.add(deviceMode);if(active)loadDesignControls();frame.contentDocument?.querySelectorAll("[data-x7-builder-selected]").forEach(el=>el.removeAttribute("data-x7-builder-selected"));if(active){const el=frame.contentDocument?.querySelector(active.selector);if(el)el.setAttribute("data-x7-builder-selected","true")}}));
  load();
 })();
 </script>
