@@ -2909,21 +2909,38 @@ addEventListener("scroll", () => {
 </script>
 
 <script id="x7-published-website-content">
-/* Apply only owner-published visual edits. The builder canvas applies these itself before its local draft. */
+/* Published visual edits are applied safely to the existing X7 site. */
 (async()=>{
  if(new URLSearchParams(location.search).has("x7builder"))return;
  try{
   const response=await fetch("https://api.x7studios.co.za/website-content",{cache:"no-store"});
   if(!response.ok)return;
-  const data=await response.json();
-  for(const edit of Array.isArray(data.edits)?data.edits:[]){
-   if(!edit||typeof edit.selector!=="string"||typeof edit.value!=="string")continue;
-   let element;try{element=document.querySelector(edit.selector)}catch{continue}
-   if(!element)continue;
-   if(edit.type==="text"&&element.children.length===0)element.textContent=edit.value;
-   else if(edit.type==="image"&&element instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value))element.src=edit.value;
-   else if(edit.type==="link"&&element instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value))element.href=edit.value;
+  const data=await response.json(),edits=Array.isArray(data.edits)?data.edits:[];
+  const styleKeys=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow"]);
+  const applied=new Map();
+  function device(){return innerWidth<=600?"mobile":innerWidth<=1024?"tablet":"desktop"}
+  function apply(){
+   for(const [el,keys] of applied)for(const key of keys)el.style.removeProperty(key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase()));
+   applied.clear();
+   for(const edit of edits){
+    if(!edit||typeof edit.selector!=="string")continue;
+    let el;try{el=document.querySelector(edit.selector)}catch{continue}if(!el)continue;
+    if(edit.type==="text"&&typeof edit.value==="string"&&el.children.length===0)el.textContent=edit.value;
+    else if(edit.type==="image"&&el instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value||""))el.src=edit.value;
+    else if(edit.type==="link"&&el instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||""))el.href=edit.value;
+    else if(edit.type==="style"&&edit.styles&&typeof edit.styles==="object"){
+     const styles=edit.styles[device()]||edit.styles.desktop||{};
+     for(const [key,value] of Object.entries(styles)){
+      if(!styleKeys.has(key)||typeof value!=="string")continue;
+      const css=key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());
+      if(key==="backgroundImage"){if(/^https:\/\//i.test(value))el.style.backgroundImage="url("+JSON.stringify(value)+")"}
+      else el.style.setProperty(css,value);
+      if(!applied.has(el))applied.set(el,new Set());applied.get(el).add(key);
+     }
+    }
+   }
   }
+  apply();let resizeTimer;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(apply,120)});
  }catch(error){console.warn("X7 published website edits could not be applied",error)}
 })();
 </script>
