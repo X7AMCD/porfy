@@ -908,9 +908,10 @@ if (
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
           )`).run();
           const state = await env.DB.prepare("SELECT draft_json, published_json, updated_at FROM website_builder_state WHERE id = 1").first();
-          let draft = [];
+          let draft = [], published = [];
           try { draft = JSON.parse(state?.draft_json || "[]"); } catch {}
-          return json({ draft: Array.isArray(draft) ? draft : [], published_count: (() => { try { return JSON.parse(state?.published_json || "[]").length; } catch { return 0; } })(), updated_at: state?.updated_at || null }, 200, origin);
+          try { published = JSON.parse(state?.published_json || "[]"); } catch {}
+          return json({ draft: Array.isArray(draft) ? draft : [], published: Array.isArray(published) ? published : [], updated_at: state?.updated_at || null }, 200, origin);
         } catch (error) {
           console.error("Website builder state load failed:", error);
           return json({ error: "Could not load website builder state" }, 500, origin);
