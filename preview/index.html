@@ -2916,7 +2916,7 @@ addEventListener("scroll", () => {
   const response=await fetch("https://api.x7studios.co.za/website-content",{cache:"no-store"});
   if(!response.ok)return;
   const data=await response.json(),edits=Array.isArray(data.edits)?data.edits:[];
-  const styleKeys=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow"]);
+  const styleKeys=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","justifyContent","alignItems","gap","gridTemplateColumns","zIndex","top","left","overflow","objectPosition"]);
   const applied=new Map();
   function device(){return innerWidth<=600?"mobile":innerWidth<=1024?"tablet":"desktop"}
   function apply(){
