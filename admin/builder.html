@@ -68,6 +68,13 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 </div><div class="panel-label">BORDERS & IMAGE PRESENTATION</div><div class="design-grid"><div class="field"><label>Corner radius</label><input data-style="borderRadius" placeholder="12px"></div><div class="field"><label>Border width</label><input data-style="borderWidth" placeholder="1px"></div><div class="field"><label>Border colour</label><input type="color" data-style="borderColor" value="#dfe7eb"></div><div class="field"><label>Border style</label><select data-style="borderStyle"><option value="">Theme default</option><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option><option value="none">None</option></select></div><div class="field"><label>Image fit</label><select data-style="objectFit"><option value="">Theme default</option><option value="cover">Cover</option><option value="contain">Contain</option><option value="fill">Fill</option><option value="none">Original</option></select></div></div>
 <div class="field"><label>Box shadow</label><input data-style="boxShadow" placeholder="0 8px 24px rgba(0,0,0,.12)"></div><div class="row"><button id="applyDesignBtn" class="primary">Apply design</button><button id="clearDesignBtn">Clear design</button></div></div>
 <div class="row" style="margin-top:12px"><button id="resetElementBtn">Reset selected element</button></div></div>
+
+<h2>Add an element</h2><p class="help">Select a section or content container in the canvas first. New content will be inserted inside that selected area.</p>
+<div class="field"><label for="newElementType">Element type</label><select id="newElementType"><option value="H2">Heading</option><option value="P">Paragraph</option><option value="IMG">Image</option><option value="A">Button / link</option><option value="HR">Divider</option><option value="DIV">Spacer</option></select></div>
+<div class="field"><label for="newElementContent">Text or image URL</label><input id="newElementContent" placeholder="Enter heading or content"></div>
+<div class="field" id="newElementLinkField" hidden><label for="newElementHref">Button destination</label><input id="newElementHref" placeholder="https://…"></div>
+<div class="row"><button id="addElementBtn" class="primary">Add to page</button></div>
+<p class="design-note">For images, enter a secure HTTPS image URL. Buttons need a valid destination. Select the new element to edit its design.</p>
 <h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
 <div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
 <p class="warning">Customise typography, colours, backgrounds, spacing, borders, visibility, flex and grid layout, and responsive settings per device. Core booking, calendar, navigation and gallery interactions remain protected.</p>
@@ -157,6 +164,22 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   if(!active||active.type==="design")return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
   if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&u.protocol!=="https:")throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
   applyPatch({selector:active.selector,type:active.type,value:v});setStatus("Preview updated. Save draft to keep this change.");
+ });
+
+ const newType=document.getElementById("newElementType"),newContent=document.getElementById("newElementContent"),newHref=document.getElementById("newElementHref");
+ newType.addEventListener("change",()=>{document.getElementById("newElementLinkField").hidden=newType.value!=="A";newContent.placeholder=newType.value==="IMG"?"https://…":newType.value==="HR"||newType.value==="DIV"?"Optional label":"Enter text content"});
+ document.getElementById("addElementBtn").addEventListener("click",()=>{
+  if(!active||!(active.type==="design"||["SECTION","MAIN","ARTICLE","DIV"].includes(active.element?.tagName))){setStatus("Select a section or content container in the canvas first.",true);return;}
+  const tag=newType.value,raw=newContent.value.trim(),href=newHref.value.trim();
+  if(["H2","P","A","IMG"].includes(tag)&&!raw){setStatus("Enter content for the new element.",true);return;}
+  if(tag==="IMG"&&!/^https:\/\//i.test(raw)){setStatus("Image URLs must start with https://.",true);return;}
+  if(tag==="A"&&!/^(https?:\/\/|mailto:|tel:)/i.test(href)){setStatus("Enter a valid HTTPS, HTTP, email or telephone destination.",true);return;}
+  const id="x7-added-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);
+  const item={selector:active.selector,type:"element",id,tag,value:raw,href};
+  const parent=frame.contentDocument?.querySelector(active.selector);if(!parent){setStatus("The selected container is no longer available. Reload the preview and select it again.",true);return;}
+  history.push(clone(patches));if(history.length>60)history.shift();future=[];patches.push(item);updateHistory();
+  let el=frame.contentDocument.getElementById(id);if(!el){el=frame.contentDocument.createElement(tag);el.id=id;if(tag==="IMG"){el.src=raw;el.alt="";el.loading="lazy";el.style.maxWidth="100%"}else if(tag==="A"){el.href=href;el.textContent=raw;el.style.display="inline-block";el.style.padding="12px 20px";el.style.background="#89cff0";el.style.color="#122631";el.style.textDecoration="none"}else if(tag==="HR"){el.style.border="0";el.style.borderTop="1px solid #dfe7eb";el.style.margin="24px 0"}else if(tag==="DIV"){el.style.height="32px";el.setAttribute("aria-hidden","true")}else{el.textContent=raw;if(tag==="H2")el.style.margin="20px 0 12px"}parent.appendChild(el)}
+  setStatus("Element added to the preview. Save draft to keep it, then publish when ready.");markSelection(el);value.value=raw;
  });
  document.getElementById("applyDesignBtn").addEventListener("click",()=>{if(validateDesign())collectDesign()});
  document.getElementById("clearDesignBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>!(p.selector===active.selector&&p.type==="style"));future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Design overrides cleared from this draft.")});
