@@ -314,7 +314,6 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   for(const node of copyable){
    const tag=node.tagName==="ARTICLE"||node.tagName==="SECTION"?"SECTION":node.tagName==="DIV"?"DIV":/^H[1-6]$/.test(node.tagName)?"H2":node.tagName;
    if(!["SECTION","DIV","H2","P","IMG","HR"].includes(tag))continue;
-   const ancestor=[...node.parentElement?.closest("*")?[]:[]]; // parent resolution is performed by walking the original tree
    let originalParent=node.parentElement;while(originalParent&&!mapping.has(originalParent)&&originalParent!==source)originalParent=originalParent.parentElement;
    const mappedParent=mapping.get(originalParent)||id,childId=id+"-"+(items.length+1);
    const value=tag==="IMG"?(node.getAttribute("src")||""):tag==="HR"?"":tag==="DIV"||tag==="SECTION"?"":node.textContent.trim();
