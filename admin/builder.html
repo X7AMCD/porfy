@@ -52,7 +52,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 (()=> {
  const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
- let patches=[],history=[],future=[],active=null,frameReady=false;
+ let patches=[],published=[],history=[],future=[],active=null,frameReady=false;
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
@@ -102,13 +102,13 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
     let el=e.target;while(el&&el!==doc.body&&!kindOf(el))el=el.parentElement;
     if(!el)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
    },true);
-   patches.forEach(p=>applyPatch(p,false));
+   published.forEach(p=>applyPatch(p,false));patches.forEach(p=>applyPatch(p,false));
    setStatus("Website loaded. Select an element in the canvas to edit.");
   }catch(err){setStatus("Could not connect to the website preview. Check that /preview/ is available.",true)}
  }
  frame.addEventListener("load",bindFrame);
  async function request(method,body){const r=await fetch(API,{method,headers:{"Content-Type":"application/json"},credentials:"include",body:body?JSON.stringify(body):undefined,cache:"no-store"});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Request failed ("+r.status+")");return data}
- async function load(){try{const d=await request("GET");patches=Array.isArray(d.draft)?d.draft:[];if(frameReady)patches.forEach(p=>applyPatch(p,false));setStatus("Draft loaded · "+patches.length+" saved edit(s).")}catch(e){setStatus("Could not load saved draft: "+e.message,true)}}
+ async function load(){try{const d=await request("GET");patches=Array.isArray(d.draft)?d.draft:[];published=Array.isArray(d.published)?d.published:[];if(frameReady){published.forEach(p=>applyPatch(p,false));patches.forEach(p=>applyPatch(p,false));}setStatus("Draft loaded · "+patches.length+" saved edit(s).")}catch(e){setStatus("Could not load saved draft: "+e.message,true)}}
  document.getElementById("applyBtn").addEventListener("click",()=>{
   if(!active)return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
   if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&!["https:","http:"].includes(u.protocol))throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
