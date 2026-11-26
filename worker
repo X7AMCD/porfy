@@ -1775,10 +1775,10 @@ if (
             JOIN clients c ON c.id = g.client_id
             WHERE g.id = ?
           `).bind(result.meta.last_row_id).first();
-          // Notify the client and admin through Resend. Gallery creation remains successful if email fails.
+          // Send gallery notifications through Brevo. Gallery creation remains successful if email fails.
           let emailNotifications = { sent: 0, reason: "" };
-          if (!env.RESEND_API_KEY) {
-            emailNotifications.reason = "RESEND_API_KEY is not configured in the Worker";
+          if (!env.BREVO_API_KEY) {
+            emailNotifications.reason = "BREVO_API_KEY is not configured in the Worker";
           } else {
             const escapeEmail = value => String(value ?? "").replace(/[&<>"']/g, function(ch) {
               return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch];
@@ -1786,24 +1786,29 @@ if (
             const safeTitle = escapeEmail(title);
             const safeName = escapeEmail(client.full_name || "there");
             const safePassword = escapeEmail(password);
-            const sendGalleryEmail = async (to, subject, heading, intro) => {
-              const response = await fetch("https://api.resend.com/emails", {
+            const sendGalleryEmail = async (to, toName, subject, heading, intro) => {
+              if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) throw new Error("Recipient email address is missing or invalid");
+              const response = await fetch("https://api.brevo.com/v3/smtp/email", {
                 method: "POST",
-                headers: { "Authorization": "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+                headers: { "api-key": env.BREVO_API_KEY, "accept": "application/json", "content-type": "application/json" },
                 body: JSON.stringify({
-                  from: SENDER.name + " <" + SENDER.email + ">",
-                  to: [to],
-                  reply_to: REPLY_TO.email,
+                  sender: { name: SENDER.name, email: SENDER.email },
+                  to: [{ email: to, name: toName || to }],
+                  replyTo: { email: REPLY_TO.email, name: REPLY_TO.name },
                   subject,
-                  html: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#263844;line-height:1.6"><div style="background:#172a35;padding:22px;color:#fff;font-weight:700;letter-spacing:2px">x7studio</div><div style="padding:24px"><h2>' + heading + '</h2><p>' + intro + '</p><p><strong>Gallery:</strong> ' + safeTitle + '</p><p><strong>Access password:</strong> <span style="font-family:monospace;font-size:18px;background:#f1f5f7;padding:8px 12px;border-radius:5px">' + safePassword + '</span></p><p>Keep this password private. If you need help accessing the gallery, reply to this email.</p><p style="color:#71818b;font-size:12px">X7 Studios</p></div></div>'
+                  htmlContent: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#263844;line-height:1.6"><div style="background:#172a35;padding:22px;color:#fff;font-weight:700;letter-spacing:2px">x7studio</div><div style="padding:24px"><h2>' + heading + '</h2><p>' + intro + '</p><p><strong>Gallery:</strong> ' + safeTitle + '</p><p><strong>Access password:</strong> <span style="font-family:monospace;font-size:18px;background:#f1f5f7;padding:8px 12px;border-radius:5px">' + safePassword + '</span></p><p>Keep this password private. If you need help accessing the gallery, reply to this email.</p><p style="color:#71818b;font-size:12px">X7 Studios</p></div></div>',
+                  textContent: heading + "\n\n" + intro + "\nGallery: " + title + "\nAccess password: " + password + "\n\nKeep this password private. X7 Studios"
                 })
               });
-              if (!response.ok) throw new Error("Resend returned HTTP " + response.status);
+              if (!response.ok) {
+                const detail = await response.text().catch(() => "");
+                throw new Error("Brevo returned HTTP " + response.status + (detail ? ": " + detail.slice(0, 200) : ""));
+              }
               return response.json();
             };
             const deliveries = await Promise.allSettled([
-              sendGalleryEmail(client.email, "Your X7 Studios private gallery is ready", "Your private gallery is ready", "Hello " + safeName + ", your X7 Studios private gallery has been created."),
-              sendGalleryEmail(ADMIN_EMAIL, "Private gallery created: " + title, "A private gallery was created", "A new private gallery has been created for " + safeName + " (" + escapeEmail(client.email) + ").")
+              sendGalleryEmail(client.email, client.full_name, "Your X7 Studios private gallery is ready", "Your private gallery is ready", "Hello " + safeName + ", your X7 Studios private gallery has been created."),
+              sendGalleryEmail(ADMIN_EMAIL, "X7 Studios admin", "Private gallery created: " + title, "A private gallery was created", "A new private gallery has been created for " + safeName + " (" + escapeEmail(client.email) + ").")
             ]);
             emailNotifications.sent = deliveries.filter(x => x.status === "fulfilled").length;
             if (emailNotifications.sent !== 2) {
