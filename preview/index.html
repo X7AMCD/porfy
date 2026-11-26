@@ -1104,9 +1104,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .x7-date-cell{min-height:36px;border:1px solid transparent;border-radius:6px;background:#f5f7f8;color:#33434b;font:inherit;font-size:12px;cursor:pointer}
 .x7-date-cell.available:hover{border-color:#89cff0;background:#edf7fb}
 .x7-date-cell.selected{background:#dff1f8;border-color:#79b9d5;color:#1c5871;font-weight:700}
-.x7-date-cell.limited{background:#fff4df;border-color:#e7c27d;color:#80591d;position:relative;padding-bottom:12px}
-.x7-date-limited-label{display:block;font-size:7px;line-height:8px;letter-spacing:-.02em;text-decoration:none}
+.x7-date-cell.limited{background:#fff4df;border-color:#e7c27d;color:#80591d;font-weight:650}
+.x7-date-dot.limited{background:#fff4df;border-color:#e7c27d;margin-left:8px}
 html[data-theme="dark"] .x7-date-cell.limited{background:#49391f;border-color:#80612d;color:#f2cf8a}
+html[data-theme="dark"] .x7-date-dot.limited{background:#49391f;border-color:#80612d}
 .x7-date-cell.unavailable{background:#f8e9e9;border-color:#edcece;color:#a14e54;text-decoration:line-through;cursor:not-allowed;opacity:.9}
 .x7-date-cell.past{background:#f7f7f7;color:#b8bfc2;cursor:not-allowed}
 .x7-date-cell:disabled{cursor:not-allowed}
@@ -1254,7 +1255,7 @@ html[data-theme="dark"] .x7-date-dot.blocked{
               <div class="x7-date-popover" id="x7DatePopover" hidden>
                 <div class="x7-date-head"><button type="button" id="x7DatePrev" aria-label="Previous month">‹</button><strong id="x7DateMonth"></strong><button type="button" id="x7DateNext" aria-label="Next month">›</button></div>
                 <div class="x7-date-grid" id="x7DateGrid"></div>
-                <p class="x7-date-legend"><span class="x7-date-dot blocked"></span> Unavailable <span class="x7-date-dot"></span> Available</p>
+                <p class="x7-date-legend"><span class="x7-date-dot"></span> Available <span class="x7-date-dot limited"></span> Limited <span class="x7-date-dot blocked"></span> Unavailable</p>
                 <p class="x7-date-note" id="x7DateNote" role="status"></p>
               </div>
             </div></div>
@@ -1633,6 +1634,7 @@ addEventListener("load", locChange);                              // keeps the r
 /* Date picker: marks dates blocked in the X7 Studios availability calendar */
 const x7UnavailableDates = new Set();
 const x7BookedDates = new Set();
+const x7LimitedDates = new Set();
 const x7Today = new Date(); x7Today.setHours(0,0,0,0);
 const x7DateISO = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 let x7VisibleMonth = new Date(x7Today.getFullYear(),x7Today.getMonth(),1);
@@ -1645,9 +1647,9 @@ function x7RenderDatePicker(){
  for(let i=0;i<offset;i++)out+='<span aria-hidden="true"></span>';
  for(let day=1;day<=total;day++){
   const date=new Date(y,m,day),key=x7DateISO(date),past=date<x7Today,blocked=x7UnavailableDates.has(key),closed=CLOSED_WEEKDAYS.includes(date.getDay()),disabled=past||blocked||closed;
-  const limited=!blocked&&!past&&!closed&&x7BookedDates.has(key);
+  const limited=!blocked&&!past&&!closed&&(x7BookedDates.has(key)||x7LimitedDates.has(key));
   const cls="x7-date-cell "+(blocked?"unavailable":past||closed?"past":limited?"limited":"available")+( $("date").value===key?" selected":"");
-  out+='<button type="button" class="'+cls+'" data-date="'+key+'" '+(disabled?'disabled aria-disabled="true"':'')+(blocked?' title="Unavailable for the entire day"':limited?' title="Limited availability — bookings already exist on this date"':closed?' title="Not available"':'')+'>'+day+(limited?'<span class="x7-date-limited-label">Limited</span>':'')+'</button>';
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'" '+(disabled?'disabled aria-disabled="true"':'')+(blocked?' title="Unavailable for the entire day"':limited?' title="Limited availability — bookings already exist on this date"':closed?' title="Not available"':'')+'>'+day+'</button>';
  }
  x7DateGrid.innerHTML=out;
  $("x7DateNote").textContent="Unavailable dates are blocked for the entire day.";
@@ -1656,15 +1658,17 @@ function x7RenderDatePicker(){
 async function x7LoadUnavailableDates(){
  $("x7DateNote").textContent="Checking availability…";
  try{
-  const [blockedResponse,bookedResponse]=await Promise.all([
+  const [blockedResponse,bookedResponse,limitedResponse]=await Promise.all([
    fetch("https://api.x7studios.co.za/unavailable-dates",{method:"GET",cache:"no-store"}),
-   fetch("https://api.x7studios.co.za/booking-dates",{method:"GET",cache:"no-store"})
+   fetch("https://api.x7studios.co.za/booking-dates",{method:"GET",cache:"no-store"}),
+   fetch("https://api.x7studios.co.za/limited-dates",{method:"GET",cache:"no-store"})
   ]);
-  if(!blockedResponse.ok||!bookedResponse.ok)throw new Error("Availability is temporarily unavailable.");
-  const [blockedData,bookedData]=await Promise.all([blockedResponse.json(),bookedResponse.json()]);
-  x7UnavailableDates.clear();x7BookedDates.clear();
+  if(!blockedResponse.ok||!bookedResponse.ok||!limitedResponse.ok)throw new Error("Availability is temporarily unavailable.");
+  const [blockedData,bookedData,limitedData]=await Promise.all([blockedResponse.json(),bookedResponse.json(),limitedResponse.json()]);
+  x7UnavailableDates.clear();x7BookedDates.clear();x7LimitedDates.clear();
   (Array.isArray(blockedData.dates)?blockedData.dates:[]).forEach(d=>{if(/^\d{4}-\d{2}-\d{2}$/.test(d))x7UnavailableDates.add(d)});
   (Array.isArray(bookedData.dates)?bookedData.dates:[]).forEach(d=>{if(/^\d{4}-\d{2}-\d{2}$/.test(d))x7BookedDates.add(d)});
+  (Array.isArray(limitedData.dates)?limitedData.dates:[]).forEach(d=>{if(/^\d{4}-\d{2}-\d{2}$/.test(d))x7LimitedDates.add(d)});
   x7RenderDatePicker();
  }catch(error){$("x7DateNote").textContent="Could not refresh availability. Please try again shortly.";console.warn("X7 unavailable dates could not load",error)}
 }
