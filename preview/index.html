@@ -1457,8 +1457,27 @@ const $ = id => document.getElementById(id);
 const state = { type:null, time:null };
 const money = n => "R" + n.toLocaleString("en-ZA");
 
-/* Taken slots live in this browser only. For real bookings use a backend (see notes). */
+/* Local legacy cache plus authoritative booking availability from the API. */
 const taken = () => { try { return JSON.parse(localStorage.getItem("taken") || "{}"); } catch { return {}; } };
+const x7BookedTimes = new Set();
+const x7ManuallyBlockedTimes = new Set();
+let x7TimeAvailabilityDate = "";
+let x7TimeAvailabilityRequest = 0;
+async function x7LoadTimeAvailability(date) {
+  x7TimeAvailabilityDate = date || "";
+  x7BookedTimes.clear(); x7ManuallyBlockedTimes.clear();
+  if (!date) { drawSlots(); return; }
+  const requestId = ++x7TimeAvailabilityRequest;
+  try {
+    const response = await fetch("https://api.x7studios.co.za/booking-times?date="+encodeURIComponent(date), {method:"GET",cache:"no-store"});
+    if (!response.ok) throw new Error("Could not load booked times");
+    const data = await response.json();
+    if (requestId !== x7TimeAvailabilityRequest || $("date").value !== date) return;
+    (Array.isArray(data.booked)?data.booked:[]).forEach(t=>x7BookedTimes.add(t));
+    (Array.isArray(data.limited)?data.limited:[]).forEach(t=>x7ManuallyBlockedTimes.add(t));
+  } catch(error) { console.warn("X7 time availability could not load",error); }
+  if (requestId === x7TimeAvailabilityRequest) drawSlots();
+}
 
 /* Shoot types are loaded from the X7 Studios service catalogue.
    The original values above remain as a fallback if the API is temporarily unavailable. */
@@ -1689,20 +1708,22 @@ $("date").onchange=()=>{
  if(x7UnavailableDates.has(key)){show("Sorry, this date is unavailable. Please choose another date.",true);$("date").value="";$("x7DateLabel").textContent="Choose a date"}
  else if(CLOSED_WEEKDAYS.includes(d.getDay())){show("Sorry, I'm unavailable on that day. Please pick another.",true);$("date").value="";$("x7DateLabel").textContent="Choose a date"}
  else $("msg").style.display="none";
- state.time=null;drawSlots();summary();x7RenderDatePicker();
+ state.time=null;drawSlots();x7LoadTimeAvailability(key);summary();x7RenderDatePicker();
 };
 $("bookForm").addEventListener("reset",()=>{setTimeout(()=>{$("x7DateLabel").textContent="Choose a date";x7VisibleMonth=new Date(x7Today.getFullYear(),x7Today.getMonth(),1);x7RenderDatePicker()},0)});
 x7RenderDatePicker();x7LoadUnavailableDates();
 
-/* Time slots (taken ones are disabled) */
+/* Booked or manually blocked time slots are disabled for everyone. */
 function drawSlots() {
   $("slots").innerHTML = "";
-  const day = taken()[$("date").value] || [];
+  const date = $("date").value, legacy = taken()[date] || [];
   TIMES.forEach(t => {
     const b = document.createElement("button"); b.type = "button"; b.textContent = t;
-    b.disabled = !$("date").value || day.includes(t);
+    const booked = x7BookedTimes.has(t) || legacy.includes(t), manuallyBlocked = x7ManuallyBlockedTimes.has(t);
+    b.disabled = !date || booked || manuallyBlocked;
+    if (booked || manuallyBlocked) b.title = booked ? "Already booked" : "Unavailable";
     b.onclick = () => { state.time = t; [...$("slots").children].forEach(x => x.classList.toggle("on", x === b)); summary(); };
-    if (state.time === t) b.classList.add("on");
+    if (state.time === t && !b.disabled) b.classList.add("on");
     $("slots").append(b);
   });
 }
