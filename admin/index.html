@@ -604,6 +604,28 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
 /* Shared image upload and drag/drop controls */
 .x7-upload-dropzone{border:1px dashed #9bb9c8;border-radius:10px;background:#f7fbfd;padding:15px;text-align:center;color:#526b78;font-size:11px;line-height:1.6;transition:background .15s,border-color .15s}.x7-upload-dropzone strong{display:block;color:#294451;font-size:12px}.x7-upload-dropzone.is-dragging{border-color:#398db0;background:#eaf7fc;box-shadow:inset 0 0 0 1px #398db0}.x7-upload-dropzone small{display:block;color:#81939d}.x7-upload-preview{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.x7-upload-preview img{width:58px;height:58px;object-fit:cover;border-radius:6px;border:1px solid #dce6eb}
 </style>
+
+<style id="x7-custom-select-styles">
+/* X7 Studios custom dropdowns */
+select.x7-native-select-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;opacity:0!important;pointer-events:none!important}
+.x7-select{position:relative;display:block;width:100%;min-width:0;font:inherit}
+.x7-select-trigger{width:100%;min-height:39px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid #dce4e8;border-radius:8px;background:#fff;color:#263843;font:inherit;font-size:12px;text-align:left;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}
+.x7-select-trigger:hover,.x7-select.open .x7-select-trigger{border-color:#78bfdf}
+.x7-select-trigger:focus-visible{outline:none;border-color:#78bfdf;box-shadow:0 0 0 3px rgba(137,207,240,.2)}
+.x7-select-chevron{width:8px;height:8px;flex:0 0 8px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s ease;opacity:.65}
+.x7-select.open .x7-select-chevron{transform:rotate(225deg) translate(-1px,-1px)}
+.x7-select-menu{position:absolute;z-index:10050;top:calc(100% + 5px);left:0;right:0;max-height:260px;overflow:auto;padding:5px;border:1px solid #dce4e8;border-radius:9px;background:#fff;box-shadow:0 12px 30px rgba(24,39,48,.16);display:none}
+.x7-select.open .x7-select-menu{display:block;animation:x7SelectIn .12s ease-out}
+.x7-select-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:0;border-radius:6px;background:transparent;color:#31434d;font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.x7-select-option:hover,.x7-select-option[aria-selected="true"]{background:#edf6fa;color:#245a73}
+.x7-select-option:focus-visible{outline:2px solid #89cff0;outline-offset:-2px}
+.x7-select-option:disabled{opacity:.42;cursor:not-allowed}
+.x7-select-check{font-size:12px;color:#397c9d}
+.x7-select[aria-disabled="true"] .x7-select-trigger{opacity:.55;cursor:not-allowed}
+@keyframes x7SelectIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.x7-select-menu,.x7-select-trigger,.x7-select-chevron{animation:none;transition:none}}
+</style>
+
 </head>
 <body>
 <div class="shell">
@@ -1330,6 +1352,57 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
 function render(){const y=month.getFullYear(),m=month.getMonth(),first=new Date(y,m,1),offset=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate();$("calendarMonth").textContent=month.toLocaleDateString("en-ZA",{month:"long",year:"numeric"});let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>'<div style="text-align:center;font-size:10px;padding:7px;color:#87949b">'+x+'</div>').join("");for(let i=0;i<offset;i++)h+="<div></div>";for(let d=1;d<=total;d++){const key=iso(new Date(y,m,d)),blocked=dates.some(x=>x.date===key),count=bookings.filter(x=>x.booking_date===key&&x.status!=="Cancelled").length;h+='<button type="button" data-day="'+key+'" style="min-height:52px;border:1px solid '+(blocked?"#e6c4c6":count?"#d2e4ec":"#edf0f2")+';border-radius:6px;background:'+(blocked?"#f8e9e9":count?"#eaf3f7":"#f7f9fa")+';color:'+(blocked?"#a34f55":"#53636c")+'"><strong>'+d+'</strong><small style="display:block;font-size:9px">'+(blocked?"Unavailable":count?count+" booking(s)":"")+'</small></button>'}grid.innerHTML=h;$("unavailableDateList").innerHTML=dates.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>'<div class="module-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><strong>'+esc(x.date)+'</strong><small style="display:block">'+esc(x.reason||"Unavailable all day")+'</small></span><button class="secondary-btn" data-unblock="'+esc(x.date)+'">Restore availability</button></div>').join("")||'<div class="empty">No unavailable dates.</div>';$("calendarBookings").innerHTML=bookings.filter(x=>(x.booking_date||"").startsWith(y+"-"+pad(m+1))&&x.status!=="Cancelled").map(x=>'<div class="module-row"><strong>'+esc(x.customer_name)+'</strong><span>'+esc(x.booking_date)+' · '+esc(x.booking_time)+' · '+esc(x.status)+'</span></div>').join("")||'<div class="empty">No bookings this month.</div>'}
 async function load(){$("calendarStatus").textContent="Loading…";try{const [d,b]=await Promise.all([req("/admin/unavailable-dates"),req("/admin/bookings")]);dates=d.dates||[];bookings=b.bookings||[];render();$("calendarStatus").textContent="Calendar updated."}catch(e){$("calendarStatus").textContent=e.message}}
 window.x7LoadAvailabilityCalendar=load;$("calendarPrev").onclick=()=>{month.setMonth(month.getMonth()-1);render()};$("calendarNext").onclick=()=>{month.setMonth(month.getMonth()+1);render()};$("calendarRefresh").onclick=load;$("blockDate").onclick=async()=>{const date=$("unavailableDate").value,reason=$("unavailableReason").value.trim();if(!date){$("calendarStatus").textContent="Choose a date first.";return}try{await req("/admin/unavailable-dates",{method:"POST",body:JSON.stringify({date,reason})});$("unavailableDate").value="";$("unavailableReason").value="";await load()}catch(e){$("calendarStatus").textContent=e.message}};grid.onclick=e=>{const b=e.target.closest("[data-day]");if(b)$("unavailableDate").value=b.dataset.day};$("unavailableDateList").onclick=async e=>{const b=e.target.closest("[data-unblock]");if(!b)return;if(!confirm("Restore availability for "+b.dataset.unblock+"?"))return;try{await req("/admin/unavailable-dates/"+b.dataset.unblock,{method:"DELETE"});await load()}catch(err){$("calendarStatus").textContent=err.message}};load()})();
+</script>
+
+
+<script id="x7-custom-select-script">
+(()=>{
+ const enhanced=new WeakMap();
+ let openSelect=null;
+ const close=()=>{if(!openSelect)return;openSelect.classList.remove("open");const t=openSelect.querySelector(".x7-select-trigger");if(t)t.setAttribute("aria-expanded","false");openSelect=null};
+ const makeId=()=> "x7-menu-"+Math.random().toString(36).slice(2,10);
+ function enhance(select){
+  if(!(select instanceof HTMLSelectElement)||select.dataset.x7Custom==="true"||!select.isConnected)return;
+  select.dataset.x7Custom="true";
+  const wrap=document.createElement("div");wrap.className="x7-select";wrap.setAttribute("role","presentation");
+  const trigger=document.createElement("button");trigger.type="button";trigger.className="x7-select-trigger";trigger.setAttribute("aria-haspopup","listbox");trigger.setAttribute("aria-expanded","false");
+  const label=document.createElement("span");label.className="x7-select-label";
+  const chevron=document.createElement("span");chevron.className="x7-select-chevron";chevron.setAttribute("aria-hidden","true");trigger.append(label,chevron);
+  const menu=document.createElement("div");menu.className="x7-select-menu";menu.id=makeId();menu.setAttribute("role","listbox");trigger.setAttribute("aria-controls",menu.id);
+  select.parentNode.insertBefore(wrap,select);wrap.append(trigger,menu,select);select.classList.add("x7-native-select-hidden");select.tabIndex=-1;select.setAttribute("aria-hidden","true");
+  function refresh(){
+   const current=select.options[select.selectedIndex];
+   label.textContent=current?current.textContent.trim():"Choose an option";
+   menu.innerHTML="";
+   [...select.options].forEach((option,index)=>{
+    const item=document.createElement("button");item.type="button";item.className="x7-select-option";item.setAttribute("role","option");item.dataset.index=String(index);item.textContent=option.textContent.trim();item.disabled=option.disabled||select.disabled;item.setAttribute("aria-selected",option.selected?"true":"false");
+    if(option.selected){const tick=document.createElement("span");tick.className="x7-select-check";tick.textContent="✓";tick.setAttribute("aria-hidden","true");item.append(tick)}
+    item.addEventListener("click",()=>{if(item.disabled)return;select.selectedIndex=index;select.dispatchEvent(new Event("change",{bubbles:true}));refresh();close();trigger.focus()});
+    menu.appendChild(item);
+   });
+   wrap.setAttribute("aria-disabled",select.disabled?"true":"false");trigger.disabled=select.disabled;
+  }
+  function show(){if(select.disabled)return;if(openSelect&&openSelect!==wrap)close();refresh();wrap.classList.add("open");trigger.setAttribute("aria-expanded","true");openSelect=wrap;const chosen=menu.querySelector('[aria-selected="true"]:not(:disabled)')||menu.querySelector("button:not(:disabled)");if(chosen)chosen.focus()}
+  trigger.addEventListener("click",()=>wrap.classList.contains("open")?close():show());
+  trigger.addEventListener("keydown",e=>{if(["ArrowDown","ArrowUp","Enter"," "].includes(e.key)){e.preventDefault();show()}});
+  menu.addEventListener("keydown",e=>{
+   const items=[...menu.querySelectorAll("button:not(:disabled)")];let i=items.indexOf(document.activeElement);
+   if(e.key==="Escape"){e.preventDefault();close();trigger.focus()}
+   else if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();i=(i+(e.key==="ArrowDown"?1:-1)+items.length)%items.length;items[i]?.focus()}
+   else if(e.key==="Home"){e.preventDefault();items[0]?.focus()}
+   else if(e.key==="End"){e.preventDefault();items[items.length-1]?.focus()}
+  });
+  select.addEventListener("change",refresh);
+  select.addEventListener("x7:refresh",refresh);
+  enhanced.set(select,refresh);refresh();
+ }
+ function scan(root){if(root.nodeType===1&&root.matches?.("select"))enhance(root);root.querySelectorAll?.("select").forEach(enhance)}
+ document.addEventListener("click",e=>{if(openSelect&&!openSelect.contains(e.target))close()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+ scan(document);
+ new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===1)scan(node)}))).observe(document.documentElement,{childList:true,subtree:true});
+ window.x7RefreshCustomMenus=()=>document.querySelectorAll("select").forEach(s=>enhanced.get(s)?.());
+})();
 </script>
 
 </body>
