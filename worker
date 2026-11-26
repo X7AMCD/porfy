@@ -1782,6 +1782,62 @@ if (
           return json({ error: "Could not create private gallery" }, 500, origin);
         }
       }
+      // PRIVATE GALLERY EDITOR API: manage metadata and gallery-only media links.
+      const gItems = url.pathname.match(/^\/admin\/galleries\/(\d+)\/items$/);
+      const gItem = url.pathname.match(/^\/admin\/galleries\/(\d+)\/items\/(\d+)$/);
+      const gEdit = url.pathname.match(/^\/admin\/galleries\/(\d+)$/);
+      if (gItems) {
+        try {
+          const gid=Number(gItems[1]), exists=await env.DB.prepare("SELECT id FROM client_galleries WHERE id = ?").bind(gid).first();
+          if(!exists)return json({error:"Gallery not found"},404,origin);
+          if(request.method==="GET"){
+            const r=await env.DB.prepare(`SELECT gi.id AS gallery_item_id,gi.gallery_id,gi.media_id,gi.display_order,gi.is_downloadable,ma.image_url,ma.thumbnail_url,ma.file_name,ma.alt_text,ma.width,ma.height FROM gallery_items gi JOIN media_assets ma ON ma.id=gi.media_id WHERE gi.gallery_id=? ORDER BY gi.display_order,gi.id`).bind(gid).all();
+            return json({success:true,items:r.results},200,origin);
+          }
+          if(request.method==="POST"){
+            const b=await request.json(),mid=Number(b?.media_id);
+            if(!Number.isSafeInteger(mid)||mid<1)return json({error:"Select a valid photograph"},400,origin);
+            const media=await env.DB.prepare("SELECT id FROM media_assets WHERE id=?").bind(mid).first();
+            if(!media)return json({error:"Photograph not found in media library"},404,origin);
+            const duplicate=await env.DB.prepare("SELECT id FROM gallery_items WHERE gallery_id=? AND media_id=?").bind(gid,mid).first();
+            if(duplicate)return json({error:"This photograph is already in the gallery"},409,origin);
+            const order=await env.DB.prepare("SELECT COALESCE(MAX(display_order),-1)+1 AS n FROM gallery_items WHERE gallery_id=?").bind(gid).first();
+            await env.DB.prepare("INSERT INTO gallery_items (gallery_id,media_id,display_order,is_downloadable) VALUES (?,?,?,?)").bind(gid,mid,order.n,b?.is_downloadable===false?0:1).run();
+            return json({success:true},201,origin);
+          }
+          return json({error:"Method not allowed"},405,origin);
+        }catch(error){console.error("Gallery item operation failed:",error);return json({error:"Could not update gallery photographs"},500,origin)}
+      }
+      if(gItem&&request.method==="PATCH"){
+        try{
+          const gid=Number(gItem[1]),iid=Number(gItem[2]),b=await request.json();
+          const item=await env.DB.prepare("SELECT id FROM gallery_items WHERE id=? AND gallery_id=?").bind(iid,gid).first();
+          if(!item)return json({error:"Gallery photograph not found"},404,origin);
+          if(typeof b?.is_downloadable!=="boolean")return json({error:"No valid change supplied"},400,origin);
+          await env.DB.prepare("UPDATE gallery_items SET is_downloadable=? WHERE id=? AND gallery_id=?").bind(b.is_downloadable?1:0,iid,gid).run();
+          return json({success:true},200,origin);
+        }catch(error){console.error("Gallery item permission update failed:",error);return json({error:"Could not update download permission"},500,origin)}
+      }
+      if(gItem&&request.method==="DELETE"){
+        try{
+          const result=await env.DB.prepare("DELETE FROM gallery_items WHERE id=? AND gallery_id=?").bind(Number(gItem[2]),Number(gItem[1])).run();
+          if(!result.meta.changes)return json({error:"Gallery photograph not found"},404,origin);
+          return json({success:true,message:"Removed from gallery; ImageKit original retained."},200,origin);
+        }catch(error){console.error("Gallery item removal failed:",error);return json({error:"Could not remove photograph"},500,origin)}
+      }
+      if(gEdit&&request.method==="PATCH"){
+        try{
+          const gid=Number(gEdit[1]),b=await request.json(),g=await env.DB.prepare("SELECT id,title,description,is_active,expires_at FROM client_galleries WHERE id=?").bind(gid).first();
+          if(!g)return json({error:"Gallery not found"},404,origin);
+          const title=typeof b?.title==="string"?b.title.trim().slice(0,200):g.title;
+          const description=typeof b?.description==="string"?b.description.trim().slice(0,2000):(g.description||"");
+          const expiry=typeof b?.expires_at==="string"?b.expires_at.trim():(g.expires_at||"");
+          if(!title)return json({error:"Gallery title is required"},400,origin);
+          if(expiry&&Number.isNaN(Date.parse(expiry)))return json({error:"Gallery expiry date is invalid"},400,origin);
+          await env.DB.prepare("UPDATE client_galleries SET title=?,description=?,expires_at=?,is_active=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(title,description||null,expiry||null,b?.is_active===false?0:b?.is_active===true?1:g.is_active,gid).run();
+          return json({success:true},200,origin);
+        }catch(error){console.error("Gallery details update failed:",error);return json({error:"Could not save gallery details"},500,origin)}
+      }
       // -------------------------------------------------
       // WEBSITE CONTENT: LIST
       // -------------------------------------------------
