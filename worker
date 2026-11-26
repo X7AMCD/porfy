@@ -948,7 +948,7 @@ if (
             if (item.type === "element" && item.tag === "IMG" && !/^https:\/\//i.test(item.value)) return json({ error: "New images must use secure HTTPS URLs" }, 400, origin);
             if (item.type === "element" && item.tag === "A" && !/^(https?:\/\/|mailto:|tel:)/i.test(item.href)) return json({ error: "New button destinations must be valid links" }, 400, origin);
             if (item.type === "style") {
-              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","justifyContent","alignItems","gap","gridTemplateColumns","zIndex","top","left","overflow","objectPosition"]);
+              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","height","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","justifyContent","alignItems","gap","gridTemplateColumns","zIndex","top","left","overflow","objectPosition"]);
               for (const [device, styles] of Object.entries(item.styles)) {
                 if (!["desktop","tablet","mobile"].includes(device) || !styles || typeof styles !== "object" || Array.isArray(styles)) return json({ error: "Invalid responsive design settings" }, 400, origin);
                 for (const [key, value] of Object.entries(styles)) {
