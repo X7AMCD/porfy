@@ -1463,9 +1463,11 @@ const x7BookedTimes = new Set();
 const x7ManuallyBlockedTimes = new Set();
 let x7TimeAvailabilityDate = "";
 let x7TimeAvailabilityRequest = 0;
+let x7TimeAvailabilityLoaded = false;
 async function x7LoadTimeAvailability(date) {
   x7TimeAvailabilityDate = date || "";
   x7BookedTimes.clear(); x7ManuallyBlockedTimes.clear();
+  x7TimeAvailabilityLoaded = !date;
   if (!date) { drawSlots(); return; }
   const requestId = ++x7TimeAvailabilityRequest;
   try {
@@ -1475,6 +1477,7 @@ async function x7LoadTimeAvailability(date) {
     if (requestId !== x7TimeAvailabilityRequest || $("date").value !== date) return;
     (Array.isArray(data.booked)?data.booked:[]).forEach(t=>x7BookedTimes.add(t));
     (Array.isArray(data.limited)?data.limited:[]).forEach(t=>x7ManuallyBlockedTimes.add(t));
+    x7TimeAvailabilityLoaded = true;
   } catch(error) { console.warn("X7 time availability could not load",error); }
   if (requestId === x7TimeAvailabilityRequest) drawSlots();
 }
@@ -1720,7 +1723,7 @@ function drawSlots() {
   TIMES.forEach(t => {
     const b = document.createElement("button"); b.type = "button"; b.textContent = t;
     const booked = x7BookedTimes.has(t) || legacy.includes(t), manuallyBlocked = x7ManuallyBlockedTimes.has(t);
-    b.disabled = !date || booked || manuallyBlocked;
+    b.disabled = !date || !x7TimeAvailabilityLoaded || booked || manuallyBlocked;
     if (booked || manuallyBlocked) b.title = booked ? "Already booked" : "Unavailable";
     b.onclick = () => { state.time = t; [...$("slots").children].forEach(x => x.classList.toggle("on", x === b)); summary(); };
     if (state.time === t && !b.disabled) b.classList.add("on");
