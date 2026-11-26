@@ -1112,6 +1112,46 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .x7-date-dot.blocked{background:#f5dddd;border-color:#e4bcbc;margin-left:8px}
 .x7-date-note{margin:7px 0 0;font-size:10px;color:#718087;min-height:13px}
 @media(max-width:520px){.x7-date-popover{width:min(320px,calc(100vw - 40px))}.x7-date-cell{min-height:34px}}
+
+/* X7 Studios dark-mode calendar theme */
+html[data-theme="dark"] .x7-date-trigger{
+  background:var(--card);color:var(--ink);border-color:var(--line);
+}
+html[data-theme="dark"] .x7-date-trigger:hover,
+html[data-theme="dark"] .x7-date-trigger[aria-expanded="true"]{border-color:var(--accent)}
+html[data-theme="dark"] .x7-date-popover{
+  background:var(--card);color:var(--ink);border-color:var(--line);
+  box-shadow:0 16px 40px rgba(0,0,0,.48);
+  color-scheme:dark;
+}
+html[data-theme="dark"] .x7-date-head strong,
+html[data-theme="dark"] .x7-date-weekday,
+html[data-theme="dark"] .x7-date-legend,
+html[data-theme="dark"] .x7-date-note{color:var(--muted)}
+html[data-theme="dark"] .x7-date-head button{
+  background:var(--soft);color:var(--ink);border:1px solid var(--line);
+}
+html[data-theme="dark"] .x7-date-cell{
+  background:var(--soft);color:var(--ink);border-color:var(--line);
+}
+html[data-theme="dark"] .x7-date-cell.available:hover{
+  background:#29292c;border-color:var(--accent);
+}
+html[data-theme="dark"] .x7-date-cell.selected{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+html[data-theme="dark"] .x7-date-cell.unavailable{
+  background:#4a2320;border-color:#784039;color:#f0aaa0;
+}
+html[data-theme="dark"] .x7-date-cell.past{
+  background:#171718;border-color:#29292c;color:#68686e;
+}
+html[data-theme="dark"] .x7-date-dot{
+  background:var(--soft);border-color:var(--line);
+}
+html[data-theme="dark"] .x7-date-dot.blocked{
+  background:#4a2320;border-color:#784039;
+}
 </style>
 
 </head>
