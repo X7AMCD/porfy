@@ -2907,5 +2907,25 @@ addEventListener("scroll", () => {
  }catch(error){console.warn("X7 image settings unavailable",error)}
 })();
 </script>
+
+<script id="x7-published-website-content">
+/* Apply only owner-published visual edits. The builder canvas applies these itself before its local draft. */
+(async()=>{
+ if(new URLSearchParams(location.search).has("x7builder"))return;
+ try{
+  const response=await fetch("https://api.x7studios.co.za/website-content",{cache:"no-store"});
+  if(!response.ok)return;
+  const data=await response.json();
+  for(const edit of Array.isArray(data.edits)?data.edits:[]){
+   if(!edit||typeof edit.selector!=="string"||typeof edit.value!=="string")continue;
+   let element;try{element=document.querySelector(edit.selector)}catch{continue}
+   if(!element)continue;
+   if(edit.type==="text"&&element.children.length===0)element.textContent=edit.value;
+   else if(edit.type==="image"&&element instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value))element.src=edit.value;
+   else if(edit.type==="link"&&element instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value))element.href=edit.value;
+  }
+ }catch(error){console.warn("X7 published website edits could not be applied",error)}
+})();
+</script>
 </body>
 </html>
