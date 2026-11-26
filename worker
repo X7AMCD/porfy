@@ -518,6 +518,16 @@ export default {
         return json({ dates: (result.results || []).map(row => row.date) }, 200, origin);
       } catch (error) { console.error("Unavailable dates lookup failed:", error); return json({ error: "Could not retrieve unavailable dates" }, 500, origin); }
     }
+    // PUBLIC: dates with existing active bookings; dates only, no customer information
+    if (url.pathname === "/booking-dates" && request.method === "GET") {
+      try {
+        const result = await env.DB.prepare("SELECT DISTINCT booking_date AS date FROM bookings WHERE booking_date >= date('now') AND (status IS NULL OR status != 'Cancelled') ORDER BY booking_date").all();
+        return json({ dates: (result.results || []).map(row => row.date) }, 200, origin);
+      } catch (error) {
+        console.error("Public booking dates lookup failed:", error);
+        return json({ error: "Could not retrieve booked dates" }, 500, origin);
+      }
+    }
     // PUBLIC BOOKING SUBMISSION
     // -------------------------------------------------
     if (url.pathname === "/bookings" && request.method === "POST") {
