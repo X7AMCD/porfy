@@ -96,7 +96,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   if(el.tagName==="IMG")return "image";
   if(el.tagName==="A"&&el.children.length===0)return "link";
   if(el.children.length===0&&el.textContent.trim())return "text";
-  if(["SECTION","HEADER","FOOTER","MAIN","ARTICLE"].includes(el.tagName))return "design";
+  if(["SECTION","HEADER","FOOTER","MAIN","ARTICLE","DIV"].includes(el.tagName))return "design";
   return null;
  }
  function markSelection(el){
@@ -142,7 +142,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
    const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
    doc.addEventListener("click",e=>{
     if(e.target.closest("button,input,select,textarea,form"))return;
-    let el=e.altKey?e.target.closest("section,header,footer,main,article"):e.target;
+    let el=e.altKey?e.target.closest("section,header,footer,main,article,div"):e.target;
     while(el&&el!==doc.body&&!kindOf(el))el=el.parentElement;
     if(!el)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
    },true);
