@@ -2957,5 +2957,65 @@ addEventListener("scroll", () => {
  }catch(error){console.warn("X7 published website edits could not be applied",error)}
 })();
 </script>
+
+<script id="x7-website-builder-runtime">
+/* Apply the published visual-builder changes to the original X7 website. */
+(()=> {
+ const API="https://api.x7studios.co.za/website-content";
+ const safeSelector=selector=>{try{return [...document.querySelectorAll(selector)]}catch(error){console.warn("X7 builder: invalid selector",selector);return []}};
+ const applyStyle=(node,styles)=>{
+  if(!styles||typeof styles!=="object")return;
+  const map={fontFamily:"font-family",fontSize:"font-size",fontWeight:"font-weight",lineHeight:"line-height",letterSpacing:"letter-spacing",textAlign:"text-align",textTransform:"text-transform",textDecoration:"text-decoration",backgroundColor:"background-color",backgroundImage:"background-image",minWidth:"min-width",maxWidth:"max-width",minHeight:"min-height",maxHeight:"max-height",borderRadius:"border-radius",borderWidth:"border-width",borderColor:"border-color",borderStyle:"border-style",boxShadow:"box-shadow",flexDirection:"flex-direction",flexWrap:"flex-wrap",justifyContent:"justify-content",alignItems:"align-items",alignContent:"align-content",alignSelf:"align-self",gridTemplateColumns:"grid-template-columns",gridTemplateRows:"grid-template-rows",gridAutoFlow:"grid-auto-flow",gridColumn:"grid-column",gridRow:"grid-row",flexBasis:"flex-basis",flexGrow:"flex-grow",flexShrink:"flex-shrink",justifyItems:"justify-items",justifySelf:"justify-self",placeItems:"place-items",placeContent:"place-content",transformOrigin:"transform-origin",objectFit:"object-fit",objectPosition:"object-position"};
+  Object.entries(styles).forEach(([key,value])=>{
+   if(value==null||typeof value!=="string")return;
+   const property=map[key]||key.replace(/[A-Z]/g,c=>"-"+c.toLowerCase());
+   if(!/^[a-z-]+$/.test(property))return;
+   if(key==="backgroundImage"){if(/^https:\/\//i.test(value))node.style.setProperty(property,'url("'+value.replace(/["\\]/g,"\\</body>")+'")');return}
+   if(/url\s*\(|expression\s*\(|javascript:/i.test(value))return;
+   node.style.setProperty(property,value);
+  });
+ };
+ const apply=(edits)=>{
+  if(!Array.isArray(edits))return;
+  const responsive=[];
+  edits.forEach(edit=>{
+   if(!edit||typeof edit!=="object"||typeof edit.selector!=="string")return;
+   if(edit.type==="style"){responsive.push(edit);return}
+   if(edit.type==="element"){
+    const parents=safeSelector(edit.selector);
+    parents.forEach(parent=>{
+     if(document.getElementById(edit.id))return;
+     const tag=String(edit.tag||"DIV").toUpperCase();
+     if(!["H2","P","IMG","A","HR","DIV","SECTION"].includes(tag))return;
+     const node=document.createElement(tag);node.id=edit.id;
+     if(tag==="IMG"){if(/^https:\/\//i.test(edit.value||""))node.src=edit.value;node.alt=edit.id}
+     else if(tag==="A"){node.textContent=edit.value||"Link";if(/^(https?:\/\/|mailto:|tel:)/i.test(edit.href||"")){node.href=edit.href;node.rel="noopener noreferrer"}}
+     else if(tag!=="HR")node.textContent=edit.value||"";
+     parent.appendChild(node);
+    });
+    return;
+   }
+   const nodes=safeSelector(edit.selector);
+   nodes.forEach(node=>{
+    if(edit.type==="text")node.textContent=edit.value||"";
+    else if(edit.type==="image"&&node instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value||""))node.src=edit.value;
+    else if(edit.type==="link"&&node instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||"")){node.href=edit.value;node.rel="noopener noreferrer"}
+    else if(edit.type==="remove"&&node!==document.body&&node!==document.documentElement)node.remove();
+    else if(edit.type==="reorder"&&Array.isArray(edit.children)){
+     const children=edit.children.flatMap(selector=>safeSelector(selector)).filter(child=>child.parentElement===node);
+     children.forEach(child=>node.appendChild(child));
+    }
+   });
+  });
+  const applyResponsive=()=>{
+   const width=window.innerWidth,device=width<=620?"mobile":width<=1024?"tablet":"desktop";
+   responsive.forEach(edit=>{const styles=edit.styles?.[device]||edit.styles?.desktop;if(styles)safeSelector(edit.selector).forEach(node=>applyStyle(node,styles))});
+  };
+  applyResponsive();
+  window.addEventListener("resize",applyResponsive,{passive:true});
+ };
+ fetch(API,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(data=>apply(data.edits||[])).catch(error=>console.warn("X7 published website edits unavailable",error));
+})();
+</script>
 </body>
 </html>
