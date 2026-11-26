@@ -528,6 +528,17 @@ export default {
         return json({ error: "Could not retrieve booked dates" }, 500, origin);
       }
     }
+    // PUBLIC: manually marked limited-availability dates; no booking/customer details
+    if (url.pathname === "/limited-dates" && request.method === "GET") {
+      try {
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_dates (date TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
+        const result = await env.DB.prepare("SELECT date FROM limited_dates WHERE date >= date('now') ORDER BY date").all();
+        return json({ dates: (result.results || []).map(row => row.date) }, 200, origin);
+      } catch (error) {
+        console.error("Limited dates lookup failed:", error);
+        return json({ error: "Could not retrieve limited dates" }, 500, origin);
+      }
+    }
     // PUBLIC BOOKING SUBMISSION
     // -------------------------------------------------
     if (url.pathname === "/bookings" && request.method === "POST") {
@@ -861,6 +872,39 @@ if (
       if(blockedDateMatch&&request.method==="DELETE"){
         try{await env.DB.prepare("DELETE FROM unavailable_dates WHERE date=?").bind(blockedDateMatch[1]).run();return json({success:true,date:blockedDateMatch[1]},200,origin)}
         catch(error){console.error("Unavailable date removal failed:",error);return json({error:"Could not restore availability"},500,origin)}
+      }
+      // AVAILABILITY CALENDAR: manually mark full days as limited
+      if (url.pathname === "/admin/limited-dates" && request.method === "GET") {
+        try {
+          await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_dates (date TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
+          const result = await env.DB.prepare("SELECT date, reason, created_at FROM limited_dates ORDER BY date").all();
+          return json({ dates: result.results || [] }, 200, origin);
+        } catch (error) {
+          console.error("Limited date list failed:", error);
+          return json({ error: "Could not retrieve limited dates" }, 500, origin);
+        }
+      }
+      if (url.pathname === "/admin/limited-dates" && request.method === "POST") {
+        try {
+          await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_dates (date TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
+          const body = await request.json(), date = String(body?.date || "").trim(), reason = typeof body?.reason === "string" ? body.reason.trim().slice(0,160) : "";
+          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !Number.isFinite(Date.parse(date+"T00:00:00Z")) || new Date(date+"T00:00:00Z").toISOString().slice(0,10)!==date) return json({ error: "Enter a valid date" }, 400, origin);
+          await env.DB.prepare("INSERT INTO limited_dates (date, reason) VALUES (?, ?) ON CONFLICT(date) DO UPDATE SET reason=excluded.reason").bind(date,reason).run();
+          return json({ success:true,date,reason },200,origin);
+        } catch (error) {
+          console.error("Limited date save failed:",error);
+          return json({ error:"Could not mark date as limited" },500,origin);
+        }
+      }
+      const limitedDateMatch=url.pathname.match(/^\\/admin\\/limited-dates\\/(\\d{4}-\\d{2}-\\d{2})$/);
+      if(limitedDateMatch&&request.method==="DELETE"){
+        try {
+          await env.DB.prepare("DELETE FROM limited_dates WHERE date=?").bind(limitedDateMatch[1]).run();
+          return json({success:true,date:limitedDateMatch[1]},200,origin);
+        } catch(error) {
+          console.error("Limited date removal failed:",error);
+          return json({error:"Could not remove limited availability"},500,origin);
+        }
       }
       if (url.pathname === "/admin/image-settings" && request.method === "GET") {
         try {
