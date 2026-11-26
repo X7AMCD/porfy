@@ -867,6 +867,27 @@ if (
       }
     }
 
+    // -------------------------------------------------
+    // PUBLIC: published visual website-builder edits
+    // -------------------------------------------------
+    if (url.pathname === "/website-content" && request.method === "GET") {
+      try {
+        await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_state (
+          id INTEGER PRIMARY KEY CHECK (id = 1),
+          draft_json TEXT NOT NULL DEFAULT '[]',
+          published_json TEXT NOT NULL DEFAULT '[]',
+          updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`).run();
+        const state = await env.DB.prepare("SELECT published_json, updated_at FROM website_builder_state WHERE id = 1").first();
+        let edits = [];
+        try { edits = JSON.parse(state?.published_json || "[]"); } catch {}
+        return json({ edits: Array.isArray(edits) ? edits : [], updated_at: state?.updated_at || null }, 200, origin);
+      } catch (error) {
+        console.error("Published website edits could not load:", error);
+        return json({ error: "Could not load published website content" }, 500, origin);
+      }
+    }
+
     // ALL ADMIN ROUTES REQUIRE CLOUDFLARE ACCESS
     // -------------------------------------------------
     if (url.pathname.startsWith("/admin/")) {
@@ -875,6 +896,74 @@ if (
           error: "Unauthorized"
         }, 401, origin);
       }
+      // -------------------------------------------------
+      // VISUAL WEBSITE BUILDER: draft, publish and discard
+      // -------------------------------------------------
+      if (url.pathname === "/admin/website-builder" && request.method === "GET") {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_state (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            draft_json TEXT NOT NULL DEFAULT '[]',
+            published_json TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const state = await env.DB.prepare("SELECT draft_json, published_json, updated_at FROM website_builder_state WHERE id = 1").first();
+          let draft = [];
+          try { draft = JSON.parse(state?.draft_json || "[]"); } catch {}
+          return json({ draft: Array.isArray(draft) ? draft : [], published_count: (() => { try { return JSON.parse(state?.published_json || "[]").length; } catch { return 0; } })(), updated_at: state?.updated_at || null }, 200, origin);
+        } catch (error) {
+          console.error("Website builder state load failed:", error);
+          return json({ error: "Could not load website builder state" }, 500, origin);
+        }
+      }
+      if (url.pathname === "/admin/website-builder" && request.method === "POST") {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_state (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            draft_json TEXT NOT NULL DEFAULT '[]',
+            published_json TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const body = await request.json();
+          const action = String(body?.action || "");
+          if (action === "discard") {
+            await env.DB.prepare(`INSERT INTO website_builder_state (id, draft_json, published_json, updated_at)
+              VALUES (1, '[]', '[]', CURRENT_TIMESTAMP)
+              ON CONFLICT(id) DO UPDATE SET draft_json = '[]', updated_at = CURRENT_TIMESTAMP`).run();
+            return json({ success: true }, 200, origin);
+          }
+          if (!["save", "publish"].includes(action) || !Array.isArray(body?.draft) || body.draft.length > 500) {
+            return json({ error: "Invalid website builder request" }, 400, origin);
+          }
+          const edits = [];
+          for (const item of body.draft) {
+            if (!item || typeof item.selector !== "string" || item.selector.length > 1200 ||
+                !/^[a-zA-Z0-9_#.:>\-\[\]="' ]+$/.test(item.selector) ||
+                /(^|[ >])(form|input|button|select|textarea|script|style)([.#:[ >]|$)/i.test(item.selector) ||
+                !["text", "image", "link"].includes(item.type) || typeof item.value !== "string" || item.value.length > 12000) {
+              return json({ error: "One or more edits are invalid or target protected website components" }, 400, origin);
+            }
+            if (item.type === "image" && !/^https:\/\//i.test(item.value)) return json({ error: "Images must use secure HTTPS URLs" }, 400, origin);
+            if (item.type === "link" && !/^(https?:\/\/|mailto:|tel:)/i.test(item.value)) return json({ error: "Link destination is invalid" }, 400, origin);
+            edits.push({ selector: item.selector, type: item.type, value: item.value });
+          }
+          const encoded = JSON.stringify(edits);
+          if (action === "save") {
+            await env.DB.prepare(`INSERT INTO website_builder_state (id, draft_json, published_json, updated_at)
+              VALUES (1, ?, '[]', CURRENT_TIMESTAMP)
+              ON CONFLICT(id) DO UPDATE SET draft_json = excluded.draft_json, updated_at = CURRENT_TIMESTAMP`).bind(encoded).run();
+          } else {
+            await env.DB.prepare(`INSERT INTO website_builder_state (id, draft_json, published_json, updated_at)
+              VALUES (1, '[]', ?, CURRENT_TIMESTAMP)
+              ON CONFLICT(id) DO UPDATE SET draft_json = '[]', published_json = excluded.published_json, updated_at = CURRENT_TIMESTAMP`).bind(encoded).run();
+          }
+          return json({ success: true, count: edits.length, action }, 200, origin);
+        } catch (error) {
+          console.error("Website builder save/publish failed:", error);
+          return json({ error: "Could not save website builder changes" }, 500, origin);
+        }
+      }
+
       // -----------------------------------------------
       // AVAILABILITY CALENDAR: full-day blocks
       if (url.pathname === "/admin/unavailable-dates" && request.method === "GET") {
