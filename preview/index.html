@@ -1315,9 +1315,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div class="login-card" id="loginCard">
     <form id="loginForm" autocomplete="on" novalidate>
       <h3>Client sign in</h3>
-      <p class="hint">Use the username and password I sent you.</p>
-      <label for="cUser">Username</label>
-      <input id="cUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <p class="hint">Use the email address and private-gallery password sent to you.</p>
+      <label for="cUser">Email address</label>
+      <input id="cUser" name="username" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required>
       <label for="cPass">Password</label>
       <div class="pw"><input id="cPass" name="password" type="password" autocomplete="current-password" required><button type="button" id="pwShow" aria-label="Show password">Show</button></div>
       <button type="submit" class="submit" id="loginBtn">Sign in</button>
@@ -1355,15 +1355,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ====== SETTINGS: edit these ====== */
 const OWNER_EMAIL = "hello@yourname.com";         // booking requests are sent here
 
-/* Client logins for "My pictures". Add one block per client.
-   hash = SHA-256 of  username:password  (all lower-case username), e.g. in a browser console:
-   crypto.subtle.digest("SHA-256", new TextEncoder().encode("anna:her-password")).then(b => console.log([...new Uint8Array(b)].map(x => x.toString(16).padStart(2,"0")).join("")))
-   pictures: { name:"Shown name", url:"clients/anna/photo1.jpg" }  (leave url empty to get a demo download)
-   Demo login:  demo / demo123  (delete this block before going live) */
-const CLIENTS = [
-  { user:"demo", hash:"b0c2e639eedf612b7f964a045c290a0b0df0dff23a803fc606ebbaf5a9342b85", name:"Demo Client",
-    pictures:[ { name:"Portrait 01", url:"" }, { name:"Portrait 02", url:"" }, { name:"Golden hour 03", url:"" } ] }
-];
+/* Client gallery sign-in is verified by the X7 Studios API.
+   Username: the email address saved on the client's profile.
+   Password: the private-gallery password generated in the admin dashboard. */
 const SHOOTS = { "Portrait":1500, "Lifestyle":2800, "Brand & Product":4500, "Event":6000 };
 const SHOOT_INFO = { "Portrait":"1 hour · 1 location · 15 edited photos", "Lifestyle":"2 hours · 2 outfits · 30 edited photos", "Brand & Product":"Half day · styling help · 50 edited photos", "Event":"Up to 4 hours · 100+ edited photos" };   // text shown on each panel
 // EDIT THESE VALUES MANUALLY. Enter a number in rand (e.g. 200 means +R200; -200 means -R200; 0 means no change).
@@ -2353,19 +2347,41 @@ $("aBook").onclick = () => {
     $("pwShow").textContent = on ? "Hide" : "Show"; $("pwShow").setAttribute("aria-label", on ? "Hide password" : "Show password");
   };
 
-  let session = null, fails = 0, lockUntil = 0;
-  const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, "0")).join("");
+  let session = null, fails = 0, lockUntil = 0, loginBusy = false;
   const err = t => { const m = $("loginMsg"); m.textContent = t; m.classList.toggle("show", !!t); };
 
   $("loginForm").addEventListener("submit", async e => {
     e.preventDefault(); err("");
-    const u = $("cUser").value.trim().toLowerCase(), p = $("cPass").value;
-    if (!u || !p) return err("Please enter your username and password.");
+    const username = $("cUser").value.trim().toLowerCase(), password = $("cPass").value;
+    if (!username || !password) return err("Please enter your email address and password.");
+    if (loginBusy) return;
     if (Date.now() < lockUntil) return err("Too many attempts. Please wait a moment and try again.");
-    if (!(window.crypto && crypto.subtle)) return err("Secure sign-in needs the site to be opened over https.");
-    const h = await sha256(u + ":" + p), c = CLIENTS.find(x => x.user.toLowerCase() === u && x.hash === h);
-    if (!c) { if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; } return err("That username or password isn’t right."); }
-    fails = 0; session = c; $("cPass").value = ""; showClient();
+    loginBusy = true;
+    const submit = $("loginBtn"); submit.disabled = true; submit.textContent = "Signing in…";
+    try {
+      const response = await fetch("https://api.x7studios.co.za/client/gallery/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        cache: "no-store"
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        if (response.status === 401) {
+          if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; }
+          throw new Error("That username or password isn’t right.");
+        }
+        throw new Error(data.error || "We couldn’t sign you in right now. Please try again shortly.");
+      }
+      fails = 0;
+      session = { name: data.client?.name || "Client", title: data.gallery?.title || "Private gallery", pictures: Array.isArray(data.pictures) ? data.pictures : [] };
+      $("cPass").value = "";
+      showClient();
+    } catch (error) {
+      err(error.message || "We couldn’t connect to the gallery. Please try again.");
+    } finally {
+      loginBusy = false; submit.disabled = false; submit.textContent = "Sign in";
+    }
   });
 
   const swatch = i => `linear-gradient(135deg,hsl(${(i * 67 + 20) % 360} 45% 38%),hsl(${(i * 67 + 70) % 360} 50% 22%))`;
@@ -2381,18 +2397,18 @@ $("aBook").onclick = () => {
   function showClient() {
     $("loginForm").hidden = true; $("clientArea").hidden = false; $("cpBack").textContent = "\u2190 Back to site";
     $("greet").textContent = "Hi, " + session.name.split(" ")[0] + "!";
-    const n = session.pictures.length; $("countTxt").textContent = n ? `${n} picture${n > 1 ? "s" : ""} ready to download.` : "Your pictures aren’t ready yet. I’ll let you know as soon as they are.";
+    const n = session.pictures.length; $("countTxt").textContent = session.title + " · " + (n ? `${n} photograph${n > 1 ? "s" : ""} in your gallery.` : "Your photographs aren’t ready yet.");
     const ul = $("plist"); ul.innerHTML = "";
     session.pictures.forEach((p, i) => {
       const li = document.createElement("li"), sw = document.createElement("span"), nm = document.createElement("span"), b = document.createElement("button");
       sw.className = "sw"; sw.style.background = p.thumb ? `url(${p.thumb}) center/cover` : swatch(i);
       nm.className = "nm"; nm.textContent = p.name;
-      b.type = "button"; b.className = "dlbtn"; b.textContent = "Download"; b.onclick = () => save(p, i);
+      b.type = "button"; b.className = "dlbtn"; b.textContent = p.downloadable === false ? "Viewing only" : "Download"; b.disabled = p.downloadable === false; if (p.downloadable !== false) b.onclick = () => save(p, i);
       li.append(sw, nm, b); ul.append(li);
     });
-    $("dlAll").hidden = n < 2;
+    $("dlAll").hidden = session.pictures.filter(p => p.downloadable !== false).length < 2;
   }
-  $("dlAll").onclick = () => session && session.pictures.forEach((p, i) => setTimeout(() => save(p, i), i * 400));
+  $("dlAll").onclick = () => session && session.pictures.filter(p => p.downloadable !== false).forEach((p, i) => setTimeout(() => save(p, i), i * 400));
   $("signOut").onclick = () => { session = null; $("clientArea").hidden = true; $("loginForm").hidden = false; $("plist").innerHTML = ""; $("cUser").value = ""; err(""); $("cUser").focus(); };
   addEventListener("pagehide", () => { session = null; });
 })();
