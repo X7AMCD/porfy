@@ -70,7 +70,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <div class="row" style="margin-top:12px"><button id="resetElementBtn">Reset selected element</button></div></div>
 <h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
 <div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
-<p class="warning">The builder currently edits text, images and links only. Booking forms, calendars, galleries, navigation structure and layout styling are protected from accidental edits.</p>
+<p class="warning">Customise typography, colours, backgrounds, spacing, borders, visibility, flex and grid layout, and responsive settings per device. Core booking, calendar, navigation and gallery interactions remain protected.</p>
 </aside></div>
 <script>
 (()=> {
@@ -125,7 +125,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   document.querySelectorAll("[data-style]").forEach(input=>{const v=styles[input.dataset.style]??"";if(input.type==="color"&&v&&!/^#[0-9a-f]{6}$/i.test(v))return;input.value=v||""});
  }
  function collectDesign(){
-  if(!active)return;const p=patches.find(x=>x.selector===active.selector&&x.type==="style"),styles=clone(p?.styles||{}),current={};
+  if(!active)return;const p=patches.find(x=>x.selector===active.selector&&x.type==="style")||published.find(x=>x.selector===active.selector&&x.type==="style"),styles=clone(p?.styles||{}),current={};
   document.querySelectorAll("[data-style]").forEach(input=>{if(input.value.trim())current[input.dataset.style]=input.value.trim()});
   styles[deviceMode]=current;applyPatch({selector:active.selector,type:"style",styles});setStatus("Design updated for "+deviceMode+". Save draft to keep this change.");
  }
