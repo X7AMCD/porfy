@@ -127,7 +127,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   const el=doc.querySelector(p.selector);if(!el)return;
   if(p.type==="element"&&p.id&&["H2","P","IMG","A","HR","DIV","SECTION"].includes(p.tag)&&!doc.getElementById(p.id)){
    const node=doc.createElement(p.tag);node.id=p.id;
-   if(p.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=raw||"New section"}
+   if(p.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=String(p.value||"New section")}
    else if(p.tag==="IMG"){if(!/^https:\/\//i.test(p.value||""))return;node.src=p.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
    else if(p.tag==="A"){if(!/^(https?:\/\/|mailto:|tel:)/i.test(p.href||""))return;node.href=p.href;node.textContent=String(p.value||"");node.style.display="inline-block";node.style.padding="12px 20px";node.style.background="#89cff0";node.style.color="#122631";node.style.textDecoration="none"}
    else if(p.tag==="HR"){node.style.border="0";node.style.borderTop="1px solid #dfe7eb";node.style.margin="24px 0"}
