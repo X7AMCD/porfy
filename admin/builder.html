@@ -110,7 +110,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   const kind=kindOf(el);if(!kind)return;
   active={selector:selectorFor(el),type:kind,element:el};
   frame.contentDocument.querySelectorAll("[data-x7-builder-selected]").forEach(x=>{x.removeAttribute("data-x7-builder-selected")});
-  el.setAttribute("data-x7-builder-selected","true");
+  el.setAttribute("data-x7-builder-selected","true");el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;
   const val=kind==="image"?el.getAttribute("src")||"":kind==="link"?el.getAttribute("href")||"":kind==="text"?el.textContent:"";
   selected.textContent=kind.toUpperCase()+" · "+el.tagName.toLowerCase()+" · "+active.selector;
   valueLabel.textContent=kind==="image"?"Image URL":kind==="link"?"Link destination":"Text content";
@@ -154,7 +154,8 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   try{
    const doc=frame.contentDocument;if(!doc||!doc.body)throw new Error("Website preview is not available");
    frameReady=true;
-   doc.querySelectorAll("body *").forEach(el=>{if(kindOf(el)||["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(el.tagName)){el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;}});\n   const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
+   doc.querySelectorAll("body *").forEach(el=>{if(kindOf(el)||["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(el.tagName)){el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;}});
+   const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
    doc.addEventListener("dragstart",e=>{const el=e.target.closest("[data-x7-builder-draggable]");if(!el)return;dragged=el;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","x7-element");});
    doc.addEventListener("dragover",e=>{if(!dragged)return;const target=e.target.closest("[data-x7-builder-draggable]");if(target&&target!==dragged&&target.parentElement===dragged.parentElement)e.preventDefault();});
    doc.addEventListener("drop",e=>{if(!dragged)return;const target=e.target.closest("[data-x7-builder-draggable]");if(!target||target===dragged||target.parentElement!==dragged.parentElement){dragged=null;return;}e.preventDefault();const parent=dragged.parentElement;const before=dragged.compareDocumentPosition(target)&Node.DOCUMENT_POSITION_FOLLOWING;parent.insertBefore(dragged,before?target:target.nextSibling);const parentSelector=selectorFor(parent);const children=[...parent.children].map(selectorFor);history.push(clone(patches));if(history.length>60)history.shift();future=[];patches=patches.filter(x=>!(x.type==="reorder"&&x.selector===parentSelector));patches.push({type:"reorder",selector:parentSelector,children});updateHistory();markSelection(dragged);setStatus("Element order changed. Save draft to keep it.");dragged=null;});
