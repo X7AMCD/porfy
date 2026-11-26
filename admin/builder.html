@@ -131,7 +131,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  }
  function validateDesign(){
   const safe=/^[a-zA-Z0-9#(),.%\\s"'_-]+$/;
-  for(const input of document.querySelectorAll("[data-style]")){const v=input.value.trim(),key=input.dataset.style;if(!v)continue;if(key==="backgroundImage"){if(!/^https:\\/\\//i.test(v)){setStatus("Background image must use HTTPS.",true);return false}}else if(!safe.test(v)){setStatus("Invalid design value for "+key+".",true);return false}}
+  for(const input of document.querySelectorAll("[data-style]")){const v=input.value.trim(),key=input.dataset.style;if(!v)continue;if(key==="backgroundImage"){if(!v.startsWith("https://")){setStatus("Background image must use HTTPS.",true);return false}}else if(!safe.test(v)){setStatus("Invalid design value for "+key+".",true);return false}}
   return true;
  }
  function updateHistory(){document.getElementById("undoBtn").disabled=!history.length;document.getElementById("redoBtn").disabled=!future.length}
