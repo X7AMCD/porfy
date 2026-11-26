@@ -2932,7 +2932,7 @@ addEventListener("scroll", () => {
     else if(edit.type==="link"&&el instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||""))el.href=edit.value;
     else if(edit.type==="element"&&/^[a-zA-Z][a-zA-Z0-9_-]{0,80}$/.test(edit.id||"")&&["H2","P","IMG","A","HR","DIV","SECTION"].includes(edit.tag)&&!document.getElementById(edit.id)){
      const node=document.createElement(edit.tag);node.id=edit.id;
-     if(edit.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=String(edit.value||"New section")}
+     if(edit.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=String(edit.value??"New section")}
      else if(edit.tag==="IMG"){if(!/^https:\/\//i.test(edit.value||""))continue;node.src=edit.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
      else if(edit.tag==="A"){if(!/^(https?:\/\/|mailto:|tel:)/i.test(edit.href||""))continue;node.href=edit.href;node.textContent=String(edit.value||"");node.style.display="inline-block";node.style.padding="12px 20px";node.style.background="#89cff0";node.style.color="#122631";node.style.textDecoration="none"}
      else if(edit.tag==="HR"){node.style.border="0";node.style.borderTop="1px solid #dfe7eb";node.style.margin="24px 0"}
