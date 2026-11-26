@@ -588,28 +588,34 @@ export default {
         if (manuallyBlocked) return json({ error: "That time is unavailable. Please choose another time." }, 409, origin);
         const result = await env.DB.prepare(`
           INSERT INTO bookings (
-            customer_name,
-            email,
-            phone,
-            service,
-            booking_date,
-            booking_time,
-            message
+            customer_name, email, phone, service, booking_date, booking_time, message
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          SELECT ?, ?, ?, ?, ?, ?, ?
+          WHERE NOT EXISTS (
+            SELECT 1 FROM bookings
+            WHERE booking_date = ? AND booking_time = ?
+              AND (status IS NULL OR status != 'Cancelled')
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM limited_time_slots
+            WHERE date = ? AND time = ?
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM unavailable_dates WHERE date = ?
+          )
         `).bind(
           customer_name.trim(),
           email.trim(),
-          typeof phone === "string" && phone.trim()
-            ? phone.trim()
-            : null,
+          typeof phone === "string" && phone.trim() ? phone.trim() : null,
           service.trim(),
           booking_date.trim(),
           booking_time.trim(),
-          typeof message === "string" && message.trim()
-            ? message.trim()
-            : null
+          typeof message === "string" && message.trim() ? message.trim() : null,
+          booking_date.trim(), booking_time.trim(),
+          booking_date.trim(), booking_time.trim(),
+          booking_date.trim()
         ).run();
+        if (!result.meta.changes) return json({ error: "That time is no longer available. Please choose another time." }, 409, origin);
         const bookingId = result.meta.last_row_id;
         // Keep the client directory in sync without making booking submission
         // depend on the secondary client-profile update.
