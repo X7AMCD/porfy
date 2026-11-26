@@ -2926,6 +2926,7 @@ addEventListener("scroll", () => {
    for(const edit of edits){
     if(!edit||typeof edit.selector!=="string")continue;
     let el;try{el=document.querySelector(edit.selector)}catch{continue}if(!el)continue;
+    if(edit.type==="remove"){el.remove();continue;}
     if(edit.type==="text"&&typeof edit.value==="string"&&el.children.length===0)el.textContent=edit.value;
     else if(edit.type==="image"&&el instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value||""))el.src=edit.value;
     else if(edit.type==="link"&&el instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||""))el.href=edit.value;
