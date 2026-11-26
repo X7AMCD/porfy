@@ -1089,6 +1089,31 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 
 </style>
+
+<style id="x7-public-date-styles">
+.x7-public-date{position:relative;width:100%}
+.x7-date-trigger{width:100%;min-height:44px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line,#d8d8d8);border-radius:7px;background:var(--surface,#fff);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.x7-date-trigger:focus-visible,.x7-date-head button:focus-visible,.x7-date-cell:focus-visible{outline:2px solid #89cff0;outline-offset:2px}
+.x7-date-popover{position:absolute;z-index:1200;top:calc(100% + 7px);left:0;width:min(340px,calc(100vw - 48px));padding:13px;border:1px solid rgba(100,115,125,.25);border-radius:10px;background:#fff;color:#27333a;box-shadow:0 14px 36px rgba(0,0,0,.18)}
+.x7-date-popover[hidden]{display:none}
+.x7-date-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.x7-date-head strong{font-size:14px;font-weight:650}
+.x7-date-head button{width:32px;height:32px;border:0;border-radius:6px;background:#f1f4f5;color:#293943;font-size:22px;cursor:pointer}
+.x7-date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.x7-date-weekday{padding:6px 0;text-align:center;font-size:10px;color:#7c898f;font-weight:650}
+.x7-date-cell{min-height:36px;border:1px solid transparent;border-radius:6px;background:#f5f7f8;color:#33434b;font:inherit;font-size:12px;cursor:pointer}
+.x7-date-cell.available:hover{border-color:#89cff0;background:#edf7fb}
+.x7-date-cell.selected{background:#dff1f8;border-color:#79b9d5;color:#1c5871;font-weight:700}
+.x7-date-cell.unavailable{background:#f8e9e9;border-color:#edcece;color:#a14e54;text-decoration:line-through;cursor:not-allowed;opacity:.9}
+.x7-date-cell.past{background:#f7f7f7;color:#b8bfc2;cursor:not-allowed}
+.x7-date-cell:disabled{cursor:not-allowed}
+.x7-date-legend{display:flex;align-items:center;gap:7px;margin:11px 0 0;font-size:10px;color:#68767d}
+.x7-date-dot{width:9px;height:9px;border-radius:3px;background:#e7f2f6;border:1px solid #b7d6e2;display:inline-block}
+.x7-date-dot.blocked{background:#f5dddd;border-color:#e4bcbc;margin-left:8px}
+.x7-date-note{margin:7px 0 0;font-size:10px;color:#718087;min-height:13px}
+@media(max-width:520px){.x7-date-popover{width:min(320px,calc(100vw - 40px))}.x7-date-cell{min-height:34px}}
+</style>
+
 </head>
 <body>
 <div id="loader" role="status" aria-live="polite" aria-label="Loading">
@@ -1180,7 +1205,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
         </div>
 
         <div class="two">
-          <div><label for="date">3. Date</label><input type="date" id="date" required></div>
+          <div><label for="date">3. Date</label><input type="date" id="date" required tabindex="-1" aria-hidden="true" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+            <div class="x7-public-date" id="x7PublicDate">
+              <button type="button" class="x7-date-trigger" id="x7DateTrigger" aria-haspopup="dialog" aria-expanded="false"><span id="x7DateLabel">Choose a date</span><span aria-hidden="true">▾</span></button>
+              <div class="x7-date-popover" id="x7DatePopover" hidden>
+                <div class="x7-date-head"><button type="button" id="x7DatePrev" aria-label="Previous month">‹</button><strong id="x7DateMonth"></strong><button type="button" id="x7DateNext" aria-label="Next month">›</button></div>
+                <div class="x7-date-grid" id="x7DateGrid"></div>
+                <p class="x7-date-legend"><span class="x7-date-dot blocked"></span> Unavailable <span class="x7-date-dot"></span> Available</p>
+                <p class="x7-date-note" id="x7DateNote" role="status"></p>
+              </div>
+            </div></div>
           <div><label for="loc">Location</label>
             <select id="loc"><option>My recommendation</option><option>Outdoors / park</option><option>Choose on map</option><option>Enter an address</option></select>
           </div>
@@ -1553,15 +1587,59 @@ $("loc").addEventListener("change", locChange);
 $("addr").addEventListener("input", summary);
 addEventListener("load", locChange);                              // keeps the right panel open if the browser restored the form
 
-/* Date: no past dates */
-const today = new Date().toISOString().slice(0, 10);
-$("date").min = today;
-$("date").onchange = () => {
-  const d = new Date($("date").value + "T00:00");
-  if (CLOSED_WEEKDAYS.includes(d.getDay())) { show("Sorry, I'm unavailable on that day. Please pick another.", true); $("date").value = ""; }
-  else $("msg").style.display = "none";
-  state.time = null; drawSlots(); summary();
+/* Date picker: marks dates blocked in the X7 Studios availability calendar */
+const x7UnavailableDates = new Set();
+const x7Today = new Date(); x7Today.setHours(0,0,0,0);
+const x7DateISO = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+let x7VisibleMonth = new Date(x7Today.getFullYear(),x7Today.getMonth(),1);
+const x7DateTrigger=$("x7DateTrigger"),x7DatePopover=$("x7DatePopover"),x7DateGrid=$("x7DateGrid");
+function x7RenderDatePicker(){
+ const y=x7VisibleMonth.getFullYear(),m=x7VisibleMonth.getMonth();
+ $("x7DateMonth").textContent=x7VisibleMonth.toLocaleDateString("en-ZA",{month:"long",year:"numeric"});
+ const offset=(new Date(y,m,1).getDay()+6)%7,total=new Date(y,m+1,0).getDate();
+ let out=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>'<span class="x7-date-weekday">'+d+'</span>').join("");
+ for(let i=0;i<offset;i++)out+='<span aria-hidden="true"></span>';
+ for(let day=1;day<=total;day++){
+  const date=new Date(y,m,day),key=x7DateISO(date),past=date<x7Today,blocked=x7UnavailableDates.has(key),closed=CLOSED_WEEKDAYS.includes(date.getDay()),disabled=past||blocked||closed;
+  const cls="x7-date-cell "+(blocked?"unavailable":past||closed?"past":"available")+( $("date").value===key?" selected":"");
+  out+='<button type="button" class="'+cls+'" data-date="'+key+'" '+(disabled?'disabled aria-disabled="true"':'')+(blocked?' title="Unavailable for the entire day"':closed?' title="Not available"':'')+'>'+day+'</button>';
+ }
+ x7DateGrid.innerHTML=out;
+ $("x7DateNote").textContent="Unavailable dates are blocked for the entire day.";
+ $("x7DatePrev").disabled=(y===x7Today.getFullYear()&&m<=x7Today.getMonth());
+}
+async function x7LoadUnavailableDates(){
+ $("x7DateNote").textContent="Checking availability…";
+ try{
+  const response=await fetch("https://api.x7studios.co.za/unavailable-dates",{method:"GET",cache:"no-store"});
+  if(!response.ok)throw new Error("Availability is temporarily unavailable.");
+  const data=await response.json();
+  x7UnavailableDates.clear();
+  (Array.isArray(data.dates)?data.dates:[]).forEach(d=>{if(/^\\d{4}-\\d{2}-\\d{2}$/.test(d))x7UnavailableDates.add(d)});
+  x7RenderDatePicker();
+ }catch(error){$("x7DateNote").textContent="Could not refresh availability. Please try again shortly.";console.warn("X7 unavailable dates could not load",error)}
+}
+function x7SelectDate(key){
+ if(x7UnavailableDates.has(key))return;
+ $("date").value=key;
+ $("date").dispatchEvent(new Event("change",{bubbles:true}));
+ $("x7DateLabel").textContent=new Date(key+"T00:00:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+ x7RenderDatePicker();x7DatePopover.hidden=true;x7DateTrigger.setAttribute("aria-expanded","false");
+}
+x7DateTrigger.addEventListener("click",()=>{const opening=x7DatePopover.hidden;x7DatePopover.hidden=!opening;x7DateTrigger.setAttribute("aria-expanded",String(opening));if(opening){x7RenderDatePicker();x7LoadUnavailableDates()}});
+$("x7DatePrev").addEventListener("click",()=>{x7VisibleMonth.setMonth(x7VisibleMonth.getMonth()-1);x7RenderDatePicker()});
+$("x7DateNext").addEventListener("click",()=>{x7VisibleMonth.setMonth(x7VisibleMonth.getMonth()+1);x7RenderDatePicker()});
+x7DateGrid.addEventListener("click",e=>{const b=e.target.closest("[data-date]");if(b&&!b.disabled)x7SelectDate(b.dataset.date)});
+document.addEventListener("click",e=>{if(!e.target.closest("#x7PublicDate")){x7DatePopover.hidden=true;x7DateTrigger.setAttribute("aria-expanded","false")}});
+$("date").onchange=()=>{
+ const key=$("date").value,d=new Date(key+"T00:00:00");
+ if(x7UnavailableDates.has(key)){show("Sorry, this date is unavailable. Please choose another date.",true);$("date").value="";$("x7DateLabel").textContent="Choose a date"}
+ else if(CLOSED_WEEKDAYS.includes(d.getDay())){show("Sorry, I'm unavailable on that day. Please pick another.",true);$("date").value="";$("x7DateLabel").textContent="Choose a date"}
+ else $("msg").style.display="none";
+ state.time=null;drawSlots();summary();x7RenderDatePicker();
 };
+$("bookForm").addEventListener("reset",()=>{setTimeout(()=>{$("x7DateLabel").textContent="Choose a date";x7VisibleMonth=new Date(x7Today.getFullYear(),x7Today.getMonth(),1);x7RenderDatePicker()},0)});
+x7RenderDatePicker();x7LoadUnavailableDates();
 
 /* Time slots (taken ones are disabled) */
 function drawSlots() {
