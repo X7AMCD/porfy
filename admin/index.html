@@ -780,19 +780,12 @@ select.x7-native-select-hidden{position:absolute!important;width:1px!important;h
  </div>
 </section>
 <section class="panel module-section" id="content">
-<h2>Website content</h2>
-<p class="label">Manage editable website text without changing the existing layout or ImageKit image links.</p>
-<div class="feature-panel">
-<h3>Edit website content</h3>
-<div class="form-grid">
-<div class="form-field"><label for="contentSection">Section key</label><input id="contentSection" maxlength="80" placeholder="about"></div>
-<div class="form-field"><label for="contentKey">Content key</label><input id="contentKey" maxlength="80" placeholder="heading"></div>
-<div class="form-field full"><label for="contentValue">Text / content</label><textarea id="contentValue" maxlength="5000"></textarea></div>
-</div>
-<div class="module-actions"><button class="primary-btn" id="saveContent" type="button">Save content</button><button class="secondary-btn" id="loadContent" type="button">Refresh content</button></div>
-<div class="module-status" id="contentStatus" role="status"></div>
-</div>
-<div class="feature-panel"><h3>Saved content</h3><div id="contentList" class="module-list"><div class="empty">Select Refresh content to load saved entries.</div></div></div>
+ <div class="builder-heading"><div><div class="builder-kicker">X7 STUDIOS · WEBSITE EXPERIENCE</div><h2>Visual website builder</h2><p class="label">Edit the actual public website directly. Select text, images and links on the page, preview your changes across devices, save drafts and publish when ready.</p></div></div>
+ <div class="feature-panel" style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr);gap:22px;align-items:center">
+  <div><div class="builder-kicker">YOUR WEBSITE · YOUR EDITOR</div><h3 style="font-size:20px;margin:8px 0">Make changes on the real canvas.</h3><p class="label" style="line-height:1.8;max-width:620px">The builder opens your existing X7 Studios website in an editable preview. The design, ImageKit photographs, booking system, availability calendar and private galleries remain part of the original site.</p><div class="module-actions"><a class="primary-btn" href="builder.html" style="display:inline-block;text-decoration:none">Open website builder ↗</a><a class="secondary-btn" href="../preview/" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">View live website</a></div></div>
+  <div style="border:1px solid #e1e8ec;background:#f7fafb;padding:17px"><div class="builder-kicker">EDITOR FEATURES</div><div class="module-list" style="gap:8px"><div class="module-item">Select and edit website text</div><div class="module-item">Replace image URLs and links</div><div class="module-item">Desktop, tablet and mobile preview</div><div class="module-item">Save drafts before publishing</div><div class="module-item">Protected booking and gallery features</div></div></div>
+ </div>
+ <div class="module-status" role="status">Drafts and published edits are stored in the X7 Studios database. Publishing is separate from saving a draft.</div>
 </section>
 <section class="panel module-section" id="calendar">
 <div class="builder-heading"><div><div class="builder-kicker">BOOKING MANAGEMENT</div><h2>Availability calendar</h2><p class="label">Block dates when you are unavailable. Each block applies to the entire day.</p></div><button class="secondary-btn" id="calendarRefresh" type="button">Refresh calendar</button></div>
