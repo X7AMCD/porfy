@@ -29,7 +29,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 .selected{padding:10px;background:#f4f8fa;border:1px solid #e1e9ed;border-radius:5px;font-size:11px;overflow-wrap:anywhere}
 .history{display:flex;gap:7px;margin-top:10px}.history button{flex:1}
 .warning{font-size:10px;color:#8b6a35;line-height:1.6;margin-top:15px}
-.design-tabs{display:flex;gap:5px;margin:15px 0 12px;border-bottom:1px solid var(--line);padding-bottom:9px}.design-tabs button{flex:1;padding:8px 5px;font-size:10px}.design-tabs button.active{background:#eaf7fc;border-color:#a8d9ed;color:#15506a}.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.design-grid .field{min-width:0}.design-grid input,.design-grid select{min-width:0;width:100%;height:36px}.design-grid input[type=color]{padding:3px;height:38px}.design-note{font-size:10px;color:var(--muted);line-height:1.6;margin:8px 0}.panel-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:#81939d;margin:15px 0 4px}@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
+.mode-switch{display:flex;gap:6px;margin:14px 0 10px;padding:4px;background:#edf2f5;border-radius:7px}.mode-switch button{flex:1;border:0;background:transparent}.mode-switch button.active{background:#fff;border:1px solid #d9e5eb;color:#15506a;font-weight:700;box-shadow:0 1px 3px #0000000d}.design-tabs{display:flex;gap:5px;margin:15px 0 12px;border-bottom:1px solid var(--line);padding-bottom:9px}.design-tabs button{flex:1;padding:8px 5px;font-size:10px}.design-tabs button.active{background:#eaf7fc;border-color:#a8d9ed;color:#15506a}.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.design-grid .field{min-width:0}.design-grid input,.design-grid select{min-width:0;width:100%;height:36px}.design-grid input[type=color]{padding:3px;height:38px}.design-note{font-size:10px;color:var(--muted);line-height:1.6;margin:8px 0}.panel-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:#81939d;margin:15px 0 4px}@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
 @media(max-width:520px){.topbar{height:auto;min-height:60px;padding:12px;align-items:flex-start;flex-direction:column}.workspace{min-height:0}.stage{padding:10px}.canvas{padding:5px;min-height:440px}iframe{height:65vh;min-height:440px}.canvas.mobile iframe{width:360px}}
 </style>
 </head>
@@ -39,9 +39,10 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <section class="stage"><div class="stage-head"><div><strong>Live website canvas</strong><br><small>Click text or images to edit. Alt-click a section background to customise its layout and styling.</small></div><div class="devices"><button data-device="desktop" class="active">Desktop</button><button data-device="tablet">Tablet</button><button data-device="mobile">Mobile</button></div></div><div class="canvas" id="canvas"><iframe id="siteFrame" title="X7 Studios website preview" src="/preview/?x7builder=1"></iframe></div></section>
 <aside><div class="kicker">VISUAL EDITOR</div><h1>Website builder</h1><p class="help">Edit the actual X7 Studios website in place. Your changes remain a draft until you publish them.</p>
 <div class="status" id="status" role="status">Loading website and saved draft…</div>
+<div class="mode-switch" role="group" aria-label="Editing mode"><button type="button" class="active" data-editor-mode="text">Text mode</button><button type="button" data-editor-mode="elements">Elements mode</button></div><p class="help" id="modeHelp">Text mode: select text in the canvas to change its wording.</p>
 <h2>Selected element</h2><div class="selected" id="selected">Nothing selected. Click a text item, image or link in the website preview.</div>
 <div id="editor" hidden>
-<div class="design-tabs"><button type="button" class="active" data-tab="content">Content</button><button type="button" data-tab="design">Design</button></div>
+<div class="design-tabs" id="designTabs"><button type="button" class="active" data-tab="content">Content</button><button type="button" data-tab="design">Design</button></div>
 <div id="contentTab"><div class="field"><label for="elementValue" id="valueLabel">Content</label><textarea id="elementValue"></textarea></div><div class="row"><button id="applyBtn" class="primary">Apply content</button></div></div>
 <div id="designTab" hidden>
 <p class="design-note">Fine-tune the selected element. Switch Desktop, Tablet or Mobile above to customise each screen size independently.</p>
@@ -69,7 +70,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <div class="field"><label>Box shadow</label><input data-style="boxShadow" placeholder="0 8px 24px rgba(0,0,0,.12)"></div><div class="row"><button id="applyDesignBtn" class="primary">Apply design</button><button id="clearDesignBtn">Clear design</button></div></div>
 <div class="row" style="margin-top:12px"><button id="resetElementBtn">Reset selected element</button></div></div>
 
-<h2>Add an element</h2><p class="help">Select a section or content container in the canvas first. New content will be inserted inside that selected area.</p>
+<div id="elementsTools" hidden><h2>Add an element</h2><p class="help">Select a section or content container in the canvas first. New content will be inserted inside that selected area.</p>
 <div class="field"><label for="newElementType">Element type</label><select id="newElementType"><option value="H2">Heading</option><option value="P">Paragraph</option><option value="IMG">Image</option><option value="A">Button / link</option><option value="HR">Divider</option><option value="DIV">Spacer</option><option value="SECTION">Section</option></select></div>
 <div class="field"><label for="newElementContent">Text or image URL</label><input id="newElementContent" placeholder="Enter heading or content"></div>
 <div class="field" id="newElementLinkField" hidden><label for="newElementHref">Button destination</label><input id="newElementHref" placeholder="https://…"></div>
@@ -77,13 +78,13 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <p class="design-note">For images, enter a secure HTTPS image URL. Buttons need a valid destination. Select the new element to edit its design.</p>
 <h2>Layers</h2><p class="help">Select a section or container to inspect its direct children. Drag an item in the canvas to reorder it within the same parent.</p><div id="x7LayerList" class="field"></div><div class="row"><button id="duplicateElementBtn">Duplicate</button><button id="hideElementBtn">Hide / show</button><button id="deleteElementBtn">Delete</button></div><h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
 <div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
-<p class="warning">Customise typography, colours, backgrounds, spacing, borders, visibility, flex and grid layout, and responsive settings per device. Core booking, calendar, navigation and gallery interactions remain protected.</p>
+<p class="warning">Customise typography, colours, backgrounds, spacing, borders, visibility, flex and grid layout, and responsive settings per device. Core booking, calendar, navigation and gallery interactions remain protected.</p></div>
 </aside></div>
 <script>
 (()=> {
  const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
- let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop",dragged=null;
+ let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop",dragged=null,editorMode="text";
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
@@ -108,7 +109,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   return null;
  }
  function renderLayers(){const host=document.getElementById("x7LayerList");if(!host)return;host.innerHTML="";const root=active?.element&&["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(active.element.tagName)?active.element:frame.contentDocument?.querySelector("main")||frame.contentDocument?.body;if(!root)return;[...root.children].filter(x=>kindOf(x)||["SECTION","MAIN","ARTICLE","DIV"].includes(x.tagName)).slice(0,80).forEach((node,i)=>{const btn=document.createElement("button");btn.type="button";btn.textContent=(i+1)+". "+node.tagName.toLowerCase()+" · "+(node.textContent.trim().slice(0,36)||node.getAttribute("alt")||"element");btn.style.cssText="display:block;width:100%;text-align:left;margin:4px 0;padding:8px;border:1px solid #dce5e9;border-radius:8px;background:#fff";btn.addEventListener("click",()=>markSelection(node));host.appendChild(btn)})}\n function markSelection(el){
-  const kind=kindOf(el);if(!kind)return;
+  const kind=kindOf(el);if(!kind)return;if(editorMode==="text"&&kind!=="text"){setStatus("Switch to Elements mode to select images, links, containers and layout elements.",true);return;}
   active={selector:selectorFor(el),type:kind,element:el};
   frame.contentDocument.querySelectorAll("[data-x7-builder-selected]").forEach(x=>{x.removeAttribute("data-x7-builder-selected")});
   el.setAttribute("data-x7-builder-selected","true");el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;
@@ -117,7 +118,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   valueLabel.textContent=kind==="image"?"Image URL":kind==="link"?"Link destination":"Text content";
   value.value=val;document.getElementById("contentTab").hidden=kind==="design";
   document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===(kind==="design"?"design":"content")));
-  document.getElementById("designTab").hidden=false;editor.hidden=false;loadDesignControls();renderLayers();
+  document.getElementById("designTab").hidden=editorMode!=="elements";editor.hidden=false;loadDesignControls();renderLayers();
  }
  function applyPatch(p,record=true){
   const doc=frame.contentDocument;if(!doc)return;
@@ -150,6 +151,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   for(const input of document.querySelectorAll("[data-style]")){const v=input.value.trim(),key=input.dataset.style;if(!v)continue;if(key==="backgroundImage"){if(!v.startsWith("https://")){setStatus("Background image must use HTTPS.",true);return false}}else if(!safe.test(v)){setStatus("Invalid design value for "+key+".",true);return false}}
   return true;
  }
+ function setEditorMode(mode){editorMode=mode;document.querySelectorAll("[data-editor-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.editorMode===mode));document.getElementById("modeHelp").textContent=mode==="text"?"Text mode: select text in the canvas to change its wording.":"Elements mode: select, style, add, arrange and manage page elements.";document.getElementById("contentTab").hidden=mode!=="text"||!active||active.type!=="text";document.getElementById("designTab").hidden=mode!=="elements"||!active;document.getElementById("designTabs").hidden=true;document.getElementById("elementsTools").hidden=mode!=="elements";if(active){selected.textContent=(mode==="text"?"TEXT":"ELEMENT")+" · "+active.element.tagName.toLowerCase()+" · "+active.selector;} }
  function updateHistory(){document.getElementById("undoBtn").disabled=!history.length;document.getElementById("redoBtn").disabled=!future.length}
  function bindFrame(){
   try{
@@ -166,7 +168,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
     if(e.target.closest("button,input,select,textarea,form"))return;
     let el=e.altKey?e.target.closest("section,header,footer,main,article,div"):e.target;
     while(el&&el!==doc.body&&!kindOf(el))el=el.parentElement;
-    if(!el)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
+    if(!el)return;if(editorMode==="text"&&kindOf(el)!=="text"){setStatus("Text mode selects text only. Switch to Elements mode to edit this item.");return;}e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
    },true);
    published.forEach(p=>applyPatch(p,false));patches.forEach(p=>applyPatch(p,false));
    setStatus("Website loaded. Select an element in the canvas to edit.");
@@ -198,7 +200,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  });
  document.getElementById("applyDesignBtn").addEventListener("click",()=>{if(validateDesign())collectDesign()});
  document.getElementById("clearDesignBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>!(p.selector===active.selector&&p.type==="style"));future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Design overrides cleared from this draft.")});
- document.querySelectorAll("[data-tab]").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===tab));document.getElementById("contentTab").hidden=tab.dataset.tab!=="content";document.getElementById("designTab").hidden=tab.dataset.tab!=="design"}));
+ document.querySelectorAll("[data-editor-mode]").forEach(btn=>btn.addEventListener("click",()=>setEditorMode(btn.dataset.editorMode)));\n setEditorMode("text");\n document.querySelectorAll("[data-tab]").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===tab));document.getElementById("contentTab").hidden=tab.dataset.tab!=="content";document.getElementById("designTab").hidden=tab.dataset.tab!=="design"}));
  document.getElementById("resetElementBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>p.selector!==active.selector);future=[];updateHistory();if(active.element)active.element.removeAttribute("data-x7-builder-selected");active=null;editor.hidden=true;frame.contentWindow.location.reload();setStatus("Element edit removed from this draft. Preview reloaded.")});
  document.getElementById("saveBtn").addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"save",draft:patches});setStatus("Draft saved successfully. It is not yet public.")}catch(err){setStatus("Draft save failed: "+err.message,true)}finally{b.disabled=false}});
  document.getElementById("publishBtn").addEventListener("click",async e=>{if(!confirm("Publish these changes to the live X7 Studios website?"))return;const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"publish",draft:patches});published=clone(patches);patches=[];frame.contentWindow.location.reload();setStatus("Published. The live website will display these changes.")}catch(err){setStatus("Publish failed: "+err.message,true)}finally{b.disabled=false}});
