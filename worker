@@ -483,6 +483,36 @@ async function syncClientFromBooking(env, booking) {
   `).bind(name, email, phone || null, email).run();
 }
 
+
+async function processDueClientFollowups(env) {
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS client_followups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,client_id INTEGER NOT NULL,booking_id INTEGER,subject TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL,scheduled_for TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'scheduled',sent_at TEXT,error TEXT,
+    created_by TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS client_communications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,client_id INTEGER NOT NULL,booking_id INTEGER,channel TEXT NOT NULL DEFAULT 'note',
+    direction TEXT NOT NULL DEFAULT 'internal',subject TEXT NOT NULL DEFAULT '',body TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'recorded',
+    provider_message_id TEXT,error TEXT,created_by TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+  const due=await env.DB.prepare(`SELECT f.id,f.client_id,f.booking_id,f.subject,f.body,c.full_name,c.email FROM client_followups f
+    JOIN clients c ON c.id=f.client_id WHERE f.status='scheduled' AND f.scheduled_for<=? ORDER BY f.scheduled_for,f.id LIMIT 25`).bind(new Date().toISOString()).all();
+  for(const item of due.results||[]){
+    const claim=await env.DB.prepare("UPDATE client_followups SET status='sending' WHERE id=? AND status='scheduled'").bind(item.id).run();
+    if(!claim.meta.changes)continue;
+    let status="sent",providerId=null,errorText=null;
+    try{
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.email||""))throw new Error("Client email address is invalid");
+      const sent=await sendBrevoEmail(env,{sender:SENDER,to:[{email:item.email,name:item.full_name}],replyTo:REPLY_TO,
+        subject:item.subject||"A follow-up from x7studio",textContent:"Hi "+item.full_name+",\n\n"+item.body+"\n\nx7studio",
+        htmlContent:emailLayout("<p>Hi "+escapeHtml(item.full_name)+",</p><div style=\"white-space:pre-wrap;line-height:1.7\">"+escapeHtml(item.body)+"</div><p>x7studio</p>")});
+      providerId=sent?.messageId||null;
+    }catch(e){status="failed";errorText=String(e?.message||"Delivery failed").slice(0,1000);console.error("Scheduled follow-up failed:",item.id,errorText)}
+    await env.DB.prepare("UPDATE client_followups SET status=?,sent_at=CASE WHEN ?='sent' THEN CURRENT_TIMESTAMP ELSE sent_at END,error=? WHERE id=?").bind(status,status,errorText,item.id).run();
+    await env.DB.prepare(`INSERT INTO client_communications (client_id,booking_id,channel,direction,subject,body,status,provider_message_id,error,created_by)
+      VALUES (?,?,'email','outbound',?,?,?,?,?,'x7studio automated follow-up')`).bind(item.client_id,item.booking_id,item.subject||"A follow-up from x7studio",item.body,status,providerId,errorText).run();
+  }
+  return {processed:(due.results||[]).length};
+}
+
 // -----------------------------------------------------
 // MAIN API
 // -----------------------------------------------------
@@ -937,6 +967,7 @@ if (
             return json({ error: "Invalid website builder request" }, 400, origin);
           }
           const edits = [];
+          const createdElementIds = new Set();
           for (const item of body.draft) {
             if (!item || typeof item.selector !== "string" || item.selector.length > 1200 ||
                 !/^[a-zA-Z0-9_#.:>\-\[\]="' ()]+$/.test(item.selector) ||
@@ -944,11 +975,15 @@ if (
                 !( ["text", "image", "link", "style", "element", "reorder", "remove"].includes(item.type)) || (["text","image","link"].includes(item.type) && (typeof item.value !== "string" || item.value.length > 12000)) || (item.type === "element" && (!/^[a-zA-Z][a-zA-Z0-9_-]{0,80}$/.test(item.id || "") || !["H2","P","IMG","A","HR","DIV","SECTION"].includes(item.tag) || typeof item.value !== "string" || item.value.length > 4000 || typeof item.href !== "string" || item.href.length > 2000)) || (item.type === "reorder" && (!Array.isArray(item.children) || item.children.length > 100 || item.children.some(x => typeof x !== "string" || x.length > 1200))) || (item.type === "style" && (!item.styles || typeof item.styles !== "object" || Array.isArray(item.styles)))) {
               return json({ error: "One or more edits are invalid or target protected website components" }, 400, origin);
             }
+            if (item.type === "element") {
+              if (createdElementIds.has(item.id)) return json({ error: "Every newly added website element must have a unique persistent ID" }, 400, origin);
+              createdElementIds.add(item.id);
+            }
             if (item.type === "image" && !/^https:\/\//i.test(item.value)) return json({ error: "Images must use secure HTTPS URLs" }, 400, origin);
             if (item.type === "element" && item.tag === "IMG" && !/^https:\/\//i.test(item.value)) return json({ error: "New images must use secure HTTPS URLs" }, 400, origin);
             if (item.type === "element" && item.tag === "A" && !/^(https?:\/\/|mailto:|tel:)/i.test(item.href)) return json({ error: "New button destinations must be valid links" }, 400, origin);
             if (item.type === "style") {
-              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","textDecoration","backgroundColor","opacity","backgroundImage","width","height","minWidth","maxWidth","minHeight","maxHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","flexWrap","justifyContent","alignItems","alignContent","alignSelf","gap","gridTemplateColumns","gridTemplateRows","gridAutoFlow","order","zIndex","top","left","overflow","objectPosition","cursor"]);
+              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","textDecoration","backgroundColor","opacity","backgroundImage","width","height","minWidth","maxWidth","minHeight","maxHeight","padding","paddingTop","paddingRight","paddingBottom","paddingLeft","margin","marginTop","marginRight","marginBottom","marginLeft","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","flexWrap","justifyContent","alignItems","alignContent","alignSelf","gap","gridTemplateColumns","gridTemplateRows","gridAutoFlow","gridColumn","gridRow","order","zIndex","top","right","bottom","left","transform","transformOrigin","overflow","objectPosition","cursor","flexBasis","flexGrow","flexShrink","justifyItems","justifySelf","placeItems","placeContent"]);
               for (const [device, styles] of Object.entries(item.styles)) {
                 if (!["desktop","tablet","mobile"].includes(device) || !styles || typeof styles !== "object" || Array.isArray(styles)) return json({ error: "Invalid responsive design settings" }, 400, origin);
                 for (const [key, value] of Object.entries(styles)) {
@@ -968,15 +1003,64 @@ if (
               VALUES (1, ?, '[]', CURRENT_TIMESTAMP)
               ON CONFLICT(id) DO UPDATE SET draft_json = excluded.draft_json, updated_at = CURRENT_TIMESTAMP`).bind(encoded).run();
           } else {
+            await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_versions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT, published_json TEXT NOT NULL,
+              version_label TEXT NOT NULL DEFAULT '', action TEXT NOT NULL DEFAULT 'publish',
+              created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )`).run();
+            const previous = await env.DB.prepare("SELECT published_json FROM website_builder_state WHERE id = 1").first();
+            const previousJson = String(previous?.published_json || "[]");
+            if (previousJson !== "[]") await env.DB.prepare("INSERT INTO website_builder_versions (published_json, version_label, action, created_by) VALUES (?, 'Before publish', 'pre-publish', ?)").bind(previousJson, ADMIN_EMAIL).run();
             await env.DB.prepare(`INSERT INTO website_builder_state (id, draft_json, published_json, updated_at)
               VALUES (1, '[]', ?, CURRENT_TIMESTAMP)
               ON CONFLICT(id) DO UPDATE SET draft_json = '[]', published_json = excluded.published_json, updated_at = CURRENT_TIMESTAMP`).bind(encoded).run();
+            await env.DB.prepare("INSERT INTO website_builder_versions (published_json, version_label, action, created_by) VALUES (?, 'Published version', 'publish', ?)").bind(encoded, ADMIN_EMAIL).run();
+            await env.DB.prepare("DELETE FROM website_builder_versions WHERE id NOT IN (SELECT id FROM website_builder_versions ORDER BY id DESC LIMIT 50)").run();
           }
           return json({ success: true, count: edits.length, action }, 200, origin);
         } catch (error) {
           console.error("Website builder save/publish failed:", error);
           return json({ error: "Could not save website builder changes" }, 500, origin);
         }
+      }
+
+      // WEBSITE BUILDER: VERSION HISTORY + ROLLBACK
+      if (url.pathname === "/admin/website-builder/versions" && request.method === "GET") {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_versions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, published_json TEXT NOT NULL,
+            version_label TEXT NOT NULL DEFAULT '', action TEXT NOT NULL DEFAULT 'publish',
+            created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const current = await env.DB.prepare("SELECT published_json FROM website_builder_state WHERE id = 1").first();
+          const count = await env.DB.prepare("SELECT COUNT(*) AS total FROM website_builder_versions").first();
+          if (String(current?.published_json || "[]") !== "[]" && Number(count?.total || 0) === 0)
+            await env.DB.prepare("INSERT INTO website_builder_versions (published_json, version_label, action, created_by) VALUES (?, 'Current published version (baseline)', 'baseline', ?)").bind(current.published_json, ADMIN_EMAIL).run();
+          const result = await env.DB.prepare("SELECT id, version_label, action, created_by, created_at, length(published_json) AS content_size FROM website_builder_versions ORDER BY id DESC LIMIT 50").all();
+          return json({ versions: result.results || [] }, 200, origin);
+        } catch (error) { console.error("Website version history failed:", error); return json({ error: "Could not retrieve website version history" }, 500, origin); }
+      }
+      if (url.pathname === "/admin/website-builder/restore" && request.method === "POST") {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS website_builder_versions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, published_json TEXT NOT NULL,
+            version_label TEXT NOT NULL DEFAULT '', action TEXT NOT NULL DEFAULT 'publish',
+            created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const body = await request.json(), versionId = Number(body?.version_id);
+          if (!Number.isSafeInteger(versionId) || versionId < 1) return json({ error: "Choose a valid website version" }, 400, origin);
+          const version = await env.DB.prepare("SELECT id, published_json FROM website_builder_versions WHERE id = ?").bind(versionId).first();
+          if (!version) return json({ error: "Website version not found" }, 404, origin);
+          let edits; try { edits = JSON.parse(version.published_json); } catch { return json({ error: "Saved website version is damaged" }, 409, origin); }
+          if (!Array.isArray(edits) || edits.length > 500) return json({ error: "Saved website version is invalid" }, 409, origin);
+          const active = await env.DB.prepare("SELECT published_json FROM website_builder_state WHERE id = 1").first();
+          await env.DB.prepare("INSERT INTO website_builder_versions (published_json, version_label, action, created_by) VALUES (?, 'Before restore', 'pre-restore', ?)").bind(String(active?.published_json || "[]"), ADMIN_EMAIL).run();
+          await env.DB.prepare(`INSERT INTO website_builder_state (id, draft_json, published_json, updated_at) VALUES (1, '[]', ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET draft_json = '[]', published_json = excluded.published_json, updated_at = CURRENT_TIMESTAMP`).bind(version.published_json).run();
+          await env.DB.prepare("INSERT INTO website_builder_versions (published_json, version_label, action, created_by) VALUES (?, ?, 'restore', ?)").bind(version.published_json, "Restored version #" + versionId, ADMIN_EMAIL).run();
+          await env.DB.prepare("DELETE FROM website_builder_versions WHERE id NOT IN (SELECT id FROM website_builder_versions ORDER BY id DESC LIMIT 50)").run();
+          return json({ success: true, restored_version_id: versionId, count: edits.length }, 200, origin);
+        } catch (error) { console.error("Website version restore failed:", error); return json({ error: "Could not restore this website version" }, 500, origin); }
       }
 
       // -----------------------------------------------
@@ -1937,6 +2021,93 @@ if (
         }
       }
       // -------------------------------------------------
+      // CLIENT COMMUNICATIONS: CENTRAL HISTORY + OUTBOUND EMAIL
+      if (url.pathname.match(/^\/admin\/clients\/[1-9]\d*\/communications$/)) {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS client_communications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER NOT NULL, booking_id INTEGER,
+            channel TEXT NOT NULL DEFAULT 'note', direction TEXT NOT NULL DEFAULT 'internal',
+            subject TEXT NOT NULL DEFAULT '', body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'recorded',
+            provider_message_id TEXT, error TEXT, created_by TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const m = url.pathname.match(/^\/admin\/clients\/([1-9]\d*)\/communications$/), clientId = Number(m[1]);
+          const client = await env.DB.prepare("SELECT id, full_name, email FROM clients WHERE id = ?").bind(clientId).first();
+          if (!client) return json({ error: "Client not found" }, 404, origin);
+          if (request.method === "GET") {
+            const result = await env.DB.prepare("SELECT * FROM client_communications WHERE client_id = ? ORDER BY created_at DESC, id DESC LIMIT 200").bind(clientId).all();
+            return json({ communications: result.results || [] }, 200, origin);
+          }
+          if (request.method === "POST") {
+            const b = await request.json(), channel = b?.channel === "email" ? "email" : "note";
+            const subject = typeof b?.subject === "string" ? b.subject.trim().slice(0,250) : "";
+            const message = typeof b?.body === "string" ? b.body.trim().slice(0,10000) : "";
+            const bookingId = Number.isSafeInteger(Number(b?.booking_id)) && Number(b.booking_id)>0 ? Number(b.booking_id) : null;
+            if (!message) return json({ error: "Write a message before saving" }, 400, origin);
+            if (channel === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email || "")) return json({ error: "Client email address is invalid" }, 400, origin);
+            let status="recorded", providerId=null, errorText=null;
+            if (channel === "email") {
+              try {
+                const sent = await sendBrevoEmail(env,{sender:SENDER,to:[{email:client.email,name:client.full_name}],replyTo:REPLY_TO,
+                  subject:subject||"A message from x7studio",textContent:message+"\n\nx7studio",
+                  htmlContent:emailLayout("<p>Hi "+escapeHtml(client.full_name)+",</p><div style=\"white-space:pre-wrap;line-height:1.7\">"+escapeHtml(message)+"</div><p>x7studio</p>")});
+                status="sent"; providerId=sent?.messageId||null;
+              } catch(e) { status="failed"; errorText=String(e?.message||"Email delivery failed").slice(0,1000); }
+            }
+            const saved=await env.DB.prepare(`INSERT INTO client_communications
+              (client_id,booking_id,channel,direction,subject,body,status,provider_message_id,error,created_by)
+              VALUES (?,?,?,?,?,?,?,?,?,?)`).bind(clientId,bookingId,channel,channel==="email"?"outbound":"internal",subject,message,status,providerId,errorText,ADMIN_EMAIL).run();
+            const communication=await env.DB.prepare("SELECT * FROM client_communications WHERE id = ?").bind(saved.meta.last_row_id).first();
+            return json({success:status!=="failed",communication,error:errorText},status==="failed"?502:201,origin);
+          }
+          return json({error:"Method not allowed"},405,origin);
+        } catch(error) { console.error("Client communication failed:",error); return json({error:"Could not process client communication"},500,origin); }
+      }
+
+      // CLIENT FOLLOW-UPS: SCHEDULE, LIST AND CANCEL
+      if (url.pathname.match(/^\/admin\/clients\/[1-9]\d*\/followups$/)) {
+        try {
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS client_followups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER NOT NULL, booking_id INTEGER,
+            subject TEXT NOT NULL DEFAULT '', body TEXT NOT NULL, scheduled_for TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'scheduled', sent_at TEXT, error TEXT,
+            created_by TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`).run();
+          const m=url.pathname.match(/^\/admin\/clients\/([1-9]\d*)\/followups$/), clientId=Number(m[1]);
+          const client=await env.DB.prepare("SELECT id,full_name,email FROM clients WHERE id=?").bind(clientId).first();
+          if(!client)return json({error:"Client not found"},404,origin);
+          if(request.method==="GET"){
+            const rows=await env.DB.prepare("SELECT * FROM client_followups WHERE client_id=? ORDER BY scheduled_for DESC,id DESC LIMIT 100").bind(clientId).all();
+            return json({followups:rows.results||[]},200,origin);
+          }
+          if(request.method==="POST"){
+            const b=await request.json(),subject=typeof b?.subject==="string"?b.subject.trim().slice(0,250):"";
+            const message=typeof b?.body==="string"?b.body.trim().slice(0,10000):"";
+            const when=typeof b?.scheduled_for==="string"?b.scheduled_for.trim():"", ts=Date.parse(when);
+            const bookingId=Number.isSafeInteger(Number(b?.booking_id))&&Number(b.booking_id)>0?Number(b.booking_id):null;
+            if(!message||!Number.isFinite(ts)||ts<=Date.now())return json({error:"Enter a message and a future follow-up date and time"},400,origin);
+            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email||""))return json({error:"Client email address is invalid"},400,origin);
+            const saved=await env.DB.prepare("INSERT INTO client_followups (client_id,booking_id,subject,body,scheduled_for,created_by) VALUES (?,?,?,?,?,?)").bind(clientId,bookingId,subject||"A follow-up from x7studio",message,new Date(ts).toISOString(),ADMIN_EMAIL).run();
+            const followup=await env.DB.prepare("SELECT * FROM client_followups WHERE id=?").bind(saved.meta.last_row_id).first();
+            return json({success:true,followup},201,origin);
+          }
+          return json({error:"Method not allowed"},405,origin);
+        } catch(error) { console.error("Client follow-up failed:",error); return json({error:"Could not process follow-up"},500,origin); }
+      }
+      const cancelFollowup=url.pathname.match(/^\/admin\/followups\/([1-9]\d*)$/);
+      if(cancelFollowup&&request.method==="PATCH"){
+        try{
+          await env.DB.prepare(`CREATE TABLE IF NOT EXISTS client_followups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,client_id INTEGER NOT NULL,booking_id INTEGER,subject TEXT NOT NULL DEFAULT '',
+            body TEXT NOT NULL,scheduled_for TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'scheduled',sent_at TEXT,error TEXT,
+            created_by TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`).run();
+          const b=await request.json();if(b?.action!=="cancel")return json({error:"Only cancellation is supported"},400,origin);
+          const id=Number(cancelFollowup[1]),result=await env.DB.prepare("UPDATE client_followups SET status='cancelled' WHERE id=? AND status='scheduled'").bind(id).run();
+          if(!result.meta.changes)return json({error:"Follow-up not found or already processed"},404,origin);
+          return json({success:true,followup_id:id,status:"cancelled"},200,origin);
+        }catch(error){console.error("Follow-up cancellation failed:",error);return json({error:"Could not cancel follow-up"},500,origin)}
+      }
+
       // CLIENTS: PROFILE, BOOKING HISTORY, GALLERIES, UPDATE / ARCHIVE
       // -------------------------------------------------
       const clientMatch = url.pathname.match(/^\/admin\/clients\/([1-9]\d*)$/);
@@ -2498,5 +2669,10 @@ if (
     return json({
       error: "Not found"
     }, 404, origin);
+  },
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(processDueClientFollowups(env).catch(error => {
+      console.error("Scheduled follow-up processing failed:", error);
+    }));
   }
 };
