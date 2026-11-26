@@ -121,6 +121,14 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  function applyPatch(p,record=true){
   const doc=frame.contentDocument;if(!doc)return;
   const el=doc.querySelector(p.selector);if(!el)return;
+  if(p.type==="element"&&p.id&&["H2","P","IMG","A","HR","DIV"].includes(p.tag)&&!doc.getElementById(p.id)){
+   const node=doc.createElement(p.tag);node.id=p.id;
+   if(p.tag==="IMG"){if(!/^https:\/\//i.test(p.value||""))return;node.src=p.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
+   else if(p.tag==="A"){if(!/^(https?:\/\/|mailto:|tel:)/i.test(p.href||""))return;node.href=p.href;node.textContent=String(p.value||"");node.style.display="inline-block";node.style.padding="12px 20px";node.style.background="#89cff0";node.style.color="#122631";node.style.textDecoration="none"}
+   else if(p.tag==="HR"){node.style.border="0";node.style.borderTop="1px solid #dfe7eb";node.style.margin="24px 0"}
+   else if(p.tag==="DIV"){node.style.height="32px";node.setAttribute("aria-hidden","true")}
+   else node.textContent=String(p.value||"");el.appendChild(node);
+  }
   if(p.type==="text"&&el.children.length===0)el.textContent=p.value;
   else if(p.type==="image"&&el.tagName==="IMG")el.src=p.value;
   else if(p.type==="link"&&el.tagName==="A")el.href=p.value;
