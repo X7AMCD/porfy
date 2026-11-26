@@ -98,7 +98,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
    frameReady=true;
    const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
    doc.addEventListener("click",e=>{
-    if(e.target.closest("a,button,input,select,textarea,form")){if(e.target.closest("a")&&!kindOf(e.target.closest("a")))return;if(e.target.closest("button,input,select,textarea,form"))return}
+    if(e.target.closest("button,input,select,textarea,form"))return;
     let el=e.target;while(el&&el!==doc.body&&!kindOf(el))el=el.parentElement;
     if(!el)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
    },true);
