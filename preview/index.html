@@ -2937,6 +2937,7 @@ addEventListener("scroll", () => {
      else node.textContent=String(edit.value||"");
      el.appendChild(node);
     }
+    else if(edit.type==="reorder"&&Array.isArray(edit.children)){const parent=el;const nodes=edit.children.map(sel=>{try{return document.querySelector(sel)}catch{return null}}).filter(node=>node&&node.parentElement===parent);nodes.forEach(node=>parent.appendChild(node));}
     else if(edit.type==="style"&&edit.styles&&typeof edit.styles==="object"){
      const styles=edit.styles[device()]||edit.styles.desktop||{};
      for(const [key,value] of Object.entries(styles)){
