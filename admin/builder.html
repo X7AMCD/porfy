@@ -70,12 +70,12 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 <div class="row" style="margin-top:12px"><button id="resetElementBtn">Reset selected element</button></div></div>
 
 <h2>Add an element</h2><p class="help">Select a section or content container in the canvas first. New content will be inserted inside that selected area.</p>
-<div class="field"><label for="newElementType">Element type</label><select id="newElementType"><option value="H2">Heading</option><option value="P">Paragraph</option><option value="IMG">Image</option><option value="A">Button / link</option><option value="HR">Divider</option><option value="DIV">Spacer</option></select></div>
+<div class="field"><label for="newElementType">Element type</label><select id="newElementType"><option value="H2">Heading</option><option value="P">Paragraph</option><option value="IMG">Image</option><option value="A">Button / link</option><option value="HR">Divider</option><option value="DIV">Spacer</option><option value="SECTION">Section</option></select></div>
 <div class="field"><label for="newElementContent">Text or image URL</label><input id="newElementContent" placeholder="Enter heading or content"></div>
 <div class="field" id="newElementLinkField" hidden><label for="newElementHref">Button destination</label><input id="newElementHref" placeholder="https://…"></div>
 <div class="row"><button id="addElementBtn" class="primary">Add to page</button></div>
 <p class="design-note">For images, enter a secure HTTPS image URL. Buttons need a valid destination. Select the new element to edit its design.</p>
-<h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
+<h2>Layers</h2><p class="help">Select a section or container to inspect its direct children. Drag an item in the canvas to reorder it within the same parent.</p><div id="x7LayerList" class="field"></div><div class="row"><button id="duplicateElementBtn">Duplicate</button><button id="hideElementBtn">Hide / show</button><button id="deleteElementBtn">Delete</button></div><h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
 <div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
 <p class="warning">Customise typography, colours, backgrounds, spacing, borders, visibility, flex and grid layout, and responsive settings per device. Core booking, calendar, navigation and gallery interactions remain protected.</p>
 </aside></div>
@@ -83,7 +83,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
 (()=> {
  const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
- let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop";
+ let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop",dragged=null;
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
@@ -106,7 +106,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   if(["SECTION","HEADER","FOOTER","MAIN","ARTICLE","DIV"].includes(el.tagName))return "design";
   return null;
  }
- function markSelection(el){
+ function renderLayers(){const host=document.getElementById("x7LayerList");if(!host)return;host.innerHTML="";const root=active?.element&&["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(active.element.tagName)?active.element:frame.contentDocument?.querySelector("main")||frame.contentDocument?.body;if(!root)return;[...root.children].filter(x=>kindOf(x)||["SECTION","MAIN","ARTICLE","DIV"].includes(x.tagName)).slice(0,80).forEach((node,i)=>{const btn=document.createElement("button");btn.type="button";btn.textContent=(i+1)+". "+node.tagName.toLowerCase()+" · "+(node.textContent.trim().slice(0,36)||node.getAttribute("alt")||"element");btn.style.cssText="display:block;width:100%;text-align:left;margin:4px 0;padding:8px;border:1px solid #dce5e9;border-radius:8px;background:#fff";btn.addEventListener("click",()=>markSelection(node));host.appendChild(btn)})}\n function markSelection(el){
   const kind=kindOf(el);if(!kind)return;
   active={selector:selectorFor(el),type:kind,element:el};
   frame.contentDocument.querySelectorAll("[data-x7-builder-selected]").forEach(x=>{x.removeAttribute("data-x7-builder-selected")});
@@ -116,14 +116,14 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   valueLabel.textContent=kind==="image"?"Image URL":kind==="link"?"Link destination":"Text content";
   value.value=val;document.getElementById("contentTab").hidden=kind==="design";
   document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab===(kind==="design"?"design":"content")));
-  document.getElementById("designTab").hidden=false;editor.hidden=false;loadDesignControls();
+  document.getElementById("designTab").hidden=false;editor.hidden=false;loadDesignControls();renderLayers();
  }
  function applyPatch(p,record=true){
   const doc=frame.contentDocument;if(!doc)return;
   const el=doc.querySelector(p.selector);if(!el)return;
-  if(p.type==="element"&&p.id&&["H2","P","IMG","A","HR","DIV"].includes(p.tag)&&!doc.getElementById(p.id)){
+  if(p.type==="element"&&p.id&&["H2","P","IMG","A","HR","DIV","SECTION"].includes(p.tag)&&!doc.getElementById(p.id)){
    const node=doc.createElement(p.tag);node.id=p.id;
-   if(p.tag==="IMG"){if(!/^https:\/\//i.test(p.value||""))return;node.src=p.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
+   if(p.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=raw||"New section"}\n   else if(p.tag==="IMG"){if(!/^https:\/\//i.test(p.value||""))return;node.src=p.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
    else if(p.tag==="A"){if(!/^(https?:\/\/|mailto:|tel:)/i.test(p.href||""))return;node.href=p.href;node.textContent=String(p.value||"");node.style.display="inline-block";node.style.padding="12px 20px";node.style.background="#89cff0";node.style.color="#122631";node.style.textDecoration="none"}
    else if(p.tag==="HR"){node.style.border="0";node.style.borderTop="1px solid #dfe7eb";node.style.margin="24px 0"}
    else if(p.tag==="DIV"){node.style.height="32px";node.setAttribute("aria-hidden","true")}
@@ -154,7 +154,11 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   try{
    const doc=frame.contentDocument;if(!doc||!doc.body)throw new Error("Website preview is not available");
    frameReady=true;
-   const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
+   doc.querySelectorAll("body *").forEach(el=>{if(kindOf(el)||["SECTION","MAIN","ARTICLE","DIV","HEADER","FOOTER"].includes(el.tagName)){el.setAttribute("data-x7-builder-draggable","true");el.draggable=true;}});\n   const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
+   doc.addEventListener("dragstart",e=>{const el=e.target.closest("[data-x7-builder-draggable]");if(!el)return;dragged=el;e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","x7-element");});
+   doc.addEventListener("dragover",e=>{if(!dragged)return;const target=e.target.closest("[data-x7-builder-draggable]");if(target&&target!==dragged&&target.parentElement===dragged.parentElement)e.preventDefault();});
+   doc.addEventListener("drop",e=>{if(!dragged)return;const target=e.target.closest("[data-x7-builder-draggable]");if(!target||target===dragged||target.parentElement!==dragged.parentElement){dragged=null;return;}e.preventDefault();const parent=dragged.parentElement;const before=dragged.compareDocumentPosition(target)&Node.DOCUMENT_POSITION_FOLLOWING;parent.insertBefore(dragged,before?target:target.nextSibling);const parentSelector=selectorFor(parent);const children=[...parent.children].map(selectorFor);history.push(clone(patches));if(history.length>60)history.shift();future=[];patches=patches.filter(x=>!(x.type==="reorder"&&x.selector===parentSelector));patches.push({type:"reorder",selector:parentSelector,children});updateHistory();markSelection(dragged);setStatus("Element order changed. Save draft to keep it.");dragged=null;});
+   doc.addEventListener("dragend",()=>{dragged=null;});
    doc.addEventListener("click",e=>{
     if(e.target.closest("button,input,select,textarea,form"))return;
     let el=e.altKey?e.target.closest("section,header,footer,main,article,div"):e.target;
@@ -177,7 +181,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  const newType=document.getElementById("newElementType"),newContent=document.getElementById("newElementContent"),newHref=document.getElementById("newElementHref");
  newType.addEventListener("change",()=>{document.getElementById("newElementLinkField").hidden=newType.value!=="A";newContent.placeholder=newType.value==="IMG"?"https://…":newType.value==="HR"||newType.value==="DIV"?"Optional label":"Enter text content"});
  document.getElementById("addElementBtn").addEventListener("click",()=>{
-  if(!active||!(active.type==="design"||["SECTION","MAIN","ARTICLE","DIV"].includes(active.element?.tagName))){setStatus("Select a section or content container in the canvas first.",true);return;}
+  if(!active||!(active.type==="design"||["SECTION","MAIN","ARTICLE","DIV","BODY"].includes(active.element?.tagName))){setStatus("Select a section or content container in the canvas first.",true);return;}
   const tag=newType.value,raw=newContent.value.trim(),href=newHref.value.trim();
   if(["H2","P","A","IMG"].includes(tag)&&!raw){setStatus("Enter content for the new element.",true);return;}
   if(tag==="IMG"&&!/^https:\/\//i.test(raw)){setStatus("Image URLs must start with https://.",true);return;}
@@ -195,6 +199,10 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  document.getElementById("resetElementBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));patches=patches.filter(p=>p.selector!==active.selector);future=[];updateHistory();if(active.element)active.element.removeAttribute("data-x7-builder-selected");active=null;editor.hidden=true;frame.contentWindow.location.reload();setStatus("Element edit removed from this draft. Preview reloaded.")});
  document.getElementById("saveBtn").addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"save",draft:patches});setStatus("Draft saved successfully. It is not yet public.")}catch(err){setStatus("Draft save failed: "+err.message,true)}finally{b.disabled=false}});
  document.getElementById("publishBtn").addEventListener("click",async e=>{if(!confirm("Publish these changes to the live X7 Studios website?"))return;const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"publish",draft:patches});published=clone(patches);patches=[];frame.contentWindow.location.reload();setStatus("Published. The live website will display these changes.")}catch(err){setStatus("Publish failed: "+err.message,true)}finally{b.disabled=false}});
+
+ document.getElementById("duplicateElementBtn").addEventListener("click",()=>{if(!active?.element){setStatus("Select an element first.",true);return;}const el=active.element;if(["FORM","INPUT","BUTTON","SELECT","TEXTAREA","SCRIPT","STYLE"].includes(el.tagName)){setStatus("Functional website components cannot be duplicated.",true);return;}const cloneEl=el.cloneNode(true);cloneEl.removeAttribute("data-x7-builder-selected");cloneEl.querySelectorAll("[id]").forEach(n=>n.removeAttribute("id"));cloneEl.id="x7-added-"+Date.now().toString(36);cloneEl.setAttribute("data-x7-builder-draggable","true");cloneEl.draggable=true;el.parentElement.insertBefore(cloneEl,el.nextSibling);setStatus("Preview duplicate created. Note: save/publish support for duplicated existing content is not enabled yet.",true);});
+ document.getElementById("hideElementBtn").addEventListener("click",()=>{if(!active?.element)return;const el=active.element;const hidden=el.style.display==="none";el.style.display=hidden?"":"none";if(!hidden)applyPatch({selector:active.selector,type:"style",styles:{[deviceMode]:{display:"none"}}});else{patches=patches.filter(x=>!(x.selector===active.selector&&x.type==="style"));setStatus("Element shown in preview. Save draft to keep your changes.")}});
+ document.getElementById("deleteElementBtn").addEventListener("click",()=>{if(!active?.element)return;const el=active.element;if(["FORM","INPUT","BUTTON","SELECT","TEXTAREA","SCRIPT","STYLE","NAV"].includes(el.tagName)){setStatus("This functional website component is protected.",true);return;}if(!confirm("Remove this element from the preview?"))return;el.remove();setStatus("Element removed from preview. Persistent deletion will be added with structured page storage.",true);active=null;editor.hidden=true;renderLayers()});
  document.getElementById("undoBtn").addEventListener("click",()=>{if(!history.length)return;future.push(clone(patches));patches=history.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Undo applied. Reloading preview…")});
  document.getElementById("redoBtn").addEventListener("click",()=>{if(!future.length)return;history.push(clone(patches));patches=future.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Redo applied. Reloading preview…")});
  document.getElementById("reloadBtn").addEventListener("click",()=>frame.contentWindow.location.reload());
