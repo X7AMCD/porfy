@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>X7 Studios | Website Builder</title>
+<style>
+:root{--ink:#172832;--muted:#788791;--line:#dfe7eb;--accent:#89cff0;--nav:#0e151b}
+*{box-sizing:border-box}body{margin:0;background:#f2f5f7;color:var(--ink);font:13px/1.5 Inter,"Helvetica Neue",Arial,sans-serif}
+.topbar{height:66px;background:#101820;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:15px;border-bottom:1px solid #26343e}
+.brand{font-size:13px;letter-spacing:.15em;font-weight:700}.brand span{color:var(--accent);font-weight:400;margin-left:8px;letter-spacing:.08em}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,a.btn{border:1px solid var(--line);background:#fff;color:#273b47;padding:9px 13px;border-radius:5px;font:inherit;font-size:11px;text-decoration:none;cursor:pointer}
+button.primary{background:#89cff0;border-color:#89cff0;color:#122631;font-weight:700}button.dark{background:#263944;border-color:#40535f;color:#fff}button:disabled{opacity:.5;cursor:wait}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:calc(100vh - 66px)}
+.stage{padding:18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.stage-head strong{font-size:12px}.stage-head small{color:var(--muted)}
+.devices{display:flex;gap:5px;background:#e8edf0;padding:4px;border-radius:5px}.devices button{border:0;background:transparent;padding:7px 11px}.devices button.active{background:#fff;box-shadow:0 1px 3px #0001}
+.canvas{background:#dce3e7;border:1px solid #d2dce1;min-height:600px;flex:1;display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow:auto}
+iframe{border:0;background:#fff;width:100%;height:calc(100vh - 150px);min-height:600px;box-shadow:0 5px 24px #13232e1a;transition:width .2s}
+.canvas.mobile iframe{width:390px}.canvas.tablet iframe{width:768px}
+aside{background:#fff;border-left:1px solid var(--line);padding:22px 19px;overflow:auto}
+.kicker{font-size:9px;letter-spacing:.17em;color:#77909d;font-weight:700}
+h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font-size:13px;margin:22px 0 10px}
+.help{color:var(--muted);font-size:11px;line-height:1.65;margin:0 0 17px}
+.status{padding:10px 11px;border:1px solid #dfe8ed;background:#f7fafb;border-radius:5px;font-size:10px;color:#647782;margin:12px 0}
+.field{display:grid;gap:5px;margin:12px 0}.field label{font-size:10px;color:#6d7d87}.field input,.field textarea{width:100%;border:1px solid #dce5e9;border-radius:5px;padding:10px;font:inherit;font-size:12px;color:#243943}.field textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row button{flex:1}
+.selected{padding:10px;background:#f4f8fa;border:1px solid #e1e9ed;border-radius:5px;font-size:11px;overflow-wrap:anywhere}
+.history{display:flex;gap:7px;margin-top:10px}.history button{flex:1}
+.warning{font-size:10px;color:#8b6a35;line-height:1.6;margin-top:15px}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:520px){.topbar{height:auto;min-height:60px;padding:12px;align-items:flex-start;flex-direction:column}.workspace{min-height:0}.stage{padding:10px}.canvas{padding:5px;min-height:440px}iframe{height:65vh;min-height:440px}.canvas.mobile iframe{width:360px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand">X7 STUDIOS <span>/ WEBSITE BUILDER</span></div><div class="top-actions"><a class="btn" href="index.html#overview">← Dashboard</a><button id="undoBtn" disabled>Undo</button><button id="redoBtn" disabled>Redo</button><button id="saveBtn" class="dark">Save draft</button><button id="publishBtn" class="primary">Publish changes</button></div></header>
+<div class="workspace">
+<section class="stage"><div class="stage-head"><div><strong>Live website canvas</strong><br><small>Click an item in the website to select and edit it.</small></div><div class="devices"><button data-device="desktop" class="active">Desktop</button><button data-device="tablet">Tablet</button><button data-device="mobile">Mobile</button></div></div><div class="canvas" id="canvas"><iframe id="siteFrame" title="X7 Studios website preview" src="/preview/?x7builder=1"></iframe></div></section>
+<aside><div class="kicker">VISUAL EDITOR</div><h1>Website builder</h1><p class="help">Edit the actual X7 Studios website in place. Your changes remain a draft until you publish them.</p>
+<div class="status" id="status" role="status">Loading website and saved draft…</div>
+<h2>Selected element</h2><div class="selected" id="selected">Nothing selected. Click a text item, image or link in the website preview.</div>
+<div id="editor" hidden>
+<div class="field"><label for="elementValue" id="valueLabel">Content</label><textarea id="elementValue"></textarea></div>
+<div class="row"><button id="applyBtn" class="primary">Apply to preview</button><button id="resetElementBtn">Reset selection</button></div>
+</div>
+<h2>Page & sections</h2><p class="help">The canvas displays the real public site, including its existing layout, imagery and interactive components. Select an element directly rather than editing a generic list of fields.</p>
+<div class="history"><button id="reloadBtn">Reload website</button><button id="discardBtn">Discard draft</button></div>
+<p class="warning">The builder currently edits text, images and links only. Booking forms, calendars, galleries, navigation structure and layout styling are protected from accidental edits.</p>
+</aside></div>
+<script>
+(()=> {
+ const API="https://api.x7studios.co.za/admin/website-builder";
+ const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
+ let patches=[],history=[],future=[],active=null,frameReady=false;
+ const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ function selectorFor(el){
+  const parts=[];let node=el;
+  while(node&&node.nodeType===1&&node!==frame.contentDocument.body){
+   let part=node.tagName.toLowerCase();
+   if(node.id){part+="#"+CSS.escape(node.id);parts.unshift(part);break}
+   if(node.classList.length){const cls=[...node.classList].filter(c=>/^[a-zA-Z_-][\w-]*$/.test(c)).slice(0,2);if(cls.length)part+="."+cls.map(CSS.escape).join(".")}
+   const parent=node.parentElement;
+   if(parent){const same=[...parent.children].filter(x=>x.tagName===node.tagName);if(same.length>1)part+=":nth-of-type("+(same.indexOf(node)+1)+")"}
+   parts.unshift(part);node=parent;
+  }
+  return "body > "+parts.join(" > ");
+ }
+ function kindOf(el){
+  if(el.tagName==="IMG")return "image";
+  if(el.tagName==="A"&&el.children.length===0)return "link";
+  if(el.children.length===0&&el.textContent.trim()&&!["SCRIPT","STYLE","NOSCRIPT","SVG","PATH"].includes(el.tagName))return "text";
+  return null;
+ }
+ function markSelection(el){
+  const kind=kindOf(el);if(!kind)return;
+  active={selector:selectorFor(el),type:kind,element:el};
+  frame.contentDocument.querySelectorAll("[data-x7-builder-selected]").forEach(x=>{x.removeAttribute("data-x7-builder-selected")});
+  el.setAttribute("data-x7-builder-selected","true");
+  const val=kind==="image"?el.getAttribute("src")||"":kind==="link"?el.getAttribute("href")||"":el.textContent;
+  selected.textContent=kind.toUpperCase()+" · "+el.tagName.toLowerCase()+" · "+active.selector;
+  valueLabel.textContent=kind==="image"?"Image URL":kind==="link"?"Link destination":"Text content";
+  value.value=val;editor.hidden=false;
+ }
+ function applyPatch(p,record=true){
+  const doc=frame.contentDocument;if(!doc)return;
+  const el=doc.querySelector(p.selector);if(!el)return;
+  if(p.type==="text"&&el.children.length===0)el.textContent=p.value;
+  else if(p.type==="image"&&el.tagName==="IMG")el.src=p.value;
+  else if(p.type==="link"&&el.tagName==="A")el.href=p.value;
+  if(record){history.push(clone(patches));if(history.length>60)history.shift();future=[];patches=patches.filter(x=>!(x.selector===p.selector&&x.type===p.type));patches.push(clone(p));updateHistory()}
+ }
+ function updateHistory(){document.getElementById("undoBtn").disabled=!history.length;document.getElementById("redoBtn").disabled=!future.length}
+ function bindFrame(){
+  try{
+   const doc=frame.contentDocument;if(!doc||!doc.body)throw new Error("Website preview is not available");
+   frameReady=true;
+   const style=doc.createElement("style");style.textContent='[data-x7-builder-selected="true"]{outline:2px solid #48a9d3!important;outline-offset:3px!important;cursor:pointer!important} body{cursor:crosshair}';doc.head.appendChild(style);
+   doc.addEventListener("click",e=>{
+    if(e.target.closest("a,button,input,select,textarea,form")){if(e.target.closest("a")&&!kindOf(e.target.closest("a")))return;if(e.target.closest("button,input,select,textarea,form"))return}
+    let el=e.target;while(el&&el!==doc.body&&!kindOf(el))el=el.parentElement;
+    if(!el)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();markSelection(el);
+   },true);
+   patches.forEach(p=>applyPatch(p,false));
+   setStatus("Website loaded. Select an element in the canvas to edit.");
+  }catch(err){setStatus("Could not connect to the website preview. Check that /preview/ is available.",true)}
+ }
+ frame.addEventListener("load",bindFrame);
+ async function request(method,body){const r=await fetch(API,{method,headers:{"Content-Type":"application/json"},credentials:"include",body:body?JSON.stringify(body):undefined,cache:"no-store"});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Request failed ("+r.status+")");return data}
+ async function load(){try{const d=await request("GET");patches=Array.isArray(d.draft)?d.draft:[];if(frameReady)patches.forEach(p=>applyPatch(p,false));setStatus("Draft loaded · "+patches.length+" saved edit(s).")}catch(e){setStatus("Could not load saved draft: "+e.message,true)}}
+ document.getElementById("applyBtn").addEventListener("click",()=>{
+  if(!active)return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
+  if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&!["https:","http:"].includes(u.protocol))throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
+  applyPatch({selector:active.selector,type:active.type,value:v});setStatus("Preview updated. Save draft to keep this change.");
+ });
+ document.getElementById("resetElementBtn").addEventListener("click",()=>{if(!active)return;patches=patches.filter(p=>!(p.selector===active.selector&&p.type===active.type));history.push(clone(patches));if(active.element)active.element.removeAttribute("data-x7-builder-selected");active=null;editor.hidden=true;setStatus("Element edit removed from this draft. Reload the preview to restore its original content.")});
+ document.getElementById("saveBtn").addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"save",draft:patches});setStatus("Draft saved successfully. It is not yet public.")}catch(err){setStatus("Draft save failed: "+err.message,true)}finally{b.disabled=false}});
+ document.getElementById("publishBtn").addEventListener("click",async e=>{if(!confirm("Publish these changes to the live X7 Studios website?"))return;const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"publish",draft:patches});setStatus("Published. The live website will display these changes.")}catch(err){setStatus("Publish failed: "+err.message,true)}finally{b.disabled=false}});
+ document.getElementById("undoBtn").addEventListener("click",()=>{if(!history.length)return;future.push(clone(patches));patches=history.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Undo applied. Reloading preview…")});
+ document.getElementById("redoBtn").addEventListener("click",()=>{if(!future.length)return;history.push(clone(patches));patches=future.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Redo applied. Reloading preview…")});
+ document.getElementById("reloadBtn").addEventListener("click",()=>frame.contentWindow.location.reload());
+ document.getElementById("discardBtn").addEventListener("click",async()=>{if(!confirm("Discard all saved draft edits? Published changes will remain live."))return;try{await request("POST",{action:"discard"});patches=[];history=[];future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Draft discarded. Published content is unchanged.")}catch(e){setStatus("Could not discard draft: "+e.message,true)}});
+ document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");if(b.dataset.device!=="desktop")canvas.classList.add(b.dataset.device)}));
+ load();
+})();
+</script>
+</body></html>
