@@ -960,7 +960,7 @@ if (
             }
 
             if (item.type === "link" && !/^(https?:\/\/|mailto:|tel:)/i.test(item.value)) return json({ error: "Link destination is invalid" }, 400, origin);
-            edits.push(item.type === "style" ? { selector: item.selector, type: item.type, styles: item.styles } : item.type === "element" ? { selector: item.selector, type: item.type, id: item.id, tag: item.tag, value: item.value, href: item.href } : item.type === "reorder" ? { selector: item.selector, type: item.type, children: item.children } : { selector: item.selector, type: item.type });
+            edits.push(item.type === "style" ? { selector: item.selector, type: item.type, styles: item.styles } : item.type === "element" ? { selector: item.selector, type: item.type, id: item.id, tag: item.tag, value: item.value, href: item.href } : item.type === "reorder" ? { selector: item.selector, type: item.type, children: item.children } : ["text", "image", "link"].includes(item.type) ? { selector: item.selector, type: item.type, value: item.value } : { selector: item.selector, type: item.type });
           }
           const encoded = JSON.stringify(edits);
           if (action === "save") {
