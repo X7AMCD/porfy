@@ -539,6 +539,20 @@ export default {
         return json({ error: "Could not retrieve limited dates" }, 500, origin);
       }
     }
+    // PUBLIC: return booked and manually blocked time slots for one date only
+    if (url.pathname === "/booking-times" && request.method === "GET") {
+      try {
+        const date = String(url.searchParams.get("date") || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json({ error: "A valid date is required" }, 400, origin);
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_time_slots (date TEXT NOT NULL, time TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(date, time))").run();
+        const booked = await env.DB.prepare("SELECT booking_time AS time FROM bookings WHERE booking_date = ? AND (status IS NULL OR status != 'Cancelled') ORDER BY booking_time").bind(date).all();
+        const limited = await env.DB.prepare("SELECT time FROM limited_time_slots WHERE date = ? ORDER BY time").bind(date).all();
+        return json({ booked: (booked.results || []).map(row => row.time), limited: (limited.results || []).map(row => row.time) }, 200, origin);
+      } catch (error) {
+        console.error("Public booking times lookup failed:", error);
+        return json({ error: "Could not retrieve time availability" }, 500, origin);
+      }
+    }
     // PUBLIC BOOKING SUBMISSION
     // -------------------------------------------------
     if (url.pathname === "/bookings" && request.method === "POST") {
@@ -567,6 +581,11 @@ export default {
         await env.DB.prepare("CREATE TABLE IF NOT EXISTS unavailable_dates (date TEXT PRIMARY KEY, reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
         const blocked = await env.DB.prepare("SELECT date FROM unavailable_dates WHERE date = ?").bind(booking_date.trim()).first();
         if (blocked) return json({ error: "This date is unavailable. Please choose another day." }, 409, origin);
+        await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_time_slots (date TEXT NOT NULL, time TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(date, time))").run();
+        const alreadyBooked = await env.DB.prepare("SELECT id FROM bookings WHERE booking_date = ? AND booking_time = ? AND (status IS NULL OR status != 'Cancelled') LIMIT 1").bind(booking_date.trim(), booking_time.trim()).first();
+        if (alreadyBooked) return json({ error: "That time has already been booked. Please choose another time." }, 409, origin);
+        const manuallyBlocked = await env.DB.prepare("SELECT date FROM limited_time_slots WHERE date = ? AND time = ? LIMIT 1").bind(booking_date.trim(), booking_time.trim()).first();
+        if (manuallyBlocked) return json({ error: "That time is unavailable. Please choose another time." }, 409, origin);
         const result = await env.DB.prepare(`
           INSERT INTO bookings (
             customer_name,
@@ -904,6 +923,44 @@ if (
         } catch(error) {
           console.error("Limited date removal failed:",error);
           return json({error:"Could not remove limited availability"},500,origin);
+        }
+      }
+      // AVAILABILITY CALENDAR: manually block individual time slots on a date
+      if (url.pathname === "/admin/limited-time-slots" && request.method === "GET") {
+        try {
+          await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_time_slots (date TEXT NOT NULL, time TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(date, time))").run();
+          const date = String(url.searchParams.get("date") || "").trim();
+          const result = date
+            ? await env.DB.prepare("SELECT date, time, created_at FROM limited_time_slots WHERE date = ? ORDER BY time").bind(date).all()
+            : await env.DB.prepare("SELECT date, time, created_at FROM limited_time_slots ORDER BY date, time").all();
+          return json({ slots: result.results || [] }, 200, origin);
+        } catch (error) {
+          console.error("Admin limited time slots listing failed:", error);
+          return json({ error: "Could not retrieve manually blocked times" }, 500, origin);
+        }
+      }
+      if (url.pathname === "/admin/limited-time-slots" && request.method === "POST") {
+        try {
+          await env.DB.prepare("CREATE TABLE IF NOT EXISTS limited_time_slots (date TEXT NOT NULL, time TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(date, time))").run();
+          const body = await request.json(), date = String(body?.date || "").trim(), time = String(body?.time || "").trim();
+          const allowedTimes = ["08:00", "10:00", "12:00", "14:00", "16:00"];
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date + "T00:00:00Z")) || new Date(date + "T00:00:00Z").toISOString().slice(0,10) !== date || !allowedTimes.includes(time)) return json({ error: "Choose a valid date and time" }, 400, origin);
+          await env.DB.prepare("INSERT INTO limited_time_slots (date, time) VALUES (?, ?) ON CONFLICT(date, time) DO NOTHING").bind(date, time).run();
+          return json({ success: true, date, time }, 200, origin);
+        } catch (error) {
+          console.error("Manual time block failed:", error);
+          return json({ error: "Could not block that time" }, 500, origin);
+        }
+      }
+      if (url.pathname === "/admin/limited-time-slots" && request.method === "DELETE") {
+        try {
+          const date = String(url.searchParams.get("date") || "").trim(), time = String(url.searchParams.get("time") || "").trim();
+          if (!date || !time) return json({ error: "Date and time are required" }, 400, origin);
+          await env.DB.prepare("DELETE FROM limited_time_slots WHERE date = ? AND time = ?").bind(date, time).run();
+          return json({ success: true, date, time }, 200, origin);
+        } catch (error) {
+          console.error("Manual time unblock failed:", error);
+          return json({ error: "Could not restore that time" }, 500, origin);
         }
       }
       if (url.pathname === "/admin/image-settings" && request.method === "GET") {
