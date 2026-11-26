@@ -946,7 +946,7 @@ if (
             }
             if (item.type === "image" && !/^https:\/\//i.test(item.value)) return json({ error: "Images must use secure HTTPS URLs" }, 400, origin);
             if (item.type === "style") {
-              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow"]);
+              const allowedStyles = new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","justifyContent","alignItems","gap","gridTemplateColumns","zIndex","top","left","overflow","objectPosition"]);
               for (const [device, styles] of Object.entries(item.styles)) {
                 if (!["desktop","tablet","mobile"].includes(device) || !styles || typeof styles !== "object" || Array.isArray(styles)) return json({ error: "Invalid responsive design settings" }, 400, origin);
                 for (const [key, value] of Object.entries(styles)) {
