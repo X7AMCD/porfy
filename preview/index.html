@@ -2918,6 +2918,7 @@ addEventListener("scroll", () => {
   const data=await response.json(),edits=Array.isArray(data.edits)?data.edits:[];
   const styleKeys=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","backgroundColor","opacity","backgroundImage","width","maxWidth","minHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","justifyContent","alignItems","gap","gridTemplateColumns","zIndex","top","left","overflow","objectPosition"]);
   const applied=new Map();
+  document.querySelectorAll("*").forEach((el,i)=>el.setAttribute("data-x7-builder-key","x7-node-"+(i+1)));
   function device(){return innerWidth<=600?"mobile":innerWidth<=1024?"tablet":"desktop"}
   function apply(){
    for(const [el,keys] of applied)for(const key of keys)el.style.removeProperty(key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase()));
