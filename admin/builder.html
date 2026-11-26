@@ -130,7 +130,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
   if(!el||["SCRIPT","STYLE","NOSCRIPT","SVG","PATH","INPUT","SELECT","TEXTAREA","FORM"].includes(el.tagName))return null;
   if(el.tagName==="IMG")return "image";
   if(el.tagName==="A")return "link";
-  if(el.tagName==="BUTTON")return "design";
+  if(el.tagName==="BUTTON")return null;
   if(el.children.length===0&&el.textContent.trim())return "text";
   if(["SECTION","HEADER","FOOTER","MAIN","ARTICLE","DIV"].includes(el.tagName))return "design";
   return null;
@@ -201,6 +201,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
    else if(p.tag==="DIV"){node.style.height="32px";node.setAttribute("aria-hidden","true")}
    else node.textContent=String(p.value||"");el.appendChild(node);
   }
+  if(p.type==="reorder"&&Array.isArray(p.children)){const parent=el;const nodes=p.children.map(sel=>{try{return doc.querySelector(sel)}catch{return null}}).filter(node=>node&&node.parentElement===parent);nodes.forEach(node=>parent.appendChild(node));}
   if(p.type==="text"&&el.children.length===0)el.textContent=p.value;
   else if(p.type==="image"&&el.tagName==="IMG")el.src=p.value;
   else if(p.type==="link"&&el.tagName==="A")el.href=p.value;
@@ -339,7 +340,7 @@ h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font
  document.getElementById("redoBtn").addEventListener("click",()=>{if(!future.length)return;history.push(clone(patches));patches=future.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Redo applied. Reloading preview…")});
  document.getElementById("reloadBtn").addEventListener("click",()=>frame.contentWindow.location.reload());
  document.getElementById("discardBtn").addEventListener("click",async()=>{if(!confirm("Discard all saved draft edits? Published changes will remain live."))return;try{await request("POST",{action:"discard"});patches=[];history=[];future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Draft discarded. Published content is unchanged.")}catch(e){setStatus("Could not discard draft: "+e.message,true)}});
- document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");deviceMode=b.dataset.device;document.getElementById("x7ResponsiveDevice").textContent=deviceMode.charAt(0).toUpperCase()+deviceMode.slice(1);if(deviceMode!=="desktop")canvas.classList.add(deviceMode);if(active)loadDesignControls();frame.contentDocument?.querySelectorAll("[data-x7-builder-selected]").forEach(el=>el.removeAttribute("data-x7-builder-selected"));if(active){const el=frame.contentDocument?.querySelector(active.selector);if(el)el.setAttribute("data-x7-builder-selected","true")}}));
+ document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");deviceMode=b.dataset.device;document.getElementById("x7ResponsiveDevice").textContent=deviceMode.charAt(0).toUpperCase()+deviceMode.slice(1);if(deviceMode!=="desktop")canvas.classList.add(deviceMode);if(active)loadDesignControls();frame.contentDocument?.querySelectorAll("[data-x7-builder-selected]").forEach(el=>el.removeAttribute("data-x7-builder-selected"));if(active){const el=frame.contentDocument?.querySelector(active.selector);if(el)el.setAttribute("data-x7-builder-selected","true")}updateResizeHandles()}));
  load();
 })();
 </script>
