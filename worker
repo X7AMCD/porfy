@@ -1304,6 +1304,7 @@ if (
           if (file.size <= 0) return json({ error: "The selected image is empty" }, 400, origin);
           if (file.size > MAX_IMAGE_SIZE) return json({ error: "Images must be 20 MB or smaller" }, 400, origin);
           const uploaded = await uploadToImageKit(env, file, "photography-styles");
+          await saveMediaAsset(env, uploaded, file, file.name);
           await env.DB.prepare(`
             INSERT INTO photography_style_images
               (style_id, imagekit_file_id, image_url, thumbnail_url, file_name, updated_at)
@@ -1395,6 +1396,7 @@ if (
           if (!ALLOWED_IMAGE_TYPES.includes(file.type)) return json({ error: "Choose a JPG, PNG, WebP or AVIF image" }, 400, origin);
           if (!file.size || file.size > MAX_IMAGE_SIZE) return json({ error: "Images must be non-empty and 20 MB or smaller" }, 400, origin);
           const uploaded = await uploadToImageKit(env, file, "services");
+          await saveMediaAsset(env, uploaded, file, file.name);
           const previous = await env.DB.prepare("SELECT imagekit_file_id FROM service_images WHERE service_id = ?").bind(id).first();
           await env.DB.prepare(`
             INSERT INTO service_images (service_id, imagekit_file_id, image_url, thumbnail_url, file_name, updated_at)
@@ -1406,10 +1408,7 @@ if (
               file_name = excluded.file_name,
               updated_at = CURRENT_TIMESTAMP
           `).bind(id, uploaded.fileId, uploaded.url, uploaded.thumbnailUrl || null, uploaded.name || file.name).run();
-          if (previous?.imagekit_file_id && previous.imagekit_file_id !== uploaded.fileId) {
-            try { await deleteImageKitFile(env, previous.imagekit_file_id); }
-            catch (cleanupError) { console.error("Previous service image cleanup failed:", cleanupError); }
-          }
+          // Keep replaced ImageKit files intact: they may already be referenced by the media library or a private gallery.
           return json({ success: true, image_url: uploaded.url, thumbnail_url: uploaded.thumbnailUrl || null }, 200, origin);
         } catch (error) {
           console.error("Service image upload failed:", error);
@@ -1422,7 +1421,7 @@ if (
           const id = Number(serviceImageMatch[1]);
           const existing = await env.DB.prepare("SELECT imagekit_file_id FROM service_images WHERE service_id = ?").bind(id).first();
           if (!existing) return json({ error: "This service has no image to remove" }, 404, origin);
-          if (existing.imagekit_file_id) await deleteImageKitFile(env, existing.imagekit_file_id);
+          // Detach only. The original may also be used by the media library or a private gallery.
           await env.DB.prepare("DELETE FROM service_images WHERE service_id = ?").bind(id).run();
           return json({ success: true, message: "Service image removed" }, 200, origin);
         } catch (error) {
@@ -1783,6 +1782,27 @@ if (
         }
       }
       // PRIVATE GALLERY EDITOR API: manage metadata and gallery-only media links.
+      const galleryUploadMatch = url.pathname.match(/^\/admin\/galleries\/(\d+)\/upload$/);
+      if (galleryUploadMatch && request.method === "POST") {
+        try {
+          const galleryId = Number(galleryUploadMatch[1]);
+          const gallery = await env.DB.prepare("SELECT id FROM client_galleries WHERE id = ?").bind(galleryId).first();
+          if (!gallery) return json({ error: "Private gallery not found" }, 404, origin);
+          const formData = await request.formData();
+          const file = formData.get("file");
+          if (!file || typeof file === "string") return json({ error: "Choose an image to upload" }, 400, origin);
+          if (!file.type || !ALLOWED_IMAGE_TYPES.includes(file.type)) return json({ error: "Use a JPG, PNG, WebP or AVIF image" }, 400, origin);
+          if (!file.size || file.size > MAX_IMAGE_SIZE) return json({ error: "Images must be non-empty and 20 MB or smaller" }, 400, origin);
+          const uploaded = await uploadToImageKit(env, file, "private-galleries");
+          const mediaId = await saveMediaAsset(env, uploaded, file, file.name);
+          const order = await env.DB.prepare("SELECT COALESCE(MAX(display_order),-1)+1 AS n FROM gallery_items WHERE gallery_id=?").bind(galleryId).first();
+          await env.DB.prepare("INSERT INTO gallery_items (gallery_id,media_id,display_order,is_downloadable) VALUES (?,?,?,1)").bind(galleryId, mediaId, Number(order?.n || 0)).run();
+          return json({ success:true, media_id:mediaId, gallery_id:galleryId, image:{url:uploaded.url,thumbnail_url:uploaded.thumbnailUrl||null,file_name:uploaded.name||file.name} },201,origin);
+        } catch (error) {
+          console.error("Private gallery image upload failed:", error);
+          return json({ error:error.message || "Could not upload photograph to private gallery" },500,origin);
+        }
+      }
       const gItems = url.pathname.match(/^\/admin\/galleries\/(\d+)\/items$/);
       const gItem = url.pathname.match(/^\/admin\/galleries\/(\d+)\/items\/(\d+)$/);
       const gEdit = url.pathname.match(/^\/admin\/galleries\/(\d+)$/);
