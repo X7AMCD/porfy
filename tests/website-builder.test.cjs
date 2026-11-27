@@ -77,6 +77,12 @@ test("legacy selector-based edit records remain supported", () => {
 });
 
 
+test("element sizing starts from explicit inline dimensions, not computed layout widths", () => {
+  assert.ok(admin.includes('$("x7ElementW").value=node.style.width||""'));
+  assert.ok(admin.includes('$("x7ElementH").value=node.style.height||""'));
+  assert.ok(admin.includes('x7Frame?.contentDocument?.getElementById(item.id)'));
+});
+
 test("publishing a new draft retains all previously published edits", () => {
   assert.match(admin, /websiteBuilderPublished=Array\.isArray\(d\.published\)/);
   assert.match(admin, /const publishSet=action==="publish"\?\[\.\.\.websiteBuilderPublished,\.\.\.websiteBuilderDraft\]/);
