@@ -2913,7 +2913,6 @@ addEventListener("scroll", () => {
 <script id="x7-website-builder-runtime">
 /* Unified, ID-first published website edit runtime. */
 (()=> {
- if(new URLSearchParams(location.search).has("x7builder"))return;
  const API="https://api.x7studios.co.za/website-content";
  const safeSelector=s=>{try{return [...document.querySelectorAll(s)]}catch{return []}};
  const resolve=e=>{if(e.elementId){const n=document.getElementById(e.elementId);if(n)return [n]}return safeSelector(e.selector||"")};
