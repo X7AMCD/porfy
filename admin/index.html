@@ -1778,7 +1778,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   $("clientDirectoryCount").textContent=rows.length+" of "+cachedClients.length+" client"+(cachedClients.length===1?"":"s");
   if(!rows.length){$("clientsList").innerHTML='<div class="empty">'+(query?'No clients match your search.':clientDirectoryFilter==="archived"?'No archived clients.':clientDirectoryFilter==="active"?'No active clients.':'No clients have been added yet.')+'</div>';return}
   $("clientsList").innerHTML=rows.map(c=>{
-   const initials=String(c.name||"C").split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0)).join("").toUpperCase();
+   const initials=String(c.name||"C").split(/\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0)).join("").toUpperCase();
    return '<article class="client-directory-card"><div class="client-avatar" aria-hidden="true">'+esc(initials)+'</div><div class="client-card-content"><div class="client-card-heading"><strong>'+esc(c.name||"Unnamed client")+'</strong><span class="client-state'+(c.archived_at?' archived':'')+'">'+(c.archived_at?'Archived':'Active')+'</span></div><p>'+esc(c.email||"No email address")+'</p><p>'+esc(c.phone||"No phone number")+'</p><div class="client-row-actions"><button type="button" class="secondary-btn" data-client-view="'+Number(c.id)+'">Open profile ↗</button></div></div></article>';
   }).join('');
  }
@@ -1858,7 +1858,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
  $("closeAddClient").addEventListener("click",()=>{$("clientCreatePanel").hidden=true;});
  $("clientsList").addEventListener("click",event=>{const view=event.target.closest("[data-client-view]");if(view)openClientProfile(view.dataset.clientView)});
  $("closeClientProfile").addEventListener("click",()=>{$("clientProfilePanel").hidden=true;activeClientId=null});
- $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",async()=>{ $("clientName").value="";$("clientEmail").value="";$("clientPhone").value="";$("clientNotes").value="";await loadClients();}));
+ $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",async()=>{ $("clientName").value="";$("clientEmail").value="";$("clientPhone").value="";$("clientNotes").value="";$("clientCreatePanel").hidden=true;await loadClients();}));
  $("updateClient").addEventListener("click",async()=>{
   if(!activeClientId)return;const button=$("updateClient");button.disabled=true;status("clientProfileStatus","Saving profile…");
   try{await request("/admin/clients/"+encodeURIComponent(activeClientId),{method:"PATCH",body:JSON.stringify({name:$("editClientName").value.trim(),email:$("editClientEmail").value.trim(),phone:$("editClientPhone").value.trim(),notes:$("editClientNotes").value.trim()})});status("clientProfileStatus","Client profile saved. Booking history remains linked, including previous email addresses.");await loadClients();await openClientProfile(activeClientId);}
