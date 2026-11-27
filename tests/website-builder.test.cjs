@@ -7,7 +7,7 @@ const preview = fs.readFileSync("preview/index.html", "utf8");
 const worker = fs.readFileSync("worker", "utf8");
 
 function inlineScripts(source) {
-  return [...source.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]);
+  return [...source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
 }
 
 function parseScripts(source, label) {
@@ -24,7 +24,7 @@ test("admin and preview inline JavaScript parses", () => {
 });
 
 test("Worker module parses with its default export wrapper normalized", () => {
-  const normalized = worker.replace(/export\\s+default\\s*\\{/, "const worker = {");
+  const normalized = worker.replace(/export\s+default\s*\{/, "const worker = {");
   assert.notEqual(normalized, worker, "expected a default-export Worker module");
   assert.doesNotThrow(() => new Function(normalized));
 });
@@ -43,28 +43,28 @@ test("visual editor provides live preview, layers, drag and resize", () => {
 
 test("published runtime is disabled in editor mode and resolves stable IDs first", () => {
   assert.ok(preview.includes('has("x7builder")'));
-  assert.match(preview, /if\\(e\\.elementId\\)[\\s\\S]{0,120}getElementById/);
-  assert.match(preview, /e\\.type==="identify"/);
-  assert.match(preview, /safeSelector\\(e\\.selector/);
+  assert.match(preview, /if\(e\.elementId\)[\s\S]{0,120}getElementById/);
+  assert.match(preview, /e\.type==="identify"/);
+  assert.match(preview, /safeSelector\(e\.selector/);
 });
 
 test("responsive styles are reapplied when viewport size changes", () => {
-  assert.match(preview, /const device=\\(\\)=>innerWidth<=620\\?"mobile":innerWidth<=1024\\?"tablet":"desktop"/);
-  assert.match(preview, /addEventListener\\("resize"/);
-  assert.match(preview, /apply\\(publishedEdits\\)/);
+  assert.match(preview, /const device=\(\)=>innerWidth<=620\?"mobile":innerWidth<=1024\?"tablet":"desktop"/);
+  assert.match(preview, /addEventListener\("resize"/);
+  assert.match(preview, /apply\(publishedEdits\)/);
 });
 
 test("Worker validates persistent IDs, protected selectors and responsive style values", () => {
   assert.match(worker, /"identify"/);
-  assert.match(worker, /x7-managed-\\[a-z0-9\\]/i);
-  assert.match(worker, /form\\|input\\|button\\|select\\|textarea\\|script\\|style/);
+  assert.match(worker, /x7-managed-\[a-z0-9\]/i);
+  assert.match(worker, /form\|input\|button\|select\|textarea\|script\|style/);
   assert.match(worker, /Unsupported design setting/);
   assert.match(worker, /Invalid responsive design settings/);
 });
 
 test("Worker and browser runtime share the same style-property allowlist", () => {
-  const workerMatch = worker.match(/const allowedStyles = new Set\\(\\[([\\s\\S]*?)\\]\\);/);
-  const runtimeMatch = preview.match(/const allowed=new Set\\(\\[([\\s\\S]*?)\\]\\);/);
+  const workerMatch = worker.match(/const allowedStyles = new Set\(\[([\s\S]*?)\]\);/);
+  const runtimeMatch = preview.match(/const allowed=new Set\(\[([\s\S]*?)\]\);/);
   assert.ok(workerMatch, "Worker style allowlist not found");
   assert.ok(runtimeMatch, "browser style allowlist not found");
   const extract = value => [...value.matchAll(/"([A-Za-z]+)"/g)].map(match => match[1]).sort();
@@ -72,9 +72,9 @@ test("Worker and browser runtime share the same style-property allowlist", () =>
 });
 
 test("legacy selector-based edit records remain supported", () => {
-  assert.match(preview, /return safeSelector\\(e\\.selector\\|\\|""\\)/);
-  assert.match(worker, /item\\.type === "style"/);
-  assert.match(worker, /item\\.type === "element"/);
+  assert.match(preview, /return safeSelector\(e\.selector\|\|""\)/);
+  assert.match(worker, /item\.type === "style"/);
+  assert.match(worker, /item\.type === "element"/);
 });
 
 test("existing draft, publish and version history routes remain in Worker", () => {
