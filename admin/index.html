@@ -1339,14 +1339,14 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
  function list(id,rows,render){const el=$(id);if(!el)return;el.innerHTML=rows&&rows.length?rows.map(render).join(""):'<div class="empty">Nothing to show yet.</div>'}
 
 
-  let websiteBuilderDraft=[];
+  let websiteBuilderDraft=[],websiteBuilderPublished=[];
   function renderWebsiteDraft(){
    const host=$("websiteDraftList");
    host.innerHTML=websiteBuilderDraft.length?websiteBuilderDraft.map((x,i)=>'<div class="builder-version-row"><div><strong>'+esc(x.type.toUpperCase())+' · '+esc(x.selector)+'</strong><small>'+(x.type==="element"||x.type==="identify"?esc(x.tag||"Persistent ID")+" · #"+esc(x.id):x.type==="style"?"Responsive layout and styling":esc(String(x.value||"").slice(0,140)))+'</small></div><button type="button" class="secondary-btn" data-remove-draft="'+i+'">Remove</button></div>').join(""):'<div class="empty">Your draft is empty. Add an element change above.</div>';
   }
   async function loadWebsiteDraft(){
    status("websiteBuilderStatus","Loading saved website draft…");
-   try{const d=await request("/admin/website-builder");websiteBuilderDraft=Array.isArray(d.draft)?d.draft:[];renderWebsiteDraft();status("websiteBuilderStatus",websiteBuilderDraft.length+" draft change(s) loaded. Published changes are separate until you publish.");}
+   try{const d=await request("/admin/website-builder");websiteBuilderPublished=Array.isArray(d.published)?d.published:[];websiteBuilderDraft=Array.isArray(d.draft)?d.draft:[];renderWebsiteDraft();status("websiteBuilderStatus",websiteBuilderPublished.length+" published change(s) and "+websiteBuilderDraft.length+" draft change(s) loaded.");}
    catch(e){status("websiteBuilderStatus",e.message,true)}
   }
 
@@ -1354,11 +1354,11 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   const x7Frame=$("x7ElementFrame"),x7LayerHost=$("x7ElementLayers");
   function x7SafeText(value){return String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function x7NodeSelector(node){
-   if(node.id)return "#"+CSS.escape(node.id);
+   if(node.id&&/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(node.id))return "#"+node.id;
    const parts=[];let cur=node,guard=0;
    while(cur&&cur.nodeType===1&&cur!==cur.ownerDocument.body&&guard++<7){
     let part=cur.tagName.toLowerCase();
-    if(cur.classList.length)part+="."+[...cur.classList].slice(0,2).map(c=>CSS.escape(c)).join(".");
+    if(cur.classList.length){const safe=[...cur.classList].filter(c=>/^[A-Za-z0-9_-]+$/.test(c)).slice(0,2);if(safe.length)part+="."+safe.join(".");}
     const parent=cur.parentElement;
     if(parent){const peers=[...parent.children].filter(x=>x.tagName===cur.tagName);if(peers.length>1)part+=":nth-of-type("+(peers.indexOf(cur)+1)+")"}
     parts.unshift(part);cur=parent;
@@ -1399,7 +1399,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    Object.assign(x7SelectionOverlay.style,{left:(r.left+doc.defaultView.scrollX)+"px",top:(r.top+doc.defaultView.scrollY)+"px",width:r.width+"px",height:r.height+"px"});
   }
   function x7StartElementMove(ev){
-   if(!x7SelectedNode||x7SelectionOverlay?.contains(ev.target)||ev.target!==x7SelectedNode||ev.button!==0)return;
+   if(!x7SelectedNode||x7SelectionOverlay?.contains(ev.target)||!x7SelectedNode.contains(ev.target)||ev.target.closest?.("a,button,input,select,textarea,[contenteditable=true]")||ev.button!==0)return;
    ev.preventDefault();const doc=x7Frame.contentDocument,view=doc.defaultView,sx=ev.clientX,sy=ev.clientY,cs=view.getComputedStyle(x7SelectedNode);
    if(cs.position==="static")x7SelectedNode.style.position="relative";
    const left=parseFloat(cs.left)||0,top=parseFloat(cs.top)||0;
@@ -1476,8 +1476,9 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    if(action==="discard"&&!confirm("Discard the saved website draft? The currently published website will remain unchanged."))return;
    button.disabled=true;status("websiteBuilderStatus",action==="publish"?"Publishing website changes…":action==="save"?"Saving draft…":"Discarding draft…");
    try{
-    await request("/admin/website-builder",{method:"POST",body:JSON.stringify(action==="discard"?{action}:{action,draft:websiteBuilderDraft})});
-    if(action==="publish"||action==="discard")websiteBuilderDraft=[];
+    const publishSet=action==="publish"?[...websiteBuilderPublished,...websiteBuilderDraft]:websiteBuilderDraft;
+    await request("/admin/website-builder",{method:"POST",body:JSON.stringify(action==="discard"?{action}:{action,draft:publishSet})});
+    if(action==="publish"){websiteBuilderPublished=publishSet;websiteBuilderDraft=[];}else if(action==="discard")websiteBuilderDraft=[];
     renderWebsiteDraft();status("websiteBuilderStatus",action==="publish"?"Website changes published. Open /preview in a new tab or refresh it to verify.":action==="save"?"Draft saved. It is not public until published.":"Saved draft discarded; published website unchanged.");
     if(action==="publish")await loadBuilderVersions();
    }catch(e){status("websiteBuilderStatus",e.message,true)}
