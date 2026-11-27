@@ -1762,48 +1762,6 @@ window.x7LoadAvailabilityCalendar=load;$("calendarPrev").onclick=()=>{month.setM
 </script>
 
 
-<script>
-(()=> {
- const routes={
-  overview:{id:"overview",title:"Overview",desc:"Your studio at a glance"},
-  bookings:{id:"bookings",title:"Bookings",desc:"Review enquiries and manage confirmed sessions"},
-  calendar:{id:"calendar",title:"Availability calendar",desc:"Manage available, limited and unavailable dates"},
-  portfolio:{id:"portfolio",title:"Portfolio",desc:"Manage the photographs displayed across your website"},
-  services:{id:"services",title:"Services & pricing",desc:"Manage photography services and session pricing"},
-  clients:{id:"clients",title:"Clients",desc:"Client profiles, booking history and private records"},
-  galleries:{id:"galleries",title:"Private galleries",desc:"Manage client gallery access and image collections"},
-  website:{id:"content",title:"Website Studio",desc:"Edit, preview and publish your X7 Studios website"},
-  settings:{id:"settings",title:"Settings",desc:"Manage website and administration settings"}
- };
- const params=new URLSearchParams(location.search);
- const requested=params.get("page")||"overview";
- const page=routes[requested]?requested:"overview";
- document.body.dataset.page=page;
- document.title="X7 Studios | "+routes[page].title;
- const nav=document.querySelector('nav[aria-label="Admin sections"]');
- if(nav){
-  nav.querySelectorAll("a").forEach(a=>{
-   const id=(a.getAttribute("href")||"").replace(/^#/,"");
-   const key=Object.keys(routes).find(k=>routes[k].id===id);
-   if(!key)return;
-   a.href="?page="+key;
-   a.classList.toggle("active",key===page);
-   if(key===page)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");
-  });
- }
- const main=document.querySelector(".shell main")||document.querySelector("main");
- if(main && page!=="overview"){
-  const heading=document.createElement("header");
-  heading.className="route-heading";
-  heading.innerHTML='<div><div class="crumb">X7 STUDIOS / WORKSPACE</div><h1>'+routes[page].title+'</h1><p>'+routes[page].desc+'</p></div><div class="pill">Admin workspace</div>';
-  main.insertBefore(heading,main.firstChild);
- }
- document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  const id=a.getAttribute("href").slice(1);
-  const key=Object.keys(routes).find(k=>routes[k].id===id);
-  if(key)a.href="?page="+key;
- });
-})();
-</script>
+
 </body>
 </html>
