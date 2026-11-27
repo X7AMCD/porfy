@@ -753,6 +753,26 @@ input[type=checkbox],input[type=radio]{accent-color:#89cff0}button:focus-visible
 @media(max-width:760px){.shell{grid-template-columns:1fr!important}.shell>aside{position:sticky;height:auto;z-index:40;padding:10px 12px!important}.admin-logo{max-height:34px;width:auto;margin:0 0 7px}.shell aside nav{display:flex;overflow-x:auto;gap:5px;margin:8px 0 0;padding-bottom:2px}.shell aside nav a{flex:0 0 auto;min-height:42px!important;padding:8px 10px!important}.shell aside nav a .nav-label{font-size:10px}.shell>main{padding:25px 15px 45px!important}.overview-metrics{gap:9px!important}.card{padding:15px!important;min-height:112px}.metric{font-size:29px!important}}
 @media(max-width:420px){.overview-metrics{grid-template-columns:1fr 1fr}.card .label{font-size:9px!important}}
 
+
+/* X7 visual element manager */
+.x7-element-workspace{display:grid;grid-template-columns:minmax(190px,245px) minmax(0,1fr);gap:14px;margin:14px 0}
+.x7-element-layers,.x7-element-stage{border:1px solid #dfe7eb;border-radius:9px;background:#fff;min-width:0}
+.x7-element-layers{padding:12px;max-height:620px;overflow:auto}
+.x7-element-stage{overflow:hidden}
+.x7-element-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:11px 13px;border-bottom:1px solid #e6ecef}
+.x7-element-toolbar strong{font-size:11px;color:#344852}
+.x7-element-toolbar select{max-width:150px}
+.x7-element-frame{display:block;width:100%;height:620px;border:0;background:#fff}
+.x7-element-layer{display:flex;align-items:center;gap:7px;width:100%;padding:8px 9px;margin:3px 0;border:1px solid transparent;border-radius:6px;background:transparent;color:#465b65;text-align:left;font-size:11px;cursor:pointer;overflow:hidden}
+.x7-element-layer:hover{background:#f2f8fb}.x7-element-layer.active{background:#e8f6fc;border-color:#a9d9ec;color:#17465b}
+.x7-element-layer small{margin-left:auto;color:#8797a0;font-size:9px}
+.x7-element-layer-indent{width:var(--depth,0px);flex:0 0 var(--depth,0px)}
+.x7-element-note{padding:9px 10px;color:#7c8d96;font-size:10px;line-height:1.5}
+.x7-element-selection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px;border-top:1px solid #e6ecef}
+.x7-element-selection .form-field{min-width:0}
+.x7-element-selection .form-field.full{grid-column:1/-1}
+@media(max-width:800px){.x7-element-workspace{grid-template-columns:1fr}.x7-element-layers{max-height:220px}.x7-element-frame{height:520px}}
+@media(max-width:560px){.x7-element-selection{grid-template-columns:repeat(2,minmax(0,1fr))}.x7-element-frame{height:430px}}
 </style>
 
 <style id="x7-custom-select-styles">
@@ -968,6 +988,27 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
 
  <div class="builder-history" id="builderElementManager">
   <div class="builder-history-head"><div><h3>Website element editor</h3><p>Add text, images, links and new elements to a selected page container. Use CSS selectors to target existing sections; IDs remain stable for new elements.</p></div><button type="button" class="secondary-btn" id="loadWebsiteDraft">Load saved draft</button></div>
+
+  <div class="x7-element-workspace">
+   <aside class="x7-element-layers">
+    <div class="builder-tree-title">PAGE ELEMENTS</div>
+    <div class="x7-element-note">Choose an element from the live page preview or select it here. Protected forms and interactive controls cannot be edited.</div>
+    <div id="x7ElementLayers"><div class="empty">Loading page structure…</div></div>
+   </aside>
+   <section class="x7-element-stage">
+    <div class="x7-element-toolbar"><strong>LIVE PAGE · SELECT TO EDIT</strong><div style="display:flex;gap:7px;align-items:center"><select id="x7ElementViewport" aria-label="Preview size"><option value="100%">Desktop</option><option value="768px">Tablet</option><option value="390px">Mobile</option></select><button class="secondary-btn" type="button" id="x7ElementRefresh">Refresh preview</button></div></div>
+    <iframe id="x7ElementFrame" class="x7-element-frame" title="Website element selection preview" src="/preview/?x7builder=1"></iframe>
+    <div class="x7-element-selection">
+     <div class="form-field full"><label>Selected element</label><input id="x7SelectedElementLabel" readonly value="Nothing selected"></div>
+     <div class="form-field"><label>Stable element ID</label><input id="x7SelectedElementId" readonly placeholder="Generated when you add a change"></div>
+     <div class="form-field"><label>Element tag</label><input id="x7SelectedElementTag" readonly></div>
+     <div class="form-field"><label>Position X</label><input id="x7ElementX" placeholder="0px"></div>
+     <div class="form-field"><label>Position Y</label><input id="x7ElementY" placeholder="0px"></div>
+     <div class="form-field"><label>Width</label><input id="x7ElementW" placeholder="auto / 100%"></div>
+     <div class="form-field"><label>Height</label><input id="x7ElementH" placeholder="auto"></div>
+    </div>
+   </section>
+  </div>
   <div class="client-comms-form" style="margin-top:12px">
    <div class="form-grid">
     <div class="form-field"><label for="websiteEditType">Change type</label><select id="websiteEditType"><option value="text">Edit text</option><option value="image">Change image</option><option value="link">Change link</option><option value="element">Add new element</option><option value="style">Position and style element</option><option value="remove">Remove element</option></select></div>
@@ -1301,16 +1342,77 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   let websiteBuilderDraft=[];
   function renderWebsiteDraft(){
    const host=$("websiteDraftList");
-   host.innerHTML=websiteBuilderDraft.length?websiteBuilderDraft.map((x,i)=>'<div class="builder-version-row"><div><strong>'+esc(x.type.toUpperCase())+' · '+esc(x.selector)+'</strong><small>'+(x.type==="element"?esc(x.tag)+" · #"+esc(x.id):x.type==="style"?"Responsive layout and styling":esc(String(x.value||"").slice(0,140)))+'</small></div><button type="button" class="secondary-btn" data-remove-draft="'+i+'">Remove</button></div>').join(""):'<div class="empty">Your draft is empty. Add an element change above.</div>';
+   host.innerHTML=websiteBuilderDraft.length?websiteBuilderDraft.map((x,i)=>'<div class="builder-version-row"><div><strong>'+esc(x.type.toUpperCase())+' · '+esc(x.selector)+'</strong><small>'+(x.type==="element"||x.type==="identify"?esc(x.tag||"Persistent ID")+" · #"+esc(x.id):x.type==="style"?"Responsive layout and styling":esc(String(x.value||"").slice(0,140)))+'</small></div><button type="button" class="secondary-btn" data-remove-draft="'+i+'">Remove</button></div>').join(""):'<div class="empty">Your draft is empty. Add an element change above.</div>';
   }
   async function loadWebsiteDraft(){
    status("websiteBuilderStatus","Loading saved website draft…");
    try{const d=await request("/admin/website-builder");websiteBuilderDraft=Array.isArray(d.draft)?d.draft:[];renderWebsiteDraft();status("websiteBuilderStatus",websiteBuilderDraft.length+" draft change(s) loaded. Published changes are separate until you publish.");}
    catch(e){status("websiteBuilderStatus",e.message,true)}
   }
+
+  let x7SelectedNode=null,x7SelectedSelector="",x7SelectedId="";
+  const x7Frame=$("x7ElementFrame"),x7LayerHost=$("x7ElementLayers");
+  function x7SafeText(value){return String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  function x7NodeSelector(node){
+   if(node.id)return "#"+CSS.escape(node.id);
+   const parts=[];let cur=node,guard=0;
+   while(cur&&cur.nodeType===1&&cur!==cur.ownerDocument.body&&guard++<7){
+    let part=cur.tagName.toLowerCase();
+    if(cur.classList.length)part+="."+[...cur.classList].slice(0,2).map(c=>CSS.escape(c)).join(".");
+    const parent=cur.parentElement;
+    if(parent){const peers=[...parent.children].filter(x=>x.tagName===cur.tagName);if(peers.length>1)part+=":nth-of-type("+(peers.indexOf(cur)+1)+")"}
+    parts.unshift(part);cur=parent;
+   }
+   return "body>"+parts.join(">");
+  }
+  function x7IsProtected(node){return !node||node===node.ownerDocument.body||node===node.ownerDocument.documentElement||node.closest("form,button,input,select,textarea,script,style,nav,header,footer,[contenteditable=true]")||["SCRIPT","STYLE","BUTTON","INPUT","SELECT","TEXTAREA","FORM","SVG","PATH"].includes(node.tagName)}
+  function x7SelectNode(node){
+   if(x7IsProtected(node))return;
+   x7SelectedNode=node;x7SelectedSelector=x7NodeSelector(node);x7SelectedId=node.id||"";
+   $("websiteEditSelector").value=x7SelectedSelector;
+   $("x7SelectedElementLabel").value=(node.tagName.toLowerCase())+(node.classList.length?" · ."+[...node.classList].slice(0,2).join("."):"")+(node.textContent.trim()?" · "+node.textContent.trim().replace(/\s+/g," ").slice(0,65):"");
+   $("x7SelectedElementId").value=x7SelectedId||"Will be generated on first edit";
+   $("x7SelectedElementTag").value=node.tagName.toLowerCase();
+   const cs=node.ownerDocument.defaultView.getComputedStyle(node);
+   $("x7ElementX").value=cs.left!=="auto"?cs.left:"";
+   $("x7ElementY").value=cs.top!=="auto"?cs.top:"";
+   $("x7ElementW").value=cs.width;$("x7ElementH").value=cs.height;
+   x7RenderLayers(node);
+  }
+  function x7RenderLayers(selected){
+   if(!x7Frame?.contentDocument||!x7LayerHost)return;
+   const doc=x7Frame.contentDocument;
+   const nodes=[...doc.querySelectorAll("main,section,article,h1,h2,h3,p,a,img,div")].filter(n=>!x7IsProtected(n)&&n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).slice(0,180);
+   x7LayerHost.innerHTML=nodes.length?nodes.map(n=>{const label=n.tagName.toLowerCase()+(n.id?" #"+n.id:n.classList.length?" ."+[...n.classList].slice(0,1).join(""):"");const active=n===selected;const depth=Math.min(5,[...function*(x){while(x&&x.parentElement){yield x;x=x.parentElement}}(n)].length);return '<button type="button" class="x7-element-layer'+(active?" active":"")+'" data-x7-layer="'+nodes.indexOf(n)+'"><span class="x7-element-layer-indent" style="--depth:'+(depth*9)+'px"></span><span>'+x7SafeText(label)+'</span><small>'+x7SafeText(n.tagName.toLowerCase())+'</small></button>'}).join(""):'<div class="empty">No editable page elements found.</div>';
+   x7LayerHost._nodes=nodes;
+  }
+  function x7AttachFrame(){
+   try{
+    const doc=x7Frame.contentDocument;if(!doc)return;
+    doc.addEventListener("click",ev=>{const node=ev.target?.closest?.("*");if(!node||x7IsProtected(node))return;ev.preventDefault();ev.stopPropagation();x7SelectNode(node)},{capture:true});
+    doc.addEventListener("mouseover",ev=>{const n=ev.target;if(!n||x7IsProtected(n))return;n.style.outline="1px dashed #39a6d4";},{capture:true});
+    doc.addEventListener("mouseout",ev=>{const n=ev.target;if(n?.style?.outline==="1px dashed rgb(57, 166, 212)")n.style.outline="";},{capture:true});
+    x7RenderLayers(null);
+   }catch(err){status("websiteBuilderStatus","Preview could not be accessed. Confirm /preview is on the same domain.",true)}
+  }
+  x7Frame?.addEventListener("load",x7AttachFrame);
+  $("x7ElementRefresh")?.addEventListener("click",()=>{if(x7Frame)x7Frame.src="/preview/?x7builder=1&refresh="+Date.now()});
+  $("x7ElementViewport")?.addEventListener("change",e=>{if(x7Frame)x7Frame.style.maxWidth=e.target.value});
+  x7LayerHost?.addEventListener("click",e=>{const b=e.target.closest("[data-x7-layer]");if(!b)return;const n=x7LayerHost._nodes?.[Number(b.dataset.x7Layer)];if(n){n.scrollIntoView({block:"center",behavior:"smooth"});x7SelectNode(n)}});
+  function x7StableIdentity(){
+   if(!x7SelectedNode)return null;
+   if(x7SelectedNode.id){x7SelectedId=x7SelectedNode.id;return {selector:"#"+CSS.escape(x7SelectedId),id:x7SelectedId}}
+   const id="x7-managed-"+Math.random().toString(36).slice(2,11);
+   const selector=x7SelectedSelector;
+   websiteBuilderDraft.push({type:"identify",selector,id});
+   x7SelectedNode.id=id;x7SelectedId=id;$("x7SelectedElementId").value=id;
+   return {selector:"#"+CSS.escape(id),id};
+  }
+
   $("loadWebsiteDraft")?.addEventListener("click",loadWebsiteDraft);
   $("addWebsiteEdit")?.addEventListener("click",()=>{
-   const type=$("websiteEditType").value,selector=$("websiteEditSelector").value.trim(),value=$("websiteEditValue").value.trim(),href=$("websiteEditHref").value.trim();
+   const type=$("websiteEditType").value;let selector=$("websiteEditSelector").value.trim();const value=$("websiteEditValue").value.trim(),href=$("websiteEditHref").value.trim();
+   if(x7SelectedNode){const identity=x7StableIdentity();if(identity)selector=identity.selector;}
    if(!selector){status("websiteBuilderStatus","Enter a target CSS selector.",true);return}
    const item={selector,type};
    if(["text","image","link","element"].includes(type)&&!value){status("websiteBuilderStatus","Enter the text, image URL or link label.",true);return}
@@ -1325,11 +1427,18 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
     const styles={};
     [["position","websiteEditPosition"],["display","websiteEditDisplay"],["top","websiteEditTop"],["left","websiteEditLeft"],["width","websiteEditWidth"],["height","websiteEditHeight"]].forEach(([key,id])=>{const v=$(id).value.trim();if(v)styles[key]=v});
     if(!Object.keys(styles).length){status("websiteBuilderStatus","Enter at least one position or layout value.",true);return}
+    if(x7SelectedNode){
+     const deviceStyles={};
+     const x=$("x7ElementX").value.trim(),y=$("x7ElementY").value.trim(),w=$("x7ElementW").value.trim(),h=$("x7ElementH").value.trim();
+     if(x||y){styles.position="relative";if(x)styles.left=x;if(y)styles.top=y}
+     if(w)styles.width=w;if(h)styles.height=h;
+    }
     item.styles={desktop:styles,tablet:styles,mobile:styles};
    }
    if(type==="remove"&&!confirm("Add a removal operation for "+selector+"?"))return;
    if(websiteBuilderDraft.length>=500){status("websiteBuilderStatus","The draft has reached its 500-change limit.",true);return}
    if(type==="element"&&websiteBuilderDraft.some(x=>x.type==="element"&&x.id===item.id)){status("websiteBuilderStatus","That element ID already exists in this draft. Choose a unique ID.",true);return}
+   if(type!=="identify"&&x7SelectedNode&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===x7SelectedId)){const identity=x7StableIdentity();if(identity&&item.type!=="element")item.selector=identity.selector;}
    websiteBuilderDraft.push(item);renderWebsiteDraft();status("websiteBuilderStatus","Change added to draft. Save draft or publish when ready.");
   });
   $("websiteDraftList")?.addEventListener("click",e=>{const b=e.target.closest("[data-remove-draft]");if(!b)return;websiteBuilderDraft.splice(Number(b.dataset.removeDraft),1);renderWebsiteDraft()});
