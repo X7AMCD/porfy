@@ -77,6 +77,12 @@ test("legacy selector-based edit records remain supported", () => {
 });
 
 
+test("managed identity uses a data attribute without replacing an existing element ID", () => {
+  assert.ok(admin.includes('setAttribute("data-x7-managed-id",identity.id)'));
+  assert.ok(preview.includes('n.setAttribute("data-x7-managed-id",e.id)'));
+  assert.ok(admin.includes('getAttribute("data-x7-managed-id")'));
+});
+
 test("element sizing starts from explicit inline dimensions, not computed layout widths", () => {
   assert.ok(admin.includes('$("x7ElementW").value=node.style.width||""'));
   assert.ok(admin.includes('$("x7ElementH").value=node.style.height||""'));
