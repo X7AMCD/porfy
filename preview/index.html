@@ -2920,7 +2920,7 @@ addEventListener("scroll", () => {
  const device=()=>innerWidth<=620?"mobile":innerWidth<=1024?"tablet":"desktop";
  function apply(edits){
   if(!Array.isArray(edits))return;
-  edits.filter(e=>e&&e.type==="identify").forEach(e=>{if(!document.getElementById(e.id)){const n=safeSelector(e.selector)[0];if(n&&!n.id)n.id=e.id}});
+  edits.filter(e=>e&&e.type==="identify").forEach(e=>{if(!document.querySelector('[data-x7-managed-id="'+CSS.escape(e.id)+'"]')){const n=safeSelector(e.selector)[0];if(n)n.setAttribute("data-x7-managed-id",e.id)}});
   edits.forEach(e=>{
    if(!e||typeof e!=="object"||e.type==="identify")return;
    const nodes=resolve(e);
