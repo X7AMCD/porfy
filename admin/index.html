@@ -1439,6 +1439,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   }
 
   $("loadWebsiteDraft")?.addEventListener("click",loadWebsiteDraft);
+  loadWebsiteDraft();
   $("addWebsiteEdit")?.addEventListener("click",()=>{
    const type=$("websiteEditType").value;let selector=$("websiteEditSelector").value.trim();const value=$("websiteEditValue").value.trim(),href=$("websiteEditHref").value.trim();
    const identity=x7SelectedNode?x7StableIdentity():null;if(identity)selector=identity.selector;
