@@ -4,80 +4,33 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>X7 Studios | Website Builder</title>
 <style>
-:root{--bg:#090D13;--panel:#111923;--surface:#1A2633;--surface-2:#22303E;--accent:#89CFF0;--accent-hover:#A5DCF5;--accent-dim:rgba(137,207,240,.10);--accent-border:rgba(137,207,240,.28);--text:#E8F0F6;--text-2:#8B9AAA;--text-3:#566B7E;--border:#1C2A38;--border-2:#2A3B4C;--success:#34D399;--warning:#FBBF24;--danger:#F87171;--radius:8px;--radius-sm:5px;--font:Inter,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,"SF Mono",Monaco,"Cascadia Code",monospace;color-scheme:dark}
-*{box-sizing:border-box}[hidden]{display:none!important}html{height:100%}body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:13px/1.5 var(--font);-webkit-font-smoothing:antialiased;letter-spacing:.005em}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
-.topbar{height:60px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px;position:relative;z-index:10}
-.brand{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--text);display:flex;align-items:center;gap:10px;white-space:nowrap}
-.brand::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);transform:rotate(45deg);box-shadow:0 0 14px rgba(137,207,240,.5);flex-shrink:0}
-.brand span{color:var(--text-2);font-weight:400;letter-spacing:.08em}
-.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-button,a.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 13px;border-radius:var(--radius-sm);font:inherit;font-size:11px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,border-color .15s,color .15s,box-shadow .15s;white-space:nowrap}
-button:hover,a.btn:hover{background:var(--surface-2);border-color:var(--border-2)}
-button:focus-visible,a.btn:focus-visible{outline:none;box-shadow:0 0 0 2px var(--accent-border)}
-button.primary{background:var(--accent);border-color:var(--accent);color:#090D13;font-weight:650}
-button.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-button.dark{background:var(--surface-2);border-color:var(--border-2);color:var(--text)}
-button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
-.workspace{display:grid;grid-template-columns:minmax(0,1fr) 360px;height:calc(100vh - 60px)}
-.stage{display:flex;flex-direction:column;min-width:0;min-height:0;padding:16px;gap:12px}
-.stage-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex:0 0 auto}
-.stage-head strong{font-size:12px;font-weight:600;color:var(--text)}.stage-head small{display:block;color:var(--text-3);font-size:11px;margin-top:2px}
-.devices{display:flex;gap:2px;background:var(--surface);padding:3px;border-radius:var(--radius-sm);border:1px solid var(--border)}
-.devices button{border:0;background:transparent;color:var(--text-2);padding:6px 12px;border-radius:3px;font:inherit;font-size:11px;font-weight:500;transition:background .15s,color .15s}
-.devices button:hover{color:var(--text)}
-.devices button.active{background:var(--surface-2);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.canvas{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow:auto;background:#0B1017;border:1px solid var(--border);border-radius:var(--radius)}
-.canvas iframe{border:0;background:#fff;width:100%;height:calc(100vh - 190px);min-height:550px;border-radius:var(--radius-sm);box-shadow:0 12px 40px rgba(0,0,0,.45);transition:width .2s ease}
+:root{--ink:#172832;--muted:#788791;--line:#dfe7eb;--accent:#89cff0;--nav:#0e151b}
+*{box-sizing:border-box}body{margin:0;background:#f2f5f7;color:var(--ink);font:13px/1.5 Inter,"Helvetica Neue",Arial,sans-serif}
+.topbar{height:66px;background:#101820;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:15px;border-bottom:1px solid #26343e}
+.brand{font-size:13px;letter-spacing:.15em;font-weight:700}.brand span{color:var(--accent);font-weight:400;margin-left:8px;letter-spacing:.08em}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,a.btn{border:1px solid var(--line);background:#fff;color:#273b47;padding:9px 13px;border-radius:5px;font:inherit;font-size:11px;text-decoration:none;cursor:pointer}
+button.primary{background:#89cff0;border-color:#89cff0;color:#122631;font-weight:700}button.dark{background:#263944;border-color:#40535f;color:#fff}button:disabled{opacity:.5;cursor:wait}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:calc(100vh - 66px)}
+.stage{padding:18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.stage-head strong{font-size:12px}.stage-head small{color:var(--muted)}
+.devices{display:flex;gap:5px;background:#e8edf0;padding:4px;border-radius:5px}.devices button{border:0;background:transparent;padding:7px 11px}.devices button.active{background:#fff;box-shadow:0 1px 3px #0001}
+.canvas{background:#dce3e7;border:1px solid #d2dce1;min-height:600px;flex:1;display:flex;justify-content:center;align-items:flex-start;padding:16px;overflow:auto}
+iframe{border:0;background:#fff;width:100%;height:calc(100vh - 150px);min-height:600px;box-shadow:0 5px 24px #13232e1a;transition:width .2s}
 .canvas.mobile iframe{width:390px}.canvas.tablet iframe{width:768px}
-aside{background:var(--panel);border-left:1px solid var(--border);padding:20px;overflow-y:auto;display:flex;flex-direction:column}
-.kicker{font-size:9px;letter-spacing:.18em;font-weight:700;color:var(--text-3);text-transform:uppercase}
-aside h1{font-size:22px;font-weight:550;letter-spacing:-.03em;margin:5px 0 6px;color:var(--text)}
-aside h2{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:20px 0 10px;padding-top:16px;border-top:1px solid var(--border)}
-.help{color:var(--text-2);font-size:11px;line-height:1.6;margin:0 0 14px}
-.status{padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text-2);margin:12px 0;line-height:1.5;word-break:break-word}
-.field{display:grid;gap:6px;margin:10px 0}
-.field label{font-size:10px;font-weight:500;color:var(--text-2);letter-spacing:.02em}
-.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;color:var(--text);font:inherit;font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s}
-.field input::placeholder,.field textarea::placeholder{color:var(--text-3)}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
-.field textarea{min-height:100px;resize:vertical;line-height:1.5}
-.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238B9AAA'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.field input[type="color"]{padding:3px;height:38px;cursor:pointer}
-input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
-.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.row button{flex:1;min-width:0}
-.selected{padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text-2);overflow-wrap:anywhere;word-break:break-word;font-family:var(--mono);line-height:1.5}
-.mode-switch{display:flex;gap:3px;margin:14px 0;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
-.mode-switch button{flex:1;border:0;background:transparent;color:var(--text-2);padding:8px;border-radius:3px;font-size:11px;font-weight:500;transition:background .15s,color .15s}
-.mode-switch button:hover{color:var(--text)}
-.mode-switch button.active{background:var(--accent-dim);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-border);font-weight:650}
-.design-tabs{display:flex;gap:2px;margin:14px 0 12px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
-.design-tabs button{flex:1;border:0;background:transparent;padding:7px;border-radius:3px;font-size:10px;font-weight:500;color:var(--text-2);transition:background .15s,color .15s}
-.design-tabs button.active{background:var(--surface-2);color:var(--text)}
-.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
-.design-grid .field{min-width:0;margin:6px 0}
-.design-grid input,.design-grid select{min-width:0;width:100%;height:34px;font-size:11px}
-.design-grid input[type="color"]{height:36px;padding:3px}
-.design-note{font-size:10px;color:var(--text-3);line-height:1.6;margin:8px 0}
-.panel-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--text-3);margin:16px 0 4px;text-transform:uppercase}
-.history{display:flex;gap:7px;margin-top:12px}.history button{flex:1}
-.warning{font-size:10px;color:var(--warning);line-height:1.6;margin-top:14px;padding:10px 12px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.18);border-radius:var(--radius-sm)}
-.selection-tools{display:flex;gap:6px;margin:8px 0}.selection-tools button{flex:1}
-.layer-tree{max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px;background:var(--bg)}
-.layer-node{display:block;width:100%;text-align:left;margin:2px 0;padding:7px 9px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text-2);font-size:11px;font-weight:500;cursor:grab;transition:background .12s,border-color .12s,color .12s}
-.layer-node:hover{background:var(--surface);border-color:var(--border);color:var(--text)}
-.layer-node.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);font-weight:650}
-.layer-children{margin-left:12px;padding-left:8px;border-left:1px solid var(--border)}
-.layer-branch{margin:2px 0}
-.layer-branch details>summary{font-size:10px;color:var(--text-3);cursor:pointer;padding:4px 8px;user-select:none}
-.layer-branch details>summary:hover{color:var(--text-2)}
-.layer-branch.dragging{opacity:.4}
-.section-row{display:flex;gap:5px;align-items:center;margin:5px 0}
-.section-row button:first-child{flex:1;text-align:left}
-.section-row button.active{border-color:var(--accent-border);background:var(--accent-dim);color:var(--accent)}
-@media(max-width:900px){.workspace{grid-template-columns:minmax(0,1fr) 320px}.design-grid{grid-template-columns:1fr}}
-@media(max-width:768px){.workspace{grid-template-columns:1fr;height:auto}.stage{min-height:60vh}.canvas{min-height:440px}.canvas iframe{height:60vh;min-height:440px}aside{border-left:0;border-top:1px solid var(--border)}}
-@media(max-width:520px){.topbar{height:auto;min-height:56px;padding:10px 12px;flex-direction:column;align-items:flex-start;gap:10px}.top-actions{width:100%}.top-actions>*{flex:1}.stage{padding:10px}.canvas{padding:8px;min-height:400px}.canvas iframe{min-height:400px;height:55vh}.canvas.mobile iframe{width:100%}.design-grid{grid-template-columns:1fr 1fr}}
+aside{background:#fff;border-left:1px solid var(--line);padding:22px 19px;overflow:auto}
+.kicker{font-size:9px;letter-spacing:.17em;color:#77909d;font-weight:700}
+h1{font-size:21px;letter-spacing:-.04em;font-weight:550;margin:5px 0 4px}h2{font-size:13px;margin:22px 0 10px}
+.help{color:var(--muted);font-size:11px;line-height:1.65;margin:0 0 17px}
+.status{padding:10px 11px;border:1px solid #dfe8ed;background:#f7fafb;border-radius:5px;font-size:10px;color:#647782;margin:12px 0}
+.field{display:grid;gap:5px;margin:12px 0}.field label{font-size:10px;color:#6d7d87}.field input,.field textarea{width:100%;border:1px solid #dce5e9;border-radius:5px;padding:10px;font:inherit;font-size:12px;color:#243943}.field textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row button{flex:1}
+.selected{padding:10px;background:#f4f8fa;border:1px solid #e1e9ed;border-radius:5px;font-size:11px;overflow-wrap:anywhere}
+.history{display:flex;gap:7px;margin-top:10px}.history button{flex:1}
+.warning{font-size:10px;color:#8b6a35;line-height:1.6;margin-top:15px}
+.selection-tools{display:flex;gap:6px;margin:7px 0}.selection-tools button{flex:1}.layer-tree{max-height:330px;overflow:auto;border:1px solid #e7edf0;border-radius:6px;padding:6px}.layer-node{display:block;width:100%;text-align:left;margin:2px 0;padding:7px 9px;border:1px solid transparent;border-radius:5px;background:#fff;color:#314752;font-size:11px}.layer-node:hover{background:#eef8fc;border-color:#b9dcec}.layer-node.active{background:#e4f5fc;border-color:#48a9d3;font-weight:700}.layer-children{margin-left:13px;padding-left:7px;border-left:1px solid #dce6eb}.layer-branch{margin:3px 0}.layer-branch details>summary{font-size:10px;color:#71838c;cursor:pointer;padding:3px 8px}.layer-node[draggable=true]{cursor:grab}.layer-node:active{cursor:grabbing}.layer-branch.dragging{opacity:.45}.section-row{display:flex;gap:5px;align-items:center;margin:5px 0}.section-row button:first-child{flex:1;text-align:left}.section-row button.active{border-color:#48a9d3;background:#eef9fd}.mode-switch{display:flex;gap:6px;margin:14px 0 10px;padding:4px;background:#edf2f5;border-radius:7px}.mode-switch button{flex:1;border:0;background:transparent}.mode-switch button.active{background:#fff;border:1px solid #d9e5eb;color:#15506a;font-weight:700;box-shadow:0 1px 3px #0000000d}.design-tabs{display:flex;gap:5px;margin:15px 0 12px;border-bottom:1px solid var(--line);padding-bottom:9px}.design-tabs button{flex:1;padding:8px 5px;font-size:10px}.design-tabs button.active{background:#eaf7fc;border-color:#a8d9ed;color:#15506a}.design-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.design-grid .field{min-width:0}.design-grid input,.design-grid select{min-width:0;width:100%;height:36px}.design-grid input[type=color]{padding:3px;height:38px}.design-note{font-size:10px;color:var(--muted);line-height:1.6;margin:8px 0}.panel-label{font-size:9px;font-weight:700;letter-spacing:.12em;color:#81939d;margin:15px 0 4px}@media(max-width:850px){.workspace{grid-template-columns:1fr}.stage{min-height:65vh}.canvas{min-height:460px}iframe{height:65vh;min-height:460px}aside{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:520px){.topbar{height:auto;min-height:60px;padding:12px;align-items:flex-start;flex-direction:column}.workspace{min-height:0}.stage{padding:10px}.canvas{padding:5px;min-height:440px}iframe{height:65vh;min-height:440px}.canvas.mobile iframe{width:360px}}
 </style>
 </head>
 <body>
@@ -117,7 +70,7 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
 <div class="field"><label>Justify content</label><select data-style="justifyContent"><option value="">Theme default</option><option value="flex-start">Start</option><option value="center">Centre</option><option value="flex-end">End</option><option value="space-between">Space between</option><option value="space-around">Space around</option></select></div>
 <div class="field"><label>Align items</label><select data-style="alignItems"><option value="">Theme default</option><option value="stretch">Stretch</option><option value="flex-start">Start</option><option value="center">Centre</option><option value="flex-end">End</option></select></div>
 <div class="field"><label>Gap</label><input data-style="gap" placeholder="20px"></div>
-<div class="field"><label>Grid columns</label><input data-style="gridTemplateColumns" placeholder="repeat(3, 1fr)"></div>
+<div class="field"><label>Grid columns</label><input data-style="gridTemplateColumns" placeholder="repeat(3, 1fr)"></div><div class="field"><label>Grid columns</label><input data-style="gridTemplateColumns" placeholder="repeat(3, 1fr)"></div>
 <div class="field"><label>Grid rows</label><input data-style="gridTemplateRows" placeholder="auto auto"></div>
 <div class="field"><label>Grid auto flow</label><select data-style="gridAutoFlow"><option value="">Theme default</option><option value="row">Rows</option><option value="column">Columns</option><option value="dense">Dense</option></select></div>
 <div class="field"><label>Flex wrapping</label><select data-style="flexWrap"><option value="">Theme default</option><option value="nowrap">No wrap</option><option value="wrap">Wrap</option><option value="wrap-reverse">Wrap reverse</option></select></div>
@@ -169,7 +122,7 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
  const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
  let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop",dragged=null,layerDragged=null,editorMode="text";
- const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#F87171":"#8B9AAA"};
+ const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
  const clone=x=>JSON.parse(JSON.stringify(x));
  function selectorFor(el){
   const stable=el.getAttribute("data-x7-builder-key");if(stable)return '[data-x7-builder-key="'+stable+'"]';
@@ -331,7 +284,7 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
   else if(type==="process")cards(root,["01 · Plan","02 · Photograph","03 · Deliver"],["We discuss your vision and details.","The session is relaxed and guided.","Your final photographs are prepared and shared."]);
   else if(type==="image-showcase"){const box=add(root,"DIV","Add an image here");style(box,{minHeight:"260px",display:"flex",alignItems:"center",justifyContent:"center",backgroundColor:"#dce6eb",borderRadius:"10px",color:"#526773"});}
   else if(type==="about-profile")para(root,"A little about the person behind the camera. Add a portrait image and a short introduction to make this section your own.","15px");
-  else if(type==="minimal-banner"){para(root,description||"Photography that tells stories.","16px","#e4edf1");button(root,buttonText,href);}
+  else if(type==="minimal-banner"){para(root,description||"Photography that tells stories.","16px","#e4edf1");button(root,buttonText,href);}  else if(type==="minimal-banner"){para(root,description||"Photography that tells stories.","16px","#e4edf1");button(root,buttonText,href);}
   else if(type==="team-profile"){const bio=para(root,description||"Introduce the photographer, creative team or studio.","15px");style(bio,{maxWidth:"650px"});const note=add(root,"DIV","Add a portrait using the image element.");style(note,{padding:"18px",backgroundColor:"#dce6eb",borderRadius:"10px",color:"#526773",maxWidth:"360px"});}
   else if(type==="pricing-options")cards(root,["Essential","Signature","Full story"],["A simple session for the moments that matter.","A considered session with more time and variety.","A complete photography experience with extended coverage."]);
   else if(type==="announcement"){style(root,{padding:"22px 28px",borderRadius:"4px",textAlign:"center",backgroundColor:"#89cff0",color:"#122631"});para(root,description||"Now booking selected dates.","15px","#122631");}
@@ -408,12 +361,14 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
  function storeVersion(snapshot){try{const versions=readVersions();versions.unshift({time:new Date().toISOString(),count:snapshot.length,patches:clone(snapshot)});localStorage.setItem(VERSION_KEY,JSON.stringify(versions.slice(0,20)));refreshVersions()}catch(e){setStatus("Draft saved, but this browser could not store a local restore point.",true)}}
  async function saveDraft(manual=false){if(autoSaving)return;autoSaving=true;try{await request("POST",{action:"save",draft:patches});lastSavedSignature=JSON.stringify(patches);if(manual)storeVersion(patches);setStatus(manual?"Draft saved successfully. A local restore point was created.":"Autosaved · "+patches.length+" draft edit(s).")}catch(err){setStatus("Draft save failed: "+err.message,true)}finally{autoSaving=false}}
  function scheduleAutoSave(){if(!draftLoaded||!document.getElementById("x7AutosaveToggle")?.checked)return;clearTimeout(autoSaveTimer);autoSaveTimer=setTimeout(()=>{if(JSON.stringify(patches)!==lastSavedSignature)saveDraft(false)},1300)}
+
  async function load(){try{const d=await request("GET");patches=Array.isArray(d.draft)?d.draft:[];published=Array.isArray(d.published)?d.published:[];if(frameReady){published.forEach(p=>applyPatch(p,false));patches.forEach(p=>applyPatch(p,false));}draftLoaded=true;lastSavedSignature=JSON.stringify(patches);refreshVersions();setStatus("Draft loaded · "+patches.length+" saved edit(s).")}catch(e){setStatus("Could not load saved draft: "+e.message,true)}}
  document.getElementById("applyBtn").addEventListener("click",()=>{
   if(!active||active.type==="design")return;const v=value.value.trim();if(!v){setStatus("Please enter a value before applying.",true);return}
   if(active.type==="image"||active.type==="link"){try{const u=new URL(v,location.origin);if(active.type==="image"&&u.protocol!=="https:")throw 0;if(active.type==="link"&&!["https:","http:","mailto:","tel:"].includes(u.protocol))throw 0}catch{setStatus("Enter a valid image URL or link destination.",true);return}}
   applyPatch({selector:active.selector,type:active.type,value:v});setStatus("Preview updated. Save draft to keep this change.");
  });
+
  const newType=document.getElementById("newElementType"),newContent=document.getElementById("newElementContent"),newHref=document.getElementById("newElementHref");
  newType.addEventListener("change",()=>{document.getElementById("newElementLinkField").hidden=newType.value!=="A";newContent.placeholder=newType.value==="IMG"?"https://…":newType.value==="HR"||newType.value==="DIV"?"Optional label":"Enter text content"});
  document.getElementById("addElementBtn").addEventListener("click",()=>{
@@ -448,6 +403,7 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
  document.getElementById("resetElementBtn").addEventListener("click",()=>{if(!active)return;history.push(clone(patches));const ids=new Set([active.element,...active.element.querySelectorAll("[id]")].map(el=>el.id).filter(Boolean));patches=patches.filter(p=>p.selector!==active.selector&&!ids.has(p.id)&&![...ids].some(id=>p.selector==="#"+id));future=[];updateHistory();if(active.element)active.element.removeAttribute("data-x7-builder-selected");active=null;editor.hidden=true;frame.contentWindow.location.reload();setStatus("Selected element and its draft-only child edits have been reset. Published content is unchanged.")});
  document.getElementById("saveBtn").addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;await saveDraft(true);b.disabled=false;});
  document.getElementById("publishBtn").addEventListener("click",async e=>{if(!confirm("Publish these changes to the live X7 Studios website?"))return;const b=e.currentTarget;b.disabled=true;try{await request("POST",{action:"publish",draft:patches});published=clone(patches);patches=[];lastSavedSignature="[]";storeVersion([]);frame.contentWindow.location.reload();setStatus("Published. The live website will display these changes.")}catch(err){setStatus("Publish failed: "+err.message,true)}finally{b.disabled=false}});
+
  document.getElementById("duplicateElementBtn").addEventListener("click",()=>{
   if(!active?.element){setStatus("Select an element first.",true);return;}
   const el=active.element,tag=el.tagName;
@@ -467,6 +423,7 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
   applyPatch(item);const copy=frame.contentDocument.getElementById(id);if(copy){parent.insertBefore(copy,el.nextSibling);const reorder={selector:parentSelector,type:"reorder",children:[...parent.children].map(selectorFor)};const prior=patches.findIndex(p=>p.type==="reorder"&&p.selector===parentSelector);if(prior>=0)patches[prior]=reorder;else patches.push(reorder);active={selector:"#"+id,type:kindOf(copy)||"design",element:copy};markSelection(copy);}
   setStatus("Duplicate added. Save draft to keep it, then publish when ready.");
  });
+;
  document.getElementById("hideElementBtn").addEventListener("click",()=>{
   if(!active?.element)return;const el=active.element;if(["FORM","INPUT","BUTTON","SELECT","TEXTAREA","NAV"].includes(el.tagName)){setStatus("Functional components cannot be hidden from this editor.",true);return;}
   const prior=patches.find(x=>x.selector===active.selector&&x.type==="style")||published.find(x=>x.selector===active.selector&&x.type==="style");
@@ -474,17 +431,20 @@ input[type="checkbox"]{accent-color:var(--accent);width:14px;height:14px;cursor:
   current.display=hidden?"":"none";styles[deviceMode]=current;
   applyPatch({selector:active.selector,type:"style",styles});setStatus(hidden?"Element shown in "+deviceMode+". Save draft to keep it.":"Element hidden in "+deviceMode+". Save draft to keep it.");
  });
+;
  document.getElementById("deleteElementBtn").addEventListener("click",()=>{
   if(!active?.element)return;const el=active.element;
   if(["FORM","INPUT","BUTTON","SELECT","TEXTAREA","SCRIPT","STYLE","NAV","HEADER","FOOTER"].includes(el.tagName)){setStatus("This functional website component is protected.",true);return;}
   if(!confirm("Delete this element from the draft and live site when published?"))return;
   const selector=active.selector;applyPatch({selector,type:"remove"});active=null;editor.hidden=true;selected.textContent="Element deleted. Select another item.";renderLayers();setStatus("Element deletion saved in the draft. Publish to remove it from the live website.");
  });
+;
  document.getElementById("undoBtn").addEventListener("click",()=>{if(!history.length)return;future.push(clone(patches));patches=history.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Undo applied. Reloading preview…")});
  document.getElementById("redoBtn").addEventListener("click",()=>{if(!future.length)return;history.push(clone(patches));patches=future.pop();updateHistory();frame.contentWindow.location.reload();setStatus("Redo applied. Reloading preview…")});
  document.getElementById("reloadBtn").addEventListener("click",()=>frame.contentWindow.location.reload());
  document.getElementById("discardBtn").addEventListener("click",async()=>{if(!confirm("Discard all saved draft edits? Published changes will remain live."))return;try{await request("POST",{action:"discard"});patches=[];history=[];future=[];updateHistory();frame.contentWindow.location.reload();setStatus("Draft discarded. Published content is unchanged.")}catch(e){setStatus("Could not discard draft: "+e.message,true)}});
  document.querySelectorAll("[data-device]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-device]").forEach(x=>x.classList.toggle("active",x===b));canvas.classList.remove("mobile","tablet");deviceMode=b.dataset.device;document.getElementById("x7ResponsiveDevice").textContent=deviceMode.charAt(0).toUpperCase()+deviceMode.slice(1);if(deviceMode!=="desktop")canvas.classList.add(deviceMode);if(active)loadDesignControls();frame.contentDocument?.querySelectorAll("[data-x7-builder-selected]").forEach(el=>el.removeAttribute("data-x7-builder-selected"));if(active){const el=frame.contentDocument?.querySelector(active.selector);if(el)el.setAttribute("data-x7-builder-selected","true")}updateResizeHandles()}));
+
  document.getElementById("x7RestoreVersionBtn").addEventListener("click",()=>{const index=Number(document.getElementById("x7VersionSelect").value),versions=readVersions(),version=versions[index];if(!version||!Array.isArray(version.patches)){setStatus("Choose a valid local restore point.",true);return;}if(!confirm("Restore this local version? Your current unsaved draft will be replaced."))return;history.push(clone(patches));if(history.length>60)history.shift();future=[];patches=clone(version.patches);updateHistory();frame.contentWindow.location.reload();setStatus("Local version restored. Save draft to keep it on the server.")});
  document.addEventListener("keydown",e=>{const t=e.target,typing=t&&(t.isContentEditable||["INPUT","TEXTAREA","SELECT"].includes(t.tagName));if(typing)return;const mod=e.ctrlKey||e.metaKey;if(mod&&e.key.toLowerCase()==="s"){e.preventDefault();saveDraft(true);return;}if(mod&&e.key.toLowerCase()==="z"){e.preventDefault();document.getElementById(e.shiftKey?"redoBtn":"undoBtn").click();return;}if(mod&&e.key.toLowerCase()==="y"){e.preventDefault();document.getElementById("redoBtn").click();return;}if(mod&&e.key.toLowerCase()==="d"){e.preventDefault();document.getElementById("duplicateElementBtn").click();return;}if(e.key==="Delete"&&active?.element){e.preventDefault();document.getElementById("deleteElementBtn").click();}});
  document.getElementById("x7AutosaveToggle").addEventListener("change",e=>{if(e.target.checked){setStatus("Autosave enabled. Draft changes save after a short pause.");scheduleAutoSave()}else{clearTimeout(autoSaveTimer);setStatus("Autosave paused. Use Save draft to keep changes.")}});
