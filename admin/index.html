@@ -1462,7 +1462,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
      if(w)styles.width=w;if(h)styles.height=h;
     }
     if(!Object.keys(styles).length){status("websiteBuilderStatus","Enter at least one position or layout value.",true);return}
-    item.styles={desktop:styles,tablet:styles,mobile:styles};
+    const viewport=$("x7ElementViewport")?.value||"100%";const device=viewport==="390px"?"mobile":viewport==="768px"?"tablet":"desktop";item.styles={[device]:styles};
    }
    if(type==="remove"&&!confirm("Add a removal operation for "+selector+"?"))return;
    if(websiteBuilderDraft.length>=500){status("websiteBuilderStatus","The draft has reached its 500-change limit.",true);return}
