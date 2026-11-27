@@ -823,6 +823,49 @@ input[type=checkbox],input[type=radio]{accent-color:#89cff0}button:focus-visible
 @media(max-width:850px){#clients .client-comms-grid{grid-template-columns:1fr}#clients .client-directory-grid{grid-template-columns:1fr}}
 @media(max-width:620px){#clients .clients-hero{align-items:flex-start;flex-direction:column;padding:19px}#clients .clients-hero-actions{width:100%}#clients .clients-hero-actions button{flex:1}#clients .clients-metrics{gap:7px}#clients .clients-metrics>div{padding:12px 10px}#clients .clients-metrics strong{font-size:23px}#clients .client-directory-toolbar{flex-direction:column}#clients .client-directory-tools{width:100%;justify-items:stretch}#clients .client-search-wrap{width:100%}#clients .client-filters{width:max-content;max-width:100%}#clients .client-directory-summary{flex-direction:column;gap:4px}#clients .client-profile-heading{align-items:flex-start}#clients .client-profile-heading>button{flex:none}}
 
+ 
+/* X7 visual element editor */
+.x7-visual-editor{margin:0 0 16px;padding:17px;border:1px solid #dce5e9;border-radius:8px;background:#f8fafb}
+.x7-visual-editor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
+.x7-visual-editor-head h3{margin:4px 0!important;font-size:17px!important;color:#263b47}
+.x7-visual-editor-head p{margin:0;color:#71828c;font-size:10px;line-height:1.5}
+.x7-visual-actions{display:flex;gap:7px;flex-wrap:wrap}
+.x7-visual-layout{display:grid;grid-template-columns:190px minmax(0,1fr) 205px;gap:10px;align-items:stretch}
+.x7-visual-layers,.x7-visual-inspector,.x7-visual-stage{min-width:0;border:1px solid #dce5e9;border-radius:6px;background:#fff}
+.x7-visual-layers,.x7-visual-inspector{padding:11px}
+.x7-visual-panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px;letter-spacing:.13em;color:#50616c}
+.x7-visual-panel-title span{color:#82929b;font-size:8px}
+.x7-visual-help{margin:7px 0 10px;color:#89969e;font-size:9px;line-height:1.5}
+.x7-layer-list{display:grid;gap:3px;max-height:610px;overflow:auto}
+.x7-layer-item{display:flex;align-items:center;gap:7px;width:100%;padding:7px 6px;border:1px solid transparent;border-radius:4px;background:transparent;text-align:left;color:#52636e;cursor:pointer}
+.x7-layer-item:hover{background:#f0f6f8}
+.x7-layer-item.active{border-color:#b9ddeb;background:#eaf6fa;color:#236b89}
+.x7-layer-icon{flex:0 0 23px;width:23px;height:23px;display:grid;place-items:center;border-radius:4px;background:#edf2f5;color:#547080;font-size:8px;font-weight:800}
+.x7-layer-copy{display:grid;min-width:0;gap:2px}
+.x7-layer-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;font-weight:650}
+.x7-layer-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#91a0a8;font-size:8px}
+.x7-visual-stage{overflow:hidden;background:#e9eef1}
+.x7-visual-stagebar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;background:#fff;border-bottom:1px solid #dce5e9}
+.x7-visual-stagebar>span{font-size:8px;letter-spacing:.1em;font-weight:750;color:#647782}
+.x7-visual-stagebar>span i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#5eb58a;margin-right:6px}
+.x7-viewport-switch{display:flex;gap:3px;padding:2px;border:1px solid #e0e7eb;border-radius:5px;background:#f5f7f8}
+.x7-viewport-switch button{border:0;border-radius:3px;padding:5px 7px;background:transparent;color:#75858e;font-size:8px;cursor:pointer}
+.x7-viewport-switch button.active{background:#dff1f8;color:#236b89;font-weight:750}
+.x7-iframe-wrap{display:flex;justify-content:center;align-items:flex-start;min-height:500px;max-height:680px;overflow:auto;padding:10px;background:repeating-linear-gradient(45deg,#e7ecef,#e7ecef 8px,#edf1f3 8px,#edf1f3 16px)}
+#x7WebsiteFrame{display:block;width:100%;height:640px;border:1px solid #cbd6dc;border-radius:3px;background:#fff;box-shadow:0 5px 22px rgba(20,38,48,.13);transition:width .2s}
+.x7-visual-stage-note{padding:8px 10px;background:#fff;border-top:1px solid #dce5e9;color:#83919a;font-size:8px}
+.x7-visual-empty{padding:16px 4px;color:#8b99a1;font-size:9px;line-height:1.6}
+.x7-selected-name{margin:12px 0 9px;color:#263b47;font-size:12px;font-weight:750;overflow-wrap:anywhere}
+.x7-visual-inspector label{display:grid;gap:5px;margin:9px 0;color:#71818a;font-size:9px}
+.x7-visual-inspector input{width:100%;min-width:0;padding:8px;border:1px solid #dce5e9;border-radius:4px;background:#fbfcfd;color:#30434e;font:inherit;font-size:10px}
+.x7-visual-inspector input[readonly]{background:#f0f4f6;color:#71818a}
+.x7-geometry-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.x7-inspector-hint{margin:9px 0;padding:9px;border-radius:4px;background:#f0f6f8;color:#6d818d;font-size:8px;line-height:1.55}
+#x7SelectedControls .primary-btn,#x7SelectedControls .secondary-btn{width:100%;margin-top:7px;justify-content:center}
+#x7VisualStatus{margin-top:9px;font-size:9px}
+@media(max-width:1050px){.x7-visual-layout{grid-template-columns:160px minmax(0,1fr)}.x7-visual-inspector{grid-column:1/-1}.x7-visual-inspector #x7SelectedControls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.x7-visual-inspector .x7-selected-name,.x7-visual-inspector .x7-geometry-grid,.x7-visual-inspector .x7-inspector-hint{grid-column:1/-1}}
+@media(max-width:650px){.x7-visual-editor{padding:10px}.x7-visual-editor-head{flex-direction:column}.x7-visual-layout{grid-template-columns:1fr}.x7-visual-layers{order:2}.x7-visual-stage{order:1}.x7-visual-inspector{order:3;grid-column:auto}.x7-layer-list{max-height:220px}#x7WebsiteFrame{height:570px}.x7-visual-stagebar{align-items:flex-start;flex-direction:column}.x7-visual-inspector #x7SelectedControls{grid-template-columns:1fr 1fr}}
+
 </style>
 
 <style id="x7-custom-select-styles">
@@ -1036,6 +1079,14 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
  <div class="builder-heading"><div><div class="builder-kicker">X7 WEBSITE STUDIO</div><h2>Portfolio builder</h2><p class="label">Explore your website visually. Choose a page or collection to see the photographs used there.</p></div><button class="secondary-btn" id="refreshPortfolio" type="button"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg><span>Refresh website</span></button></div>
  
 
+ <section class="x7-visual-editor" id="x7VisualEditor">
+  <header class="x7-visual-editor-head"><div><span class="builder-kicker">X7 VISUAL EDITOR</span><h3>Website canvas</h3><p>Select any element on the live site, move it, resize it and organise the page layers.</p></div><div class="x7-visual-actions"><button type="button" class="secondary-btn" id="x7VisualRefresh">↻ Reload preview</button><button type="button" class="primary-btn" id="x7VisualMoveMode" aria-pressed="false">↔ Move mode: off</button></div></header>
+  <div class="x7-visual-layout">
+   <aside class="x7-visual-layers"><div class="x7-visual-panel-title"><strong>LAYERS</strong><span id="x7LayerCount">—</span></div><p class="x7-visual-help">Choose a layer or click an element in the preview.</p><div id="x7ElementLayers" class="x7-layer-list"><div class="empty">Loading website layers…</div></div></aside>
+   <div class="x7-visual-stage"><div class="x7-visual-stagebar"><span><i></i> LIVE WEBSITE PREVIEW</span><div class="x7-viewport-switch" role="group" aria-label="Preview width"><button type="button" class="active" data-x7-viewport="desktop">Desktop</button><button type="button" data-x7-viewport="tablet">Tablet</button><button type="button" data-x7-viewport="mobile">Mobile</button></div></div><div class="x7-iframe-wrap"><iframe id="x7WebsiteFrame" title="X7 Studios website visual editor" src="/preview/?x7builder=1" loading="lazy"></iframe></div><div class="x7-visual-stage-note">Preview edits are private until you save the draft and publish them.</div></div>
+   <aside class="x7-visual-inspector"><div class="x7-visual-panel-title"><strong>ELEMENT</strong><span id="x7SelectedTag">NONE</span></div><div id="x7SelectedEmpty" class="x7-visual-empty">Select an element in the website preview to edit its position and size.</div><div id="x7SelectedControls" hidden><div class="x7-selected-name" id="x7SelectedName">No element selected</div><label>Persistent ID<input id="x7SelectedId" readonly></label><div class="x7-geometry-grid"><label>Horizontal (X)<input id="x7ElementX" type="number" step="1"></label><label>Vertical (Y)<input id="x7ElementY" type="number" step="1"></label><label>Width<input id="x7ElementW" type="number" min="1" step="1"></label><label>Height<input id="x7ElementH" type="number" min="1" step="1"></label></div><div class="x7-inspector-hint">Use Move mode to drag the selected element. You can also resize it from its lower-right corner in the preview.</div><button type="button" class="primary-btn" id="x7AddElementToDraft">Add changes to draft</button><button type="button" class="secondary-btn" id="x7ClearElementSelection">Clear selection</button></div><div class="module-status" id="x7VisualStatus" role="status">Loading the website preview…</div></aside>
+  </div>
+ </section>
  <div class="builder-history" id="builderElementManager">
   <div class="builder-history-head"><div><h3>Website element editor</h3><p>Add text, images, links and new elements to a selected page container. Use CSS selectors to target existing sections; IDs remain stable for new elements.</p></div><button type="button" class="secondary-btn" id="loadWebsiteDraft">Load saved draft</button></div>
   <div class="client-comms-form" style="margin-top:12px">
@@ -1382,6 +1433,128 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
  function bindDropZone(zone,input,getStatus){if(!zone||zone.dataset.dropBound)return;zone.dataset.dropBound="1";zone.addEventListener("click",()=>input?.click());zone.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();input?.click()}});["dragenter","dragover"].forEach(type=>zone.addEventListener(type,e=>{e.preventDefault();zone.classList.add("is-dragging")}));["dragleave","dragend"].forEach(type=>zone.addEventListener(type,e=>{if(!zone.contains(e.relatedTarget))zone.classList.remove("is-dragging")}));zone.addEventListener("drop",e=>{e.preventDefault();zone.classList.remove("is-dragging");const checked=validImageFiles(e.dataTransfer?.files||[]);if(checked.errors.length)getStatus?.(checked.errors.join(" · "),true);if(checked.valid.length)assignFiles(input,checked.valid)})}
  function list(id,rows,render){const el=$(id);if(!el)return;el.innerHTML=rows&&rows.length?rows.map(render).join(""):'<div class="empty">Nothing to show yet.</div>'}
 
+
+  let x7VisualDoc=null,x7VisualSelected=null,x7VisualMove=false,x7VisualDrag=null,x7VisualResizeObserver=null,x7VisualLayerNodes=[];
+  const x7VisualFrame=$("x7WebsiteFrame");
+  const x7VisualBlocked=new Set(["HTML","HEAD","BODY","SCRIPT","STYLE","META","LINK","NOSCRIPT","IFRAME"]);
+  function x7VisualLabel(node){const tag=node.tagName||"ELEMENT",textValue=String(node.innerText||node.alt||node.getAttribute("aria-label")||"").trim().replace(/\\s+/g," ").slice(0,48);return textValue||node.id||tag.toLowerCase()}
+  function x7VisualSelector(node){
+   if(node.id)return "#"+node.id.replace(/([ #;?%&,.+*~\\':"!^$[\\]()=>|/@])/g,"\\$1");
+   const parts=[];let current=node;
+   while(current&&current.nodeType===1&&current!==x7VisualDoc.body){
+    if(current.id){parts.unshift("#"+current.id.replace(/([ #;?%&,.+*~\\':"!^$[\\]()=>|/@])/g,"\\$1"));break}
+    const tag=current.tagName.toLowerCase(),siblings=current.parentElement?[...current.parentElement.children].filter(el=>el.tagName===current.tagName):[];
+    parts.unshift(siblings.length>1?tag+":nth-of-type("+(siblings.indexOf(current)+1)+")":tag);
+    current=current.parentElement;
+   }
+   return parts.length? "body > "+parts.join(" > "):"body";
+  }
+  function x7VisualSetStatus(message,error=false){const el=$("x7VisualStatus");if(el){el.textContent=message;el.style.color=error?"#b34b4b":""}}
+  function x7VisualRefreshLayers(){
+   if(!x7VisualDoc)return;
+   x7VisualLayerNodes=[...x7VisualDoc.body.querySelectorAll("*")].filter(node=>{
+    if(x7VisualBlocked.has(node.tagName)||node.closest("[data-x7-visual-ui]"))return false;
+    const rect=node.getBoundingClientRect(),style=x7VisualDoc.defaultView.getComputedStyle(node);
+    return rect.width>0&&rect.height>0&&style.visibility!=="hidden"&&style.display!=="none";
+   }).slice(0,180);
+   $("x7LayerCount").textContent=x7VisualLayerNodes.length+" items";
+   $("x7ElementLayers").innerHTML=x7VisualLayerNodes.length?x7VisualLayerNodes.map((node,index)=>{
+    const selected=node===x7VisualSelected,tag=node.tagName.toLowerCase(),detail=node.id?"#"+node.id:node.classList?.length?"."+[...node.classList].slice(0,2).join("."):"Website element";
+    return '<button type="button" class="x7-layer-item'+(selected?" active":"")+'" data-x7-layer="'+index+'"><span class="x7-layer-icon">'+esc(tag.slice(0,3).toUpperCase())+'</span><span class="x7-layer-copy"><strong>'+esc(x7VisualLabel(node))+'</strong><small>'+esc(detail)+'</small></span></button>';
+   }).join(""):'<div class="empty">No visible website elements found.</div>';
+  }
+  function x7VisualSelect(node){
+   if(!node||x7VisualBlocked.has(node.tagName)||node===x7VisualDoc.body)return;
+   if(x7VisualSelected)x7VisualSelected.classList.remove("x7-visual-selected");
+   x7VisualSelected=node;node.classList.add("x7-visual-selected");
+   const win=x7VisualDoc.defaultView,style=win.getComputedStyle(node);
+   $("x7SelectedEmpty").hidden=true;$("x7SelectedControls").hidden=false;
+   $("x7SelectedTag").textContent=node.tagName;
+   $("x7SelectedName").textContent=x7VisualLabel(node);
+   $("x7SelectedId").value=node.id||"Assigned when added to draft";
+   $("x7ElementX").value=Math.round(parseFloat(style.left)||node.offsetLeft||0);
+   $("x7ElementY").value=Math.round(parseFloat(style.top)||node.offsetTop||0);
+   $("x7ElementW").value=Math.round(node.getBoundingClientRect().width);
+   $("x7ElementH").value=Math.round(node.getBoundingClientRect().height);
+   if(x7VisualResizeObserver)x7VisualResizeObserver.disconnect();
+   x7VisualResizeObserver=new win.ResizeObserver(()=>{
+    if(node!==x7VisualSelected)return;
+    $("x7ElementW").value=Math.round(node.getBoundingClientRect().width);
+    $("x7ElementH").value=Math.round(node.getBoundingClientRect().height);
+   });
+   x7VisualResizeObserver.observe(node);
+   x7VisualRefreshLayers();
+  }
+  function x7VisualApplyInspectorValues(){
+   if(!x7VisualSelected)return;
+   const node=x7VisualSelected,style=x7VisualDoc.defaultView.getComputedStyle(node);
+   if(style.position==="static")node.style.position="relative";
+   node.style.left=Number($("x7ElementX").value||0)+"px";
+   node.style.top=Number($("x7ElementY").value||0)+"px";
+   const width=Math.max(1,Number($("x7ElementW").value||node.offsetWidth));
+   const height=Math.max(1,Number($("x7ElementH").value||node.offsetHeight));
+   node.style.width=width+"px";node.style.height=height+"px";
+  }
+  function x7VisualAttach(){
+   try{
+    x7VisualDoc=x7VisualFrame.contentDocument;
+    if(!x7VisualDoc||!x7VisualDoc.body)throw new Error("The preview could not be accessed. Check that /preview is on the same X7 domain.");
+    if(!x7VisualDoc.getElementById("x7VisualEditorStyles")){
+     const style=x7VisualDoc.createElement("style");style.id="x7VisualEditorStyles";style.textContent=".x7-visual-selected{outline:2px solid #1496c5!important;outline-offset:2px!important;resize:both!important;overflow:auto!important;cursor:move!important}.x7-visual-selected::after{content:'';position:absolute;right:0;bottom:0;width:12px;height:12px;background:#1496c5;border:2px solid #fff;border-radius:2px;z-index:2147483000;pointer-events:none}";
+     x7VisualDoc.head.appendChild(style);
+    }
+    x7VisualDoc.addEventListener("click",event=>{
+     if(!event.isTrusted)return;
+     const node=event.target?.nodeType===1?event.target:event.target?.parentElement;
+     if(!node||x7VisualBlocked.has(node.tagName))return;
+     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+     x7VisualSelect(node);
+    },true);
+    x7VisualDoc.addEventListener("pointerdown",event=>{
+     if(!x7VisualMove||!x7VisualSelected||event.button!==0)return;
+     const node=event.target?.nodeType===1?event.target:event.target?.parentElement;
+     if(node!==x7VisualSelected&&!x7VisualSelected.contains(node))return;
+     event.preventDefault();event.stopPropagation();
+     const style=x7VisualDoc.defaultView.getComputedStyle(x7VisualSelected);
+     if(style.position==="static")x7VisualSelected.style.position="relative";
+     x7VisualDrag={x:event.clientX,y:event.clientY,left:parseFloat(style.left)||0,top:parseFloat(style.top)||0};
+     try{x7VisualSelected.setPointerCapture(event.pointerId)}catch{}
+    },true);
+    x7VisualDoc.addEventListener("pointermove",event=>{
+     if(!x7VisualDrag||!x7VisualSelected)return;
+     const scale=x7VisualFrame.getBoundingClientRect().width/(x7VisualDoc.documentElement.clientWidth||1);
+     const dx=(event.clientX-x7VisualDrag.x)/Math.max(.1,scale),dy=(event.clientY-x7VisualDrag.y)/Math.max(.1,scale);
+     x7VisualSelected.style.left=(x7VisualDrag.left+dx)+"px";x7VisualSelected.style.top=(x7VisualDrag.top+dy)+"px";
+     $("x7ElementX").value=Math.round(x7VisualDrag.left+dx);$("x7ElementY").value=Math.round(x7VisualDrag.top+dy);
+    },true);
+    ["pointerup","pointercancel"].forEach(type=>x7VisualDoc.addEventListener(type,()=>{if(x7VisualDrag){x7VisualDrag=null;x7VisualRefreshLayers()}},true));
+    x7VisualDoc.addEventListener("keyup",event=>{if(event.key==="Escape"&&x7VisualSelected){x7VisualSelected.classList.remove("x7-visual-selected");x7VisualSelected=null;$("x7SelectedControls").hidden=true;$("x7SelectedEmpty").hidden=false;$("x7SelectedTag").textContent="NONE";x7VisualRefreshLayers()}});
+    x7VisualRefreshLayers();x7VisualSetStatus("Preview loaded. Click an element to select it.");
+   }catch(error){x7VisualSetStatus(error.message||"Could not initialise visual editor.",true)}
+  }
+  x7VisualFrame?.addEventListener("load",x7VisualAttach);
+  $("x7VisualRefresh")?.addEventListener("click",()=>{x7VisualSetStatus("Reloading website preview…");x7VisualFrame.src="/preview/?x7builder=1&refresh="+Date.now()});
+  $("x7VisualMoveMode")?.addEventListener("click",event=>{x7VisualMove=!x7VisualMove;event.currentTarget.textContent="↔ Move mode: "+(x7VisualMove?"on":"off");event.currentTarget.setAttribute("aria-pressed",String(x7VisualMove));x7VisualSetStatus(x7VisualMove?"Move mode enabled. Drag the selected element in the preview.":"Move mode disabled. Click elements to select them.")});
+  $("x7ElementLayers")?.addEventListener("click",event=>{const button=event.target.closest("[data-x7-layer]");if(!button)return;x7VisualSelect(x7VisualLayerNodes[Number(button.dataset.x7Layer)])});
+  ["x7ElementX","x7ElementY","x7ElementW","x7ElementH"].forEach(id=>$(id)?.addEventListener("change",x7VisualApplyInspectorValues));
+  $("x7ClearElementSelection")?.addEventListener("click",()=>{if(x7VisualSelected)x7VisualSelected.classList.remove("x7-visual-selected");x7VisualSelected=null;if(x7VisualResizeObserver)x7VisualResizeObserver.disconnect();$("x7SelectedControls").hidden=true;$("x7SelectedEmpty").hidden=false;$("x7SelectedTag").textContent="NONE";x7VisualRefreshLayers()});
+  $("x7VisualEditor")?.addEventListener("click",event=>{
+   const button=event.target.closest("[data-x7-viewport]");if(!button)return;
+   const widths={desktop:"100%",tablet:"820px",mobile:"390px"};
+   $("x7VisualEditor").querySelectorAll("[data-x7-viewport]").forEach(item=>item.classList.toggle("active",item===button));
+   x7VisualFrame.style.width=widths[button.dataset.x7Viewport];
+  });
+  $("x7AddElementToDraft")?.addEventListener("click",()=>{
+   if(!x7VisualSelected){x7VisualSetStatus("Select an element first.",true);return}
+   if(websiteBuilderDraft.length>=500){x7VisualSetStatus("The draft has reached its 500-change limit.",true);return}
+   const node=x7VisualSelected,selector=x7VisualSelector(node),id=node.id||("x7-element-"+(crypto.randomUUID?crypto.randomUUID().slice(0,12):Math.random().toString(36).slice(2,14)));
+   node.id=id;$("x7SelectedId").value=id;
+   const styles={position:node.style.position||"relative",left:node.style.left||"0px",top:node.style.top||"0px",width:node.style.width||node.getBoundingClientRect().width+"px",height:node.style.height||node.getBoundingClientRect().height+"px"};
+   const existing=websiteBuilderDraft.findIndex(item=>item.type==="style"&&(item.id===id||item.selector===selector));
+   const item={type:"style",selector,id,styles:{desktop:styles,tablet:styles,mobile:styles}};
+   if(existing>=0)websiteBuilderDraft[existing]=item;else websiteBuilderDraft.push(item);
+   renderWebsiteDraft();x7VisualSetStatus("Element changes added to the website draft. Save draft before leaving this editor.");x7VisualRefreshLayers();
+  });
 
   let websiteBuilderDraft=[];
   function renderWebsiteDraft(){
