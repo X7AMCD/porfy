@@ -1383,7 +1383,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    if(!x7Frame?.contentDocument||!x7LayerHost)return;
    const doc=x7Frame.contentDocument;
    const nodes=[...doc.querySelectorAll("main,section,article,h1,h2,h3,p,a,img,div")].filter(n=>!x7IsProtected(n)&&n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).slice(0,180);
-   x7LayerHost.innerHTML=nodes.length?nodes.map(n=>{const label=n.tagName.toLowerCase()+(n.id?" #"+n.id:n.classList.length?" ."+[...n.classList].slice(0,1).join(""):"");const active=n===selected;const depth=Math.min(5,[...function*(x){while(x&&x.parentElement){yield x;x=x.parentElement}}(n)].length);return '<button type="button" class="x7-element-layer'+(active?" active":"")+'" data-x7-layer="'+nodes.indexOf(n)+'"><span class="x7-element-layer-indent" style="--depth:'+(depth*9)+'px"></span><span>'+x7SafeText(label)+'</span><small>'+x7SafeText(n.tagName.toLowerCase())+'</small></button>'}).join(""):'<div class="empty">No editable page elements found.</div>';
+   x7LayerHost.innerHTML=nodes.length?nodes.map(n=>{const label=n.tagName.toLowerCase()+(n.id?" #"+n.id:n.classList.length?" ."+[...n.classList].slice(0,1).join(""):"");const active=n===selected;let depth=0,parent=n;while(parent&&parent.parentElement&&depth<5){depth++;parent=parent.parentElement}return '<button type="button" class="x7-element-layer'+(active?" active":"")+'" data-x7-layer="'+nodes.indexOf(n)+'"><span class="x7-element-layer-indent" style="--depth:'+(depth*9)+'px"></span><span>'+x7SafeText(label)+'</span><small>'+x7SafeText(n.tagName.toLowerCase())+'</small></button>'}).join(""):'<div class="empty">No editable page elements found.</div>';
    x7LayerHost._nodes=nodes;
   }
   function x7AttachFrame(){
@@ -1426,13 +1426,12 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    if(type==="style"){
     const styles={};
     [["position","websiteEditPosition"],["display","websiteEditDisplay"],["top","websiteEditTop"],["left","websiteEditLeft"],["width","websiteEditWidth"],["height","websiteEditHeight"]].forEach(([key,id])=>{const v=$(id).value.trim();if(v)styles[key]=v});
-    if(!Object.keys(styles).length){status("websiteBuilderStatus","Enter at least one position or layout value.",true);return}
     if(x7SelectedNode){
-     const deviceStyles={};
      const x=$("x7ElementX").value.trim(),y=$("x7ElementY").value.trim(),w=$("x7ElementW").value.trim(),h=$("x7ElementH").value.trim();
      if(x||y){styles.position="relative";if(x)styles.left=x;if(y)styles.top=y}
      if(w)styles.width=w;if(h)styles.height=h;
     }
+    if(!Object.keys(styles).length){status("websiteBuilderStatus","Enter at least one position or layout value.",true);return}
     item.styles={desktop:styles,tablet:styles,mobile:styles};
    }
    if(type==="remove"&&!confirm("Add a removal operation for "+selector+"?"))return;
