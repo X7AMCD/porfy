@@ -2951,7 +2951,9 @@ addEventListener("scroll", () => {
    });
   });
  }
- fetch(API,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>apply(d.edits||[])).catch(e=>console.warn("X7 published website edits unavailable",e));
+ let publishedEdits=[];
+ fetch(API,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>{publishedEdits=Array.isArray(d.edits)?d.edits:[];apply(publishedEdits)}).catch(e=>console.warn("X7 published website edits unavailable",e));
+ let resizeFrame=0;addEventListener("resize",()=>{if(resizeFrame)return;resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;apply(publishedEdits)})},{passive:true});
 })();
 </script>
 </body>
