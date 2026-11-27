@@ -1355,6 +1355,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   function x7SafeText(value){return String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   function x7NodeSelector(node){
    if(node.id&&/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(node.id))return "#"+node.id;
+   const managed=node.getAttribute("data-x7-managed-id");if(managed&&/^x7-managed-[a-z0-9]{5,20}$/i.test(managed))return '[data-x7-managed-id="'+managed+'"]';
    const parts=[];let cur=node,guard=0;
    while(cur&&cur.nodeType===1&&cur!==cur.ownerDocument.body&&guard++<7){
     let part=cur.tagName.toLowerCase();
@@ -1368,7 +1369,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   function x7IsProtected(node){return !node||node===node.ownerDocument.body||node===node.ownerDocument.documentElement||node.closest("form,button,input,select,textarea,script,style,nav,header,footer,[contenteditable=true]")||["SCRIPT","STYLE","BUTTON","INPUT","SELECT","TEXTAREA","FORM","SVG","PATH"].includes(node.tagName)}
   function x7SelectNode(node){
    if(x7IsProtected(node))return;
-   x7SelectedNode=node;x7SelectedSelector=x7NodeSelector(node);x7SelectedId=node.id||"";
+   x7SelectedNode=node;x7SelectedSelector=x7NodeSelector(node);x7SelectedId=node.id||node.getAttribute("data-x7-managed-id")||"";
    $("websiteEditSelector").value=x7SelectedSelector;
    $("x7SelectedElementLabel").value=(node.tagName.toLowerCase())+(node.classList.length?" · ."+[...node.classList].slice(0,2).join("."):"")+(node.textContent.trim()?" · "+node.textContent.trim().replace(/\s+/g," ").slice(0,65):"");
    $("x7SelectedElementId").value=x7SelectedId||"Will be generated on first edit";
@@ -1431,6 +1432,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   x7LayerHost?.addEventListener("click",e=>{const b=e.target.closest("[data-x7-layer]");if(!b)return;const n=x7LayerHost._nodes?.[Number(b.dataset.x7Layer)];if(n){n.scrollIntoView({block:"center",behavior:"smooth"});x7SelectNode(n)}});
   function x7StableIdentity(){
    if(!x7SelectedNode)return null;
+   const managed=x7SelectedNode.getAttribute("data-x7-managed-id");if(managed&&/^x7-managed-[a-z0-9]{5,20}$/i.test(managed))return {selector:'[data-x7-managed-id="'+managed+'"]',id:managed,registration:null};
    if(x7SelectedNode.id&&/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(x7SelectedNode.id)){x7SelectedId=x7SelectedNode.id;return {selector:"#"+x7SelectedId,id:x7SelectedId,registration:null}}
    const id="x7-managed-"+Math.random().toString(36).slice(2,11);
    return {selector:'[data-x7-managed-id="'+id+'"]',id,registration:{type:"identify",selector:x7SelectedSelector,id}};
