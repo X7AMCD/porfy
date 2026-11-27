@@ -1376,7 +1376,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    const cs=node.ownerDocument.defaultView.getComputedStyle(node);
    $("x7ElementX").value=cs.left!=="auto"?cs.left:"";
    $("x7ElementY").value=cs.top!=="auto"?cs.top:"";
-   $("x7ElementW").value=cs.width;$("x7ElementH").value=cs.height;
+   $("x7ElementW").value=node.style.width||"";$("x7ElementH").value=node.style.height||"";
    x7RenderLayers(node);x7UpdateSelectionOverlay();
   }
 
@@ -1465,6 +1465,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    const extraIdentity=identity?.registration&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===identity.id)?1:0;
    if(websiteBuilderDraft.length+extraIdentity>=500){status("websiteBuilderStatus","The draft has reached its 500-change limit.",true);return}
    if(type==="element"&&websiteBuilderDraft.some(x=>x.type==="element"&&x.id===item.id)){status("websiteBuilderStatus","That element ID already exists in this draft. Choose a unique ID.",true);return}
+   if(type==="element"&&x7Frame?.contentDocument?.getElementById(item.id)){status("websiteBuilderStatus","That element ID is already used on this page. Choose a different ID.",true);return}
    if(identity?.registration&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===identity.id)){websiteBuilderDraft.push(identity.registration);x7SelectedNode.id=identity.id;x7SelectedId=identity.id;$("x7SelectedElementId").value=identity.id;}
    if(identity)item.selector=identity.selector;
    websiteBuilderDraft.push(item);renderWebsiteDraft();status("websiteBuilderStatus","Change added to draft. Save draft or publish when ready.");
