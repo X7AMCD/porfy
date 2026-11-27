@@ -165,7 +165,15 @@ iframe{height:100%!important;min-height:0!important;background:#fff!important;bo
 </aside></div>
 <script>
 (()=> {
- const workspace=document.querySelector(".workspace");\n const inspector=workspace?.querySelector(":scope > aside");\n if(workspace&&inspector&&!document.getElementById("x7LayersSidebar")){\n  const rail=document.createElement("aside");rail.className="layers-sidebar";rail.id="x7LayersSidebar";rail.setAttribute("aria-label","Website layers");\n  const headings=[...inspector.querySelectorAll("h2")];const first=headings.find(h=>h.textContent.trim().toLowerCase()==="layers");const stop=headings.find(h=>h.textContent.trim().toLowerCase()==="page & sections");\n  if(first){let node=first;while(node&&node!==stop){const next=node.nextElementSibling;rail.appendChild(node);node=next;}}\n  workspace.insertBefore(rail,inspector);\n }\n const API="https://api.x7studios.co.za/admin/website-builder";
+ const workspace=document.querySelector(".workspace");
+ const inspector=workspace?.querySelector(":scope > aside");
+ if(workspace&&inspector&&!document.getElementById("x7LayersSidebar")){
+  const rail=document.createElement("aside");rail.className="layers-sidebar";rail.id="x7LayersSidebar";rail.setAttribute("aria-label","Website layers");
+  const headings=[...inspector.querySelectorAll("h2")];const first=headings.find(h=>h.textContent.trim().toLowerCase()==="layers");const stop=headings.find(h=>h.textContent.trim().toLowerCase()==="page & sections");
+  if(first){let node=first;while(node&&node!==stop){const next=node.nextElementSibling;rail.appendChild(node);node=next;}}
+  workspace.insertBefore(rail,inspector);
+ }
+ const API="https://api.x7studios.co.za/admin/website-builder";
  const frame=document.getElementById("siteFrame"),canvas=document.getElementById("canvas"),status=document.getElementById("status"),selected=document.getElementById("selected"),editor=document.getElementById("editor"),value=document.getElementById("elementValue"),valueLabel=document.getElementById("valueLabel");
  let patches=[],published=[],history=[],future=[],active=null,frameReady=false,deviceMode="desktop",dragged=null,layerDragged=null,editorMode="text";
  const setStatus=(s,bad=false)=>{status.textContent=s;status.style.color=bad?"#a33":"#647782"};
