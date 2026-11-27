@@ -1431,9 +1431,9 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   x7LayerHost?.addEventListener("click",e=>{const b=e.target.closest("[data-x7-layer]");if(!b)return;const n=x7LayerHost._nodes?.[Number(b.dataset.x7Layer)];if(n){n.scrollIntoView({block:"center",behavior:"smooth"});x7SelectNode(n)}});
   function x7StableIdentity(){
    if(!x7SelectedNode)return null;
-   if(x7SelectedNode.id){x7SelectedId=x7SelectedNode.id;return {selector:"#"+CSS.escape(x7SelectedId),id:x7SelectedId,registration:null}}
+   if(x7SelectedNode.id&&/^[A-Za-z][A-Za-z0-9_-]{0,100}$/.test(x7SelectedNode.id)){x7SelectedId=x7SelectedNode.id;return {selector:"#"+x7SelectedId,id:x7SelectedId,registration:null}}
    const id="x7-managed-"+Math.random().toString(36).slice(2,11);
-   return {selector:"#"+CSS.escape(id),id,registration:{type:"identify",selector:x7SelectedSelector,id}};
+   return {selector:'[data-x7-managed-id="'+id+'"]',id,registration:{type:"identify",selector:x7SelectedSelector,id}};
   }
 
   $("loadWebsiteDraft")?.addEventListener("click",loadWebsiteDraft);
@@ -1470,7 +1470,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    if(identity)item.selector=identity.selector;
    websiteBuilderDraft.push(item);renderWebsiteDraft();status("websiteBuilderStatus","Change added to draft. Save draft or publish when ready.");
   });
-  $("websiteDraftList")?.addEventListener("click",e=>{const b=e.target.closest("[data-remove-draft]");if(!b)return;const index=Number(b.dataset.removeDraft),removed=websiteBuilderDraft[index];websiteBuilderDraft.splice(index,1);if(removed?.type==="identify")websiteBuilderDraft=websiteBuilderDraft.filter(x=>x.selector!=="#"+removed.id);renderWebsiteDraft()});
+  $("websiteDraftList")?.addEventListener("click",e=>{const b=e.target.closest("[data-remove-draft]");if(!b)return;const index=Number(b.dataset.removeDraft),removed=websiteBuilderDraft[index];websiteBuilderDraft.splice(index,1);if(removed?.type==="identify")websiteBuilderDraft=websiteBuilderDraft.filter(x=>x.selector!=='[data-x7-managed-id="'+removed.id+'"]');renderWebsiteDraft()});
   async function submitWebsiteDraft(action){
    const button=$(action==="publish"?"publishWebsiteDraft":action==="save"?"saveWebsiteDraft":"discardWebsiteDraft");
    if(action==="publish"&&!confirm("Publish these website changes now? Visitors to the original website page will see them after refresh."))return;
