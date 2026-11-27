@@ -1431,18 +1431,15 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   x7LayerHost?.addEventListener("click",e=>{const b=e.target.closest("[data-x7-layer]");if(!b)return;const n=x7LayerHost._nodes?.[Number(b.dataset.x7Layer)];if(n){n.scrollIntoView({block:"center",behavior:"smooth"});x7SelectNode(n)}});
   function x7StableIdentity(){
    if(!x7SelectedNode)return null;
-   if(x7SelectedNode.id){x7SelectedId=x7SelectedNode.id;return {selector:"#"+CSS.escape(x7SelectedId),id:x7SelectedId}}
+   if(x7SelectedNode.id){x7SelectedId=x7SelectedNode.id;return {selector:"#"+CSS.escape(x7SelectedId),id:x7SelectedId,registration:null}}
    const id="x7-managed-"+Math.random().toString(36).slice(2,11);
-   const selector=x7SelectedSelector;
-   websiteBuilderDraft.push({type:"identify",selector,id});
-   x7SelectedNode.id=id;x7SelectedId=id;$("x7SelectedElementId").value=id;
-   return {selector:"#"+CSS.escape(id),id};
+   return {selector:"#"+CSS.escape(id),id,registration:{type:"identify",selector:x7SelectedSelector,id}};
   }
 
   $("loadWebsiteDraft")?.addEventListener("click",loadWebsiteDraft);
   $("addWebsiteEdit")?.addEventListener("click",()=>{
    const type=$("websiteEditType").value;let selector=$("websiteEditSelector").value.trim();const value=$("websiteEditValue").value.trim(),href=$("websiteEditHref").value.trim();
-   if(x7SelectedNode){const identity=x7StableIdentity();if(identity)selector=identity.selector;}
+   const identity=x7SelectedNode?x7StableIdentity():null;if(identity)selector=identity.selector;
    if(!selector){status("websiteBuilderStatus","Enter a target CSS selector.",true);return}
    const item={selector,type};
    if(["text","image","link","element"].includes(type)&&!value){status("websiteBuilderStatus","Enter the text, image URL or link label.",true);return}
@@ -1465,12 +1462,14 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
     const viewport=$("x7ElementViewport")?.value||"100%";const device=viewport==="390px"?"mobile":viewport==="768px"?"tablet":"desktop";item.styles={[device]:styles};
    }
    if(type==="remove"&&!confirm("Add a removal operation for "+selector+"?"))return;
-   if(websiteBuilderDraft.length>=500){status("websiteBuilderStatus","The draft has reached its 500-change limit.",true);return}
+   const extraIdentity=identity?.registration&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===identity.id)?1:0;
+   if(websiteBuilderDraft.length+extraIdentity>=500){status("websiteBuilderStatus","The draft has reached its 500-change limit.",true);return}
    if(type==="element"&&websiteBuilderDraft.some(x=>x.type==="element"&&x.id===item.id)){status("websiteBuilderStatus","That element ID already exists in this draft. Choose a unique ID.",true);return}
-   if(type!=="identify"&&x7SelectedNode&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===x7SelectedId)){const identity=x7StableIdentity();if(identity&&item.type!=="element")item.selector=identity.selector;}
+   if(identity?.registration&&!websiteBuilderDraft.some(x=>x.type==="identify"&&x.id===identity.id)){websiteBuilderDraft.push(identity.registration);x7SelectedNode.id=identity.id;x7SelectedId=identity.id;$("x7SelectedElementId").value=identity.id;}
+   if(identity)item.selector=identity.selector;
    websiteBuilderDraft.push(item);renderWebsiteDraft();status("websiteBuilderStatus","Change added to draft. Save draft or publish when ready.");
   });
-  $("websiteDraftList")?.addEventListener("click",e=>{const b=e.target.closest("[data-remove-draft]");if(!b)return;websiteBuilderDraft.splice(Number(b.dataset.removeDraft),1);renderWebsiteDraft()});
+  $("websiteDraftList")?.addEventListener("click",e=>{const b=e.target.closest("[data-remove-draft]");if(!b)return;const index=Number(b.dataset.removeDraft),removed=websiteBuilderDraft[index];websiteBuilderDraft.splice(index,1);if(removed?.type==="identify")websiteBuilderDraft=websiteBuilderDraft.filter(x=>x.selector!=="#"+removed.id);renderWebsiteDraft()});
   async function submitWebsiteDraft(action){
    const button=$(action==="publish"?"publishWebsiteDraft":action==="save"?"saveWebsiteDraft":"discardWebsiteDraft");
    if(action==="publish"&&!confirm("Publish these website changes now? Visitors to the original website page will see them after refresh."))return;
