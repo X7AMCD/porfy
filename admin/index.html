@@ -753,6 +753,76 @@ input[type=checkbox],input[type=radio]{accent-color:#89cff0}button:focus-visible
 @media(max-width:760px){.shell{grid-template-columns:1fr!important}.shell>aside{position:sticky;height:auto;z-index:40;padding:10px 12px!important}.admin-logo{max-height:34px;width:auto;margin:0 0 7px}.shell aside nav{display:flex;overflow-x:auto;gap:5px;margin:8px 0 0;padding-bottom:2px}.shell aside nav a{flex:0 0 auto;min-height:42px!important;padding:8px 10px!important}.shell aside nav a .nav-label{font-size:10px}.shell>main{padding:25px 15px 45px!important}.overview-metrics{gap:9px!important}.card{padding:15px!important;min-height:112px}.metric{font-size:29px!important}}
 @media(max-width:420px){.overview-metrics{grid-template-columns:1fr 1fr}.card .label{font-size:9px!important}}
 
+
+/* X7 CLIENT STUDIO — redesigned workspace */
+#clients.module-section{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+#clients .clients-workspace{display:grid;gap:16px;min-width:0}
+#clients .clients-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;padding:25px 27px;border:1px solid #2b4050;border-radius:10px;background:radial-gradient(circle at 92% 0%,rgba(73,145,180,.19),transparent 35%),linear-gradient(135deg,#172633,#101923 72%);position:relative;overflow:hidden}
+#clients .clients-hero:after{content:"X7";position:absolute;right:24px;top:-29px;font-size:112px;line-height:1;font-weight:850;letter-spacing:-.1em;color:rgba(137,207,240,.045);pointer-events:none}
+#clients .clients-hero>div{position:relative;z-index:1}
+#clients .clients-kicker{display:block;font-size:9px;letter-spacing:.19em;font-weight:750;color:#89cff0;text-transform:uppercase}
+#clients .clients-hero h2{font-size:clamp(24px,3vw,34px)!important;margin:8px 0 7px!important;color:#f2f7fb!important}
+#clients .clients-hero p,#clients .client-directory-toolbar p,#clients .client-panel-heading p,#clients .client-profile-heading p,#clients .client-profile-section-title p{margin:0;color:#91a2af;font-size:11px;line-height:1.6}
+#clients .clients-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+#clients .clients-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#clients .clients-metrics>div{display:grid;gap:7px;padding:15px 18px;border:1px solid #293946;border-radius:8px;background:linear-gradient(145deg,#151f29,#111923)}
+#clients .clients-metrics span{font-size:9px;letter-spacing:.15em;color:#8396a4;font-weight:750}
+#clients .clients-metrics strong{font-size:27px;line-height:1;color:#f0f6fa;font-weight:750;letter-spacing:-.04em}
+#clients .clients-metrics small{font-size:10px;color:#728391}
+#clients .client-create-panel,#clients .client-directory-panel{padding:20px;border:1px solid #2a3946;border-radius:9px;background:linear-gradient(145deg,#141f29,#111923);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+#clients .client-panel-heading,#clients .client-directory-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:17px}
+#clients .client-panel-heading h3,#clients .client-directory-toolbar h3{margin:5px 0 5px!important;font-size:17px!important;color:#eaf2f7!important}
+#clients .client-panel-heading>button{font-size:20px;line-height:1;padding:7px 12px}
+#clients .client-directory-tools{display:grid;gap:9px;justify-items:end;min-width:min(100%,320px)}
+#clients .client-search-wrap{display:flex;align-items:center;gap:9px;width:min(100%,320px);padding:0 11px;border:1px solid #344553;border-radius:7px;background:#0b1219;color:#89cff0}
+#clients .client-search-wrap>span{font-size:19px;line-height:1}
+#clients .client-search-wrap .client-search{width:100%;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:10px 0!important;min-height:38px}
+#clients .client-filters{display:flex;gap:4px;padding:3px;border:1px solid #2b3b48;border-radius:7px;background:#0b1219}
+#clients .client-filter{border:0;border-radius:5px;padding:7px 11px;background:transparent;color:#91a2af;font:inherit;font-size:10px;font-weight:650;cursor:pointer}
+#clients .client-filter.active{background:#89cff0;color:#07131b}
+#clients .client-directory-summary{display:flex;justify-content:space-between;gap:12px;padding:11px 0 13px;border-top:1px solid #263642;color:#9aabb7;font-size:10px}
+#clients .client-directory-summary span:last-child{font-size:8px;letter-spacing:.12em;color:#6e8493}
+#clients .client-directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#clients .client-directory-card{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;align-items:start;min-width:0;padding:14px;border:1px solid #2b3b48;border-radius:7px;background:#151f29;transition:border-color .16s,transform .16s}
+#clients .client-directory-card:hover{border-color:#4c7188;transform:translateY(-1px)}
+#clients .client-avatar{width:42px;height:42px;display:grid;place-items:center;border:1px solid #3c6176;border-radius:7px;background:linear-gradient(145deg,#1d3a4b,#172a37);color:#bdeaff;font-size:12px;font-weight:800;letter-spacing:.04em}
+#clients .client-card-content{min-width:0}
+#clients .client-card-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#clients .client-card-heading strong{font-size:12px;color:#eaf2f7}
+#clients .client-card-content p{margin:5px 0 0;color:#8fa0ad;font-size:10px;overflow-wrap:anywhere}
+#clients .client-state{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid #2f604d;border-radius:99px;background:#142b23;color:#9ce1bd;font-size:8px;font-weight:750;text-transform:uppercase;letter-spacing:.06em}
+#clients .client-state.archived{border-color:#5d4a32;background:#302719;color:#e7c58c}
+#clients .client-row-actions{margin-top:10px}
+#clients .client-row-actions button{padding:6px 10px;font-size:9px}
+#clients .client-profile-panel{margin:0!important;padding:21px!important;border:1px solid #355063!important;border-radius:9px!important;background:linear-gradient(145deg,#141f29,#101821)!important}
+#clients .client-profile-heading{padding-bottom:15px;margin-bottom:17px;border-bottom:1px solid #2a3b47}
+#clients .client-profile-heading h3{margin:5px 0!important;font-size:21px!important;color:#f0f6fa!important}
+#clients .client-profile-edit{padding:17px;border:1px solid #2b3b48;border-radius:8px;background:#111923}
+#clients .client-profile-section-title{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+#clients .client-profile-section-title>span{display:grid;place-items:center;width:27px;height:27px;border:1px solid #35586d;border-radius:6px;background:#172b38;color:#89cff0;font-size:9px;font-weight:800}
+#clients .client-profile-section-title h4{margin:0 0 3px;color:#e5edf3;font-size:12px}
+#clients .client-related-grid{margin-top:16px;padding-top:0;border:0}
+#clients .client-related-grid>div{padding:16px;border:1px solid #2b3b48;border-radius:8px;background:#111923}
+#clients .client-related-item{background:#151f29!important;border-color:#2c3d49!important}
+#clients .client-related-item strong{color:#e7eff5!important}
+#clients .client-comms{margin-top:17px;padding:18px;border:1px solid #2b3b48;border-radius:8px;background:#0e151d}
+#clients .client-comms-head{margin-bottom:15px}
+#clients .client-comms-head h3{margin:5px 0!important;font-size:16px!important;color:#edf4f8!important}
+#clients .client-subheading{margin:0 0 9px;color:#dce8ef;font-size:11px}
+#clients .client-comms-grid{grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);align-items:start}
+#clients .client-comms-compose{display:grid;gap:10px;align-content:start}
+#clients .client-comms-form{background:#151f29!important;border-color:#2c3d49!important}
+#clients .client-comms-form strong{color:#e7eff5!important;font-size:11px}
+#clients .client-comms-form label{color:#9aabb7!important}
+#clients .client-comms-form input,#clients .client-comms-form select,#clients .client-comms-form textarea{background:#0b1219!important;border-color:#344553!important;color:#e5edf3!important}
+#clients .client-comms-row,#clients .client-followup-row{background:#151f29!important;border-color:#2c3d49!important}
+#clients .client-comms-row strong,#clients .client-followup-row strong{color:#e7eff5!important}
+#clients .client-comms-row .message-body,#clients .client-followup-row .message-body{color:#b2c0ca!important}
+#clients .client-followups-section{margin-top:15px;padding-top:14px;border-top:1px solid #293a46}
+#clients .client-profile-panel[hidden],#clients #clientCreatePanel[hidden]{display:none!important}
+@media(max-width:850px){#clients .client-comms-grid{grid-template-columns:1fr}#clients .client-directory-grid{grid-template-columns:1fr}}
+@media(max-width:620px){#clients .clients-hero{align-items:flex-start;flex-direction:column;padding:19px}#clients .clients-hero-actions{width:100%}#clients .clients-hero-actions button{flex:1}#clients .clients-metrics{gap:7px}#clients .clients-metrics>div{padding:12px 10px}#clients .clients-metrics strong{font-size:23px}#clients .client-directory-toolbar{flex-direction:column}#clients .client-directory-tools{width:100%;justify-items:stretch}#clients .client-search-wrap{width:100%}#clients .client-filters{width:max-content;max-width:100%}#clients .client-directory-summary{flex-direction:column;gap:4px}#clients .client-profile-heading{align-items:flex-start}#clients .client-profile-heading>button{flex:none}}
+
 </style>
 
 <style id="x7-custom-select-styles">
@@ -1071,44 +1141,58 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
  </div>
  </section>
 <section class="panel module-section" id="clients">
-<h2>Client management</h2><p class="label">Manage client profiles, booking history and private galleries. Archived clients remain in your records.</p>
-<div class="feature-panel"><h3>Add a client</h3><div class="form-grid"><div class="form-field"><label for="clientName">Client name</label><input id="clientName" maxlength="120"></div><div class="form-field"><label for="clientEmail">Email</label><input id="clientEmail" type="email" maxlength="180"></div><div class="form-field"><label for="clientPhone">Phone</label><input id="clientPhone" maxlength="40"></div><div class="form-field"><label for="clientNotes">Notes</label><input id="clientNotes" maxlength="500"></div></div>
-<div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><button class="secondary-btn" id="loadClients" type="button">Refresh clients</button></div><div class="module-status" id="clientsStatus"></div></div>
-<div class="feature-panel"><div class="client-directory-head"><div><h3>Client directory</h3><p class="label">Search by name, email or phone.</p></div><input id="clientSearch" class="client-search" type="search" placeholder="Search clients…" aria-label="Search clients"></div><div id="clientsList" class="module-list"><div class="empty">Select Refresh clients to load the client directory.</div></div></div>
-<div class="feature-panel" id="clientProfilePanel" hidden><div class="client-profile-heading"><div><span class="client-profile-kicker">CLIENT PROFILE</span><h3 id="clientProfileTitle">Client details</h3></div><button type="button" class="secondary-btn" id="closeClientProfile">Close</button></div>
-<div class="form-grid"><div class="form-field"><label for="editClientName">Client name</label><input id="editClientName" maxlength="200"></div><div class="form-field"><label for="editClientEmail">Email</label><input id="editClientEmail" type="email" maxlength="254"></div><div class="form-field"><label for="editClientPhone">Phone</label><input id="editClientPhone" maxlength="50"></div><div class="form-field full"><label for="editClientNotes">Notes</label><textarea id="editClientNotes" maxlength="5000"></textarea></div></div>
-<div class="module-actions"><button type="button" class="primary-btn" id="updateClient">Save profile</button><button type="button" class="secondary-btn" id="toggleClientArchive">Archive client</button></div><div class="module-status" id="clientProfileStatus"></div>
-<div class="client-related-grid"><div><h3>Booking history</h3><div id="clientBookings" class="module-list"><div class="empty">Loading bookings…</div></div></div><div><h3>Private galleries</h3><div id="clientGalleries" class="module-list"><div class="empty">Loading galleries…</div></div></div></div>
-
-<div class="client-comms" id="clientCommunications">
- <div class="client-comms-head"><div><h3>Client communication</h3><p>Internal notes, sent emails and scheduled follow-ups in one history.</p></div><button type="button" class="secondary-btn" id="refreshClientComms">Refresh history</button></div>
- <div class="client-comms-grid">
-  <div>
-   <h4 style="font-size:11px;margin:0 0 8px;color:#536873">Communication history</h4>
-   <div id="clientCommsList" class="client-comms-list"><div class="empty">Open a client profile to load communication history.</div></div>
+ <div class="clients-workspace">
+  <header class="clients-hero">
+   <div><span class="clients-kicker">X7 STUDIOS · RELATIONSHIP MANAGEMENT</span><h2>Client studio</h2><p>Every client, booking, gallery and conversation in one workspace.</p></div>
+   <div class="clients-hero-actions"><button class="secondary-btn" id="loadClients" type="button">↻ Refresh</button><button class="primary-btn" id="toggleAddClient" type="button">＋ Add client</button></div>
+  </header>
+  <div class="clients-metrics" aria-label="Client totals">
+   <div><span>ALL CLIENTS</span><strong id="clientTotalCount">—</strong><small>Every saved profile</small></div>
+   <div><span>ACTIVE</span><strong id="clientActiveCount">—</strong><small>Available in the directory</small></div>
+   <div><span>ARCHIVED</span><strong id="clientArchivedCount">—</strong><small>Preserved records</small></div>
   </div>
-  <div style="display:grid;gap:12px;align-content:start">
-   <div class="client-comms-form">
-    <strong style="font-size:11px;color:#344852">Write a note or email</strong>
-    <label>Message type<select id="clientCommsChannel"><option value="note">Internal note (not sent)</option><option value="email">Email client</option></select></label>
-    <label>Subject (for email)<input id="clientCommsSubject" maxlength="250" placeholder="A message from x7studio"></label>
-    <label>Message<textarea id="clientCommsBody" maxlength="10000" placeholder="Write your message…"></textarea></label>
-    <button type="button" class="primary-btn" id="sendClientComms">Save note</button>
-    <div class="module-status" id="clientCommsStatus" role="status"></div>
+  <section class="client-create-panel" id="clientCreatePanel" hidden>
+   <div class="client-panel-heading"><div><span class="clients-kicker">NEW RECORD</span><h3>Add a client</h3><p>Save their contact details to start building their history.</p></div><button class="secondary-btn" id="closeAddClient" type="button" aria-label="Close add client form">×</button></div>
+   <div class="form-grid">
+    <div class="form-field"><label for="clientName">Client name</label><input id="clientName" maxlength="120" placeholder="Full name" autocomplete="name"></div>
+    <div class="form-field"><label for="clientEmail">Email</label><input id="clientEmail" type="email" maxlength="180" placeholder="name@example.com" autocomplete="email"></div>
+    <div class="form-field"><label for="clientPhone">Phone</label><input id="clientPhone" maxlength="40" placeholder="+27…" autocomplete="tel"></div>
+    <div class="form-field"><label for="clientNotes">Notes</label><input id="clientNotes" maxlength="500" placeholder="Anything useful to remember"></div>
    </div>
-   <div class="client-comms-form">
-    <strong style="font-size:11px;color:#344852">Schedule an email follow-up</strong>
-    <label>Send date and time<input id="clientFollowupWhen" type="datetime-local"></label>
-    <label>Subject<input id="clientFollowupSubject" maxlength="250" value="A follow-up from x7studio"></label>
-    <label>Message<textarea id="clientFollowupBody" maxlength="10000" placeholder="Write the follow-up email…"></textarea></label>
-    <button type="button" class="primary-btn" id="scheduleClientFollowup">Schedule follow-up</button>
-    <div class="module-status" id="clientFollowupStatus" role="status"></div>
+   <div class="module-actions"><button class="primary-btn" id="saveClient" type="button">Save client</button><span class="module-status" id="clientsStatus" role="status"></span></div>
+  </section>
+  <section class="client-directory-panel">
+   <div class="client-directory-toolbar">
+    <div><span class="clients-kicker">YOUR CONTACTS</span><h3>Client directory</h3><p>Search by name, email or phone. Open a profile to see its full history.</p></div>
+    <div class="client-directory-tools"><label class="client-search-wrap"><span>⌕</span><input id="clientSearch" class="client-search" type="search" placeholder="Search clients…" aria-label="Search clients"></label>
+     <div class="client-filters" id="clientFilters" role="group" aria-label="Filter clients"><button type="button" class="client-filter active" data-client-filter="all" aria-pressed="true">All</button><button type="button" class="client-filter" data-client-filter="active" aria-pressed="false">Active</button><button type="button" class="client-filter" data-client-filter="archived" aria-pressed="false">Archived</button></div>
+    </div>
    </div>
-  </div>
+   <div class="client-directory-summary"><span id="clientDirectoryCount">Load your clients to get started.</span><span>PROFILES ARE PRIVATE TO YOUR STUDIO</span></div>
+   <div id="clientsList" class="client-directory-grid"><div class="empty">Select Refresh to load your client directory.</div></div>
+   <div class="module-status" id="clientsDirectoryStatus" role="status"></div>
+  </section>
+  <section class="client-profile-panel feature-panel" id="clientProfilePanel" hidden>
+   <div class="client-profile-heading"><div><span class="client-profile-kicker">CLIENT PROFILE</span><h3 id="clientProfileTitle">Client details</h3><p>Contact details, booking history, private galleries and communication.</p></div><button type="button" class="secondary-btn" id="closeClientProfile">Close profile</button></div>
+   <div class="client-profile-edit">
+    <div class="client-profile-section-title"><span>01</span><div><h4>Contact details</h4><p>Keep the client's information up to date.</p></div></div>
+    <div class="form-grid"><div class="form-field"><label for="editClientName">Client name</label><input id="editClientName" maxlength="200"></div><div class="form-field"><label for="editClientEmail">Email</label><input id="editClientEmail" type="email" maxlength="254"></div><div class="form-field"><label for="editClientPhone">Phone</label><input id="editClientPhone" maxlength="50"></div><div class="form-field full"><label for="editClientNotes">Notes</label><textarea id="editClientNotes" maxlength="5000"></textarea></div></div>
+    <div class="module-actions"><button type="button" class="primary-btn" id="updateClient">Save profile</button><button type="button" class="secondary-btn" id="toggleClientArchive">Archive client</button><div class="module-status" id="clientProfileStatus" role="status"></div></div>
+   </div>
+   <div class="client-related-grid"><div><div class="client-profile-section-title"><span>02</span><div><h4>Booking history</h4><p>Previous and upcoming bookings.</p></div></div><div id="clientBookings" class="module-list"><div class="empty">Loading bookings…</div></div></div><div><div class="client-profile-section-title"><span>03</span><div><h4>Private galleries</h4><p>Client delivery and image collections.</p></div></div><div id="clientGalleries" class="module-list"><div class="empty">Loading galleries…</div></div></div></div>
+   <div class="client-comms" id="clientCommunications">
+    <div class="client-comms-head"><div><span class="clients-kicker">04 · CLIENT RELATIONSHIP</span><h3>Communications & follow-ups</h3><p>Internal notes, sent emails and scheduled follow-ups in one history.</p></div><button type="button" class="secondary-btn" id="refreshClientComms">↻ Refresh history</button></div>
+    <div class="client-comms-grid">
+     <div><h4 class="client-subheading">Communication history</h4><div id="clientCommsList" class="client-comms-list"><div class="empty">Open a client profile to load communication history.</div></div></div>
+     <div class="client-comms-compose">
+      <div class="client-comms-form"><strong>Write a note or email</strong><label>Message type<select id="clientCommsChannel"><option value="note">Internal note (not sent)</option><option value="email">Email client</option></select></label><label>Subject (for email)<input id="clientCommsSubject" maxlength="250" placeholder="A message from x7studio"></label><label>Message<textarea id="clientCommsBody" maxlength="10000" placeholder="Write your message…"></textarea></label><button type="button" class="primary-btn" id="sendClientComms">Save note</button><div class="module-status" id="clientCommsStatus" role="status"></div></div>
+      <div class="client-comms-form"><strong>Schedule an email follow-up</strong><label>Send date and time<input id="clientFollowupWhen" type="datetime-local"></label><label>Subject<input id="clientFollowupSubject" maxlength="250" value="A follow-up from x7studio"></label><label>Message<textarea id="clientFollowupBody" maxlength="10000" placeholder="Write the follow-up email…"></textarea></label><button type="button" class="primary-btn" id="scheduleClientFollowup">Schedule follow-up</button><div class="module-status" id="clientFollowupStatus" role="status"></div></div>
+     </div>
+    </div>
+    <div class="client-followups-section"><h4 class="client-subheading">Scheduled follow-ups</h4><div id="clientFollowupsList" class="client-followups-list"><div class="empty">No follow-ups loaded.</div></div></div>
+   </div>
+  </section>
  </div>
- <div style="margin-top:16px"><h4 style="font-size:11px;margin:0 0 8px;color:#536873">Scheduled follow-ups</h4><div id="clientFollowupsList" class="client-followups-list"><div class="empty">No follow-ups loaded.</div></div></div>
-</div>
-</div>
 </section>
 <section class="panel module-section gallery-workspace" id="galleries">
  <div class="gallery-heading"><div><span class="gallery-kicker">X7 STUDIOS · CLIENT DELIVERY</span><h2>Private gallery studio</h2><p class="label">Curate private collections for clients, separate from the public portfolio.</p></div><div class="gallery-heading-mark">X7 <span>/ PRIVATE</span></div></div>
@@ -1679,11 +1763,24 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
 
  let cachedClients = [];
  let activeClientId = null;
+ let clientDirectoryFilter = "all";
  function renderClients(){
   const query=$("clientSearch").value.trim().toLowerCase();
-  const rows=cachedClients.filter(c=>[c.name,c.email,c.phone].some(v=>String(v||"").toLowerCase().includes(query)));
-  if(!rows.length){$("clientsList").innerHTML='<div class="empty">'+(query?'No clients match your search.':'No clients have been added yet.')+'</div>';return}
-  $("clientsList").innerHTML=rows.map(c=>'<article class="module-item"><div class="grow"><strong>'+esc(c.name)+' '+(c.archived_at?'<span class="client-archived">Archived</span>':'')+'</strong><small>'+esc(c.email)+(c.phone?' · '+esc(c.phone):'')+'</small><div class="client-row-actions"><button type="button" class="secondary-btn" data-client-view="'+Number(c.id)+'">View profile</button></div></div></article>').join('');
+  const active=cachedClients.filter(c=>!c.archived_at),archived=cachedClients.filter(c=>!!c.archived_at);
+  $("clientTotalCount").textContent=cachedClients.length.toLocaleString();
+  $("clientActiveCount").textContent=active.length.toLocaleString();
+  $("clientArchivedCount").textContent=archived.length.toLocaleString();
+  const rows=cachedClients.filter(c=>{
+   const matches=[c.name,c.email,c.phone].some(v=>String(v||"").toLowerCase().includes(query));
+   const statusMatch=clientDirectoryFilter==="all"||(clientDirectoryFilter==="archived"?!!c.archived_at:!c.archived_at);
+   return matches&&statusMatch;
+  });
+  $("clientDirectoryCount").textContent=rows.length+" of "+cachedClients.length+" client"+(cachedClients.length===1?"":"s");
+  if(!rows.length){$("clientsList").innerHTML='<div class="empty">'+(query?'No clients match your search.':clientDirectoryFilter==="archived"?'No archived clients.':clientDirectoryFilter==="active"?'No active clients.':'No clients have been added yet.')+'</div>';return}
+  $("clientsList").innerHTML=rows.map(c=>{
+   const initials=String(c.name||"C").split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part.charAt(0)).join("").toUpperCase();
+   return '<article class="client-directory-card"><div class="client-avatar" aria-hidden="true">'+esc(initials)+'</div><div class="client-card-content"><div class="client-card-heading"><strong>'+esc(c.name||"Unnamed client")+'</strong><span class="client-state'+(c.archived_at?' archived':'')+'">'+(c.archived_at?'Archived':'Active')+'</span></div><p>'+esc(c.email||"No email address")+'</p><p>'+esc(c.phone||"No phone number")+'</p><div class="client-row-actions"><button type="button" class="secondary-btn" data-client-view="'+Number(c.id)+'">Open profile ↗</button></div></div></article>';
+  }).join('');
  }
  async function loadClients(){
   status("clientsStatus","Loading clients…");
@@ -1746,6 +1843,19 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
 
  $("loadClients").addEventListener("click",loadClients);
  $("clientSearch").addEventListener("input",renderClients);
+ $("clientFilters").addEventListener("click",event=>{
+  const button=event.target.closest("[data-client-filter]");if(!button)return;
+  clientDirectoryFilter=button.dataset.clientFilter;
+  $("clientFilters").querySelectorAll("[data-client-filter]").forEach(item=>{
+   const active=item===button;item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));
+  });
+  renderClients();
+ });
+ $("toggleAddClient").addEventListener("click",()=>{
+  $("clientCreatePanel").hidden=!$("clientCreatePanel").hidden;
+  if(!$("clientCreatePanel").hidden){$("clientName").focus();$("clientCreatePanel").scrollIntoView({behavior:"smooth",block:"nearest"});}
+ });
+ $("closeAddClient").addEventListener("click",()=>{$("clientCreatePanel").hidden=true;});
  $("clientsList").addEventListener("click",event=>{const view=event.target.closest("[data-client-view]");if(view)openClientProfile(view.dataset.clientView)});
  $("closeClientProfile").addEventListener("click",()=>{$("clientProfilePanel").hidden=true;activeClientId=null});
  $("saveClient").addEventListener("click",()=>save("/admin/clients",{name:$("clientName").value.trim(),email:$("clientEmail").value.trim(),phone:$("clientPhone").value.trim(),notes:$("clientNotes").value.trim()},"clientsStatus",async()=>{ $("clientName").value="";$("clientEmail").value="";$("clientPhone").value="";$("clientNotes").value="";await loadClients();}));
