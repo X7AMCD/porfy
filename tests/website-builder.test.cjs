@@ -89,6 +89,10 @@ test("element sizing starts from explicit inline dimensions, not computed layout
   assert.ok(admin.includes('x7Frame?.contentDocument?.getElementById(item.id)'));
 });
 
+test("published state is loaded automatically before a user publishes", () => {
+  assert.match(admin, /addEventListener\("click",loadWebsiteDraft\);\s*loadWebsiteDraft\(\);/);
+});
+
 test("publishing a new draft retains all previously published edits", () => {
   assert.match(admin, /websiteBuilderPublished=Array\.isArray\(d\.published\)/);
   assert.match(admin, /const publishSet=action==="publish"\?\[\.\.\.websiteBuilderPublished,\.\.\.websiteBuilderDraft\]/);
