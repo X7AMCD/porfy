@@ -1347,6 +1347,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   const heading=target==="overview"?"Overview":target==="bookings"?"Bookings":target==="calendar"?"Availability calendar":target==="portfolio"?"Portfolio management":target==="services"?"Services & pricing":target==="clients"?"Client management":target==="galleries"?"Private galleries":target==="content"?"Website Builder":"Website settings";
   const h=document.querySelector("main h1"); if(h)h.textContent=heading;
   if(target==="calendar"&&lastAppliedHash!==currentHash)window.x7LoadAvailabilityCalendar?.();
+  if(target==="clients"&&lastAppliedHash!==currentHash)$("loadClients")?.click();
   if(target==="portfolio"&&lastAppliedHash!==currentHash)loadMedia();
   if(target==="galleries"&&lastAppliedHash!==currentHash)$("loadGalleries")?.click();
   if(target==="content"&&lastAppliedHash!==currentHash)$("loadContent")?.click();
