@@ -41,8 +41,7 @@ test("visual editor provides live preview, layers, drag and resize", () => {
   ]) assert.ok(admin.includes(marker), "missing editor capability: " + marker);
 });
 
-test("published runtime is disabled in editor mode and resolves stable IDs first", () => {
-  assert.ok(preview.includes('has("x7builder")'));
+test("published runtime applies edits in the editor preview and resolves stable IDs first", () => {
   assert.match(preview, /if\(e\.elementId\)[\s\S]{0,120}getElementById/);
   assert.match(preview, /e\.type==="identify"/);
   assert.match(preview, /safeSelector\(e\.selector/);
@@ -75,6 +74,18 @@ test("legacy selector-based edit records remain supported", () => {
   assert.match(preview, /return safeSelector\(e\.selector\|\|""\)/);
   assert.match(worker, /item\.type === "style"/);
   assert.match(worker, /item\.type === "element"/);
+});
+
+
+test("publishing a new draft retains all previously published edits", () => {
+  assert.match(admin, /websiteBuilderPublished=Array\.isArray\(d\.published\)/);
+  assert.match(admin, /const publishSet=action==="publish"\?\[\.\.\.websiteBuilderPublished,\.\.\.websiteBuilderDraft\]/);
+  assert.match(admin, /draft:publishSet/);
+});
+
+test("editor preview avoids unsafe generated CSS selectors", () => {
+  assert.match(admin, /filter\(c=>\/\^\[A-Za-z0-9_-\]\+\$\//);
+  assert.match(admin, /node\.id&&\/\^\[A-Za-z\]\[A-Za-z0-9_-\]/);
 });
 
 test("existing draft, publish and version history routes remain in Worker", () => {
