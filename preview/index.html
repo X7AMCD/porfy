@@ -2942,7 +2942,6 @@ addEventListener("scroll", () => {
     }
     else if(edit.type==="reorder"&&Array.isArray(edit.children)){const parent=el;const nodes=edit.children.map(sel=>{try{return document.querySelector(sel)}catch{return null}}).filter(node=>node&&node.parentElement===parent);nodes.forEach(node=>parent.appendChild(node));}
     else if(edit.type==="style"&&edit.styles&&typeof edit.styles==="object"){
-     if(/^[a-zA-Z][a-zA-Z0-9_-]{0,80}$/.test(edit.id||"")&&!el.id)el.id=edit.id;
      const styles=edit.styles[device()]||edit.styles.desktop||{};
      for(const [key,value] of Object.entries(styles)){
       if(!styleKeys.has(key)||typeof value!=="string")continue;
@@ -3010,7 +3009,7 @@ addEventListener("scroll", () => {
   });
   const applyResponsive=()=>{
    const width=window.innerWidth,device=width<=620?"mobile":width<=1024?"tablet":"desktop";
-   responsive.forEach(edit=>{const styles=edit.styles?.[device]||edit.styles?.desktop;if(styles)safeSelector(edit.selector).forEach(node=>{if(/^[a-zA-Z][a-zA-Z0-9_-]{0,80}$/.test(edit.id||"")&&!node.id)node.id=edit.id;applyStyle(node,styles)})});
+   responsive.forEach(edit=>{const styles=edit.styles?.[device]||edit.styles?.desktop;if(styles)safeSelector(edit.selector).forEach(node=>applyStyle(node,styles))});
   };
   applyResponsive();
   window.addEventListener("resize",applyResponsive,{passive:true});
