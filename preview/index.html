@@ -2908,113 +2908,50 @@ addEventListener("scroll", () => {
 })();
 </script>
 
-<script id="x7-published-website-content">
-/* Published visual edits are applied safely to the existing X7 site. */
-(async()=>{
- if(new URLSearchParams(location.search).has("x7builder"))return;
- try{
-  const response=await fetch("https://api.x7studios.co.za/website-content",{cache:"no-store"});
-  if(!response.ok)return;
-  const data=await response.json(),edits=Array.isArray(data.edits)?data.edits:[];
-  const styleKeys=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","textDecoration","backgroundColor","opacity","backgroundImage","width","height","minWidth","maxWidth","minHeight","maxHeight","padding","marginTop","marginBottom","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","flexWrap","justifyContent","alignItems","alignContent","alignSelf","gap","gridTemplateColumns","gridTemplateRows","gridAutoFlow","order","zIndex","top","left","overflow","objectPosition","cursor"]);
-  const applied=new Map();
-  document.querySelectorAll("*").forEach((el,i)=>el.setAttribute("data-x7-builder-key","x7-node-"+(i+1)));
-  function device(){return innerWidth<=600?"mobile":innerWidth<=1024?"tablet":"desktop"}
-  function apply(){
-   for(const [el,keys] of applied)for(const key of keys)el.style.removeProperty(key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase()));
-   applied.clear();
-   for(const edit of edits){
-    if(!edit||typeof edit.selector!=="string")continue;
-    let el;try{el=document.querySelector(edit.selector)}catch{continue}if(!el)continue;
-    if(edit.type==="remove"){el.remove();continue;}
-    if(edit.type==="text"&&typeof edit.value==="string"&&el.children.length===0)el.textContent=edit.value;
-    else if(edit.type==="image"&&el instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value||""))el.src=edit.value;
-    else if(edit.type==="link"&&el instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||""))el.href=edit.value;
-    else if(edit.type==="element"&&/^[a-zA-Z][a-zA-Z0-9_-]{0,80}$/.test(edit.id||"")&&["H2","P","IMG","A","HR","DIV","SECTION"].includes(edit.tag)&&!document.getElementById(edit.id)){
-     const node=document.createElement(edit.tag);node.id=edit.id;
-     if(edit.tag==="SECTION"){node.style.padding="32px 20px";node.style.margin="16px 0";node.style.border="1px dashed #9bb4c1";node.textContent=String(edit.value??"New section")}
-     else if(edit.tag==="IMG"){if(!/^https:\/\//i.test(edit.value||""))continue;node.src=edit.value;node.alt="";node.loading="lazy";node.style.maxWidth="100%"}
-     else if(edit.tag==="A"){if(!/^(https?:\/\/|mailto:|tel:)/i.test(edit.href||""))continue;node.href=edit.href;node.textContent=String(edit.value||"");node.style.display="inline-block";node.style.padding="12px 20px";node.style.background="#89cff0";node.style.color="#122631";node.style.textDecoration="none"}
-     else if(edit.tag==="HR"){node.style.border="0";node.style.borderTop="1px solid #dfe7eb";node.style.margin="24px 0"}
-     else if(edit.tag==="DIV"){node.style.height="32px";node.setAttribute("aria-hidden","true")}
-     else node.textContent=String(edit.value||"");
-     el.appendChild(node);
-    }
-    else if(edit.type==="reorder"&&Array.isArray(edit.children)){const parent=el;const nodes=edit.children.map(sel=>{try{return document.querySelector(sel)}catch{return null}}).filter(node=>node&&node.parentElement===parent);nodes.forEach(node=>parent.appendChild(node));}
-    else if(edit.type==="style"&&edit.styles&&typeof edit.styles==="object"){
-     const styles=edit.styles[device()]||edit.styles.desktop||{};
-     for(const [key,value] of Object.entries(styles)){
-      if(!styleKeys.has(key)||typeof value!=="string")continue;
-      const css=key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());
-      if(key==="backgroundImage"){if(/^https:\/\//i.test(value))el.style.backgroundImage="url("+JSON.stringify(value)+")"}
-      else el.style.setProperty(css,value);
-      if(!applied.has(el))applied.set(el,new Set());applied.get(el).add(key);
-     }
-    }
-   }
-  }
-  apply();let resizeTimer;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(apply,120)});
- }catch(error){console.warn("X7 published website edits could not be applied",error)}
-})();
-</script>
+<script id="x7-published-website-content">/* Legacy duplicate applier disabled; the unified runtime below owns published edits. */</script>
 
 <script id="x7-website-builder-runtime">
-/* Apply the published visual-builder changes to the original X7 website. */
+/* Unified, ID-first published website edit runtime. */
 (()=> {
+ if(new URLSearchParams(location.search).has("x7builder"))return;
  const API="https://api.x7studios.co.za/website-content";
- const safeSelector=selector=>{try{return [...document.querySelectorAll(selector)]}catch(error){console.warn("X7 builder: invalid selector",selector);return []}};
- const applyStyle=(node,styles)=>{
-  if(!styles||typeof styles!=="object")return;
-  const map={fontFamily:"font-family",fontSize:"font-size",fontWeight:"font-weight",lineHeight:"line-height",letterSpacing:"letter-spacing",textAlign:"text-align",textTransform:"text-transform",textDecoration:"text-decoration",backgroundColor:"background-color",backgroundImage:"background-image",minWidth:"min-width",maxWidth:"max-width",minHeight:"min-height",maxHeight:"max-height",borderRadius:"border-radius",borderWidth:"border-width",borderColor:"border-color",borderStyle:"border-style",boxShadow:"box-shadow",flexDirection:"flex-direction",flexWrap:"flex-wrap",justifyContent:"justify-content",alignItems:"align-items",alignContent:"align-content",alignSelf:"align-self",gridTemplateColumns:"grid-template-columns",gridTemplateRows:"grid-template-rows",gridAutoFlow:"grid-auto-flow",gridColumn:"grid-column",gridRow:"grid-row",flexBasis:"flex-basis",flexGrow:"flex-grow",flexShrink:"flex-shrink",justifyItems:"justify-items",justifySelf:"justify-self",placeItems:"place-items",placeContent:"place-content",transformOrigin:"transform-origin",objectFit:"object-fit",objectPosition:"object-position"};
-  Object.entries(styles).forEach(([key,value])=>{
-   if(value==null||typeof value!=="string")return;
-   const property=map[key]||key.replace(/[A-Z]/g,c=>"-"+c.toLowerCase());
-   if(!/^[a-z-]+$/.test(property))return;
-   if(key==="backgroundImage"){if(/^https:\/\//i.test(value))node.style.setProperty(property,'url("'+value.replace(/["\\]/g,"\\</body>")+'")');return}
-   if(/url\s*\(|expression\s*\(|javascript:/i.test(value))return;
-   node.style.setProperty(property,value);
-  });
- };
- const apply=(edits)=>{
+ const safeSelector=s=>{try{return [...document.querySelectorAll(s)]}catch{return []}};
+ const resolve=e=>{if(e.elementId){const n=document.getElementById(e.elementId);if(n)return [n]}return safeSelector(e.selector||"")};
+ const allowed=new Set(["color","fontFamily","fontSize","fontWeight","lineHeight","letterSpacing","textAlign","textTransform","textDecoration","backgroundColor","opacity","backgroundImage","width","height","minWidth","maxWidth","minHeight","maxHeight","padding","paddingTop","paddingRight","paddingBottom","paddingLeft","margin","marginTop","marginRight","marginBottom","marginLeft","borderRadius","borderWidth","borderColor","borderStyle","objectFit","display","boxShadow","position","flexDirection","flexWrap","justifyContent","alignItems","alignContent","alignSelf","gap","gridTemplateColumns","gridTemplateRows","gridAutoFlow","gridColumn","gridRow","order","zIndex","top","right","bottom","left","transform","transformOrigin","overflow","objectPosition","cursor","flexBasis","flexGrow","flexShrink","justifyItems","justifySelf","placeItems","placeContent"]);
+ const device=()=>innerWidth<=620?"mobile":innerWidth<=1024?"tablet":"desktop";
+ function apply(edits){
   if(!Array.isArray(edits))return;
-  const responsive=[];
-  edits.forEach(edit=>{
-   if(!edit||typeof edit!=="object"||typeof edit.selector!=="string")return;
-   if(edit.type==="style"){responsive.push(edit);return}
-   if(edit.type==="element"){
-    const parents=safeSelector(edit.selector);
-    parents.forEach(parent=>{
-     if(document.getElementById(edit.id))return;
-     const tag=String(edit.tag||"DIV").toUpperCase();
-     if(!["H2","P","IMG","A","HR","DIV","SECTION"].includes(tag))return;
-     const node=document.createElement(tag);node.id=edit.id;
-     if(tag==="IMG"){if(/^https:\/\//i.test(edit.value||""))node.src=edit.value;node.alt=edit.id}
-     else if(tag==="A"){node.textContent=edit.value||"Link";if(/^(https?:\/\/|mailto:|tel:)/i.test(edit.href||"")){node.href=edit.href;node.rel="noopener noreferrer"}}
-     else if(tag!=="HR")node.textContent=edit.value||"";
-     parent.appendChild(node);
-    });
-    return;
-   }
-   const nodes=safeSelector(edit.selector);
+  edits.filter(e=>e&&e.type==="identify").forEach(e=>{if(!document.getElementById(e.id)){const n=safeSelector(e.selector)[0];if(n&&!n.id)n.id=e.id}});
+  edits.forEach(e=>{
+   if(!e||typeof e!=="object"||e.type==="identify")return;
+   const nodes=resolve(e);
    nodes.forEach(node=>{
-    if(edit.type==="text")node.textContent=edit.value||"";
-    else if(edit.type==="image"&&node instanceof HTMLImageElement&&/^https:\/\//i.test(edit.value||""))node.src=edit.value;
-    else if(edit.type==="link"&&node instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(edit.value||"")){node.href=edit.value;node.rel="noopener noreferrer"}
-    else if(edit.type==="remove"&&node!==document.body&&node!==document.documentElement)node.remove();
-    else if(edit.type==="reorder"&&Array.isArray(edit.children)){
-     const children=edit.children.flatMap(selector=>safeSelector(selector)).filter(child=>child.parentElement===node);
-     children.forEach(child=>node.appendChild(child));
+    if(e.type==="remove"){if(node!==document.body&&node!==document.documentElement)node.remove();return}
+    if(e.type==="text"&&typeof e.value==="string"){node.textContent=e.value;return}
+    if(e.type==="image"&&node instanceof HTMLImageElement&&/^https:\/\//i.test(e.value||"")){node.src=e.value;return}
+    if(e.type==="link"&&node instanceof HTMLAnchorElement&&/^(https?:\/\/|mailto:|tel:)/i.test(e.value||"")){node.href=e.value;node.rel="noopener noreferrer";return}
+    if(e.type==="element"){
+     if(document.getElementById(e.id)||!["H2","P","IMG","A","HR","DIV","SECTION"].includes(e.tag))return;
+     const child=document.createElement(e.tag);child.id=e.id;
+     if(e.tag==="IMG"){if(!/^https:\/\//i.test(e.value||""))return;child.src=e.value;child.alt=e.id;child.loading="lazy"}
+     else if(e.tag==="A"){child.textContent=e.value||"Link";if(/^(https?:\/\/|mailto:|tel:)/i.test(e.href||"")){child.href=e.href;child.rel="noopener noreferrer"}}
+     else if(e.tag!=="HR")child.textContent=e.value||"";
+     node.appendChild(child);return;
+    }
+    if(e.type==="reorder"&&Array.isArray(e.children)){e.children.map(s=>safeSelector(s)[0]).filter(n=>n&&n.parentElement===node).forEach(n=>node.appendChild(n));return}
+    if(e.type==="style"&&e.styles){
+     const styles=e.styles[device()]||e.styles.desktop||{};
+     for(const [key,value] of Object.entries(styles)){
+      if(!allowed.has(key)||typeof value!=="string"||/url\s*\(|expression\s*\(|javascript:/i.test(value))continue;
+      const css=key.replace(/[A-Z]/g,c=>"-"+c.toLowerCase());
+      if(key==="backgroundImage"){if(/^https:\/\//i.test(value))node.style.backgroundImage='url("'+value.replace(/["\\]/g,"")+'")'}
+      else node.style.setProperty(css,value);
+     }
     }
    });
   });
-  const applyResponsive=()=>{
-   const width=window.innerWidth,device=width<=620?"mobile":width<=1024?"tablet":"desktop";
-   responsive.forEach(edit=>{const styles=edit.styles?.[device]||edit.styles?.desktop;if(styles)safeSelector(edit.selector).forEach(node=>applyStyle(node,styles))});
-  };
-  applyResponsive();
-  window.addEventListener("resize",applyResponsive,{passive:true});
- };
- fetch(API,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(data=>apply(data.edits||[])).catch(error=>console.warn("X7 published website edits unavailable",error));
+ }
+ fetch(API,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(d=>apply(d.edits||[])).catch(e=>console.warn("X7 published website edits unavailable",e));
 })();
 </script>
 </body>
