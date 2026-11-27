@@ -624,6 +624,87 @@ section.panel.services-studio#services{background:transparent;border:0;box-shado
 .client-followup-actions{display:flex;gap:6px;align-items:center}
 @media(max-width:760px){.client-comms-grid{grid-template-columns:1fr}.builder-version-row,.client-comms-row,.client-followup-row{flex-direction:column}}
 
+
+/* X7 NOCTURNE — full dark workspace redesign */
+:root{color-scheme:dark;--bg:#090d12;--panel:#111820;--ink:#e8eef3;--muted:#8796a3;--line:#26323c;--accent:#89cff0;--accent-strong:#59b8e5;--nav:#090d12;--nav-soft:#15212b;--shadow:0 12px 32px rgba(0,0,0,.22);--radius:8px}
+html,body{background:#090d12!important;color:#e8eef3!important}
+body{font-family:Inter,"Helvetica Neue",Arial,sans-serif}
+.shell{background:#090d12;grid-template-columns:246px minmax(0,1fr)}
+aside{background:#0b1016!important;border-right:1px solid #202b35!important;box-shadow:12px 0 34px rgba(0,0,0,.12);padding:25px 16px 20px!important}
+.brand{color:#f1f6fa!important;font-size:17px!important;letter-spacing:.15em!important}
+.brand small{color:#748492!important}
+nav a{color:#9aa9b5!important;border:1px solid transparent!important;border-radius:6px!important;min-height:40px!important}
+nav a.active,nav a:hover{background:#172631!important;border-color:#284454!important;color:#f5fbff!important}
+nav a.active:before{background:#89cff0!important;border-color:#89cff0!important}
+nav a .nav-label{color:inherit}
+.note{color:#657582!important}
+.logout{background:#131e27!important;border-color:#2b3b47!important;color:#dce8ef!important}
+main{max-width:1600px!important;padding:34px clamp(22px,3.8vw,58px) 60px!important}
+h1,h2,h3,h4,strong{color:#e7eef4}
+h1{color:#f1f6fa!important;font-weight:550}
+h2{color:#e5edf3!important}
+.eyebrow,.date,.label,.detail-label,.builder-kicker{color:#8595a2!important}
+.card,.panel,.booking-card,.module-item,.feature-panel,.overview-layout>.panel,.builder-tree,.builder-inspector,.builder-canvas,.builder-library-panels .feature-panel,.services-form-panel,.services-catalogue,.client-related-item,.client-comms-form,.builder-history,.builder-version-row,.client-comms-row,.client-followup-row{background:#111820!important;border:1px solid #263440!important;color:#dce6ed!important;box-shadow:none!important}
+.card{min-height:116px;border-radius:7px!important;padding:19px 20px!important}
+.card:after{background:linear-gradient(90deg,transparent,rgba(137,207,240,.035))!important;border:0!important}
+.metric{color:#f1f7fb!important}
+.module-section{margin-top:0!important}
+.module-section>.feature-panel,.feature-panel{background:#131d26!important}
+.booking-message,.empty,.builder-empty,.builder-preview,.services-editor,.services-catalogue,.services-list .module-item{background:#0d141b!important;border-color:#283743!important;color:#aab8c3!important}
+.booking-name,.module-item strong,.service-card-copy h4,.builder-nav strong,.builder-inspector-name,.builder-inspector-row strong,.overview-booking strong,.overview-action,.client-related-item strong{color:#e6eef4!important}
+.booking-details,.booking-controls,.action,.overview-booking,.overview-action,.client-related-grid{border-color:#26333d!important}
+.booking-select,.form-field input,.form-field select,.form-field textarea,.client-search,.service-edit-fields input,.service-edit-fields textarea,.list-view,.view-switch,.refresh,.secondary-btn,.module-nav a,.catalogue-switch button{background:#0d151d!important;border:1px solid #2a3945!important;color:#dce7ee!important}
+.form-field label,.service-edit-fields label{color:#9aa9b5!important}
+.primary-btn,.save-booking{background:#89cff0!important;border-color:#89cff0!important;color:#08131b!important;font-weight:700}
+.primary-btn:hover,.save-booking:hover{background:#a6def6!important;color:#08131b!important}
+.secondary-btn:hover,.refresh:hover{background:#172630!important;border-color:#4b829d!important}
+.delete-booking{background:#241619!important;border-color:#59343b!important;color:#ff9eaa!important}
+.view-switch button{color:#9aabb7!important}
+.view-switch button.active{background:#89cff0!important;color:#09131a!important}
+.status{background:#332b1b!important;color:#f0ca80!important}
+.status.confirmed{background:#16352b!important;color:#8de0b5!important}
+.status.cancelled{background:#3b2025!important;color:#ff9da8!important}
+table{color:#dce6ed!important}th{background:#17222c!important;color:#91a3b0!important}td{color:#d4dfe7!important}th,td{border-color:#273540!important}
+.module-nav a:hover,.module-nav a.active{background:#172b37!important;border-color:#34586b!important;color:#a9e2ff!important}
+.builder-nav{color:#b3c1cb!important}.builder-nav:hover,.builder-nav.active{background:#172a36!important;border-color:#315366!important}.builder-nav strong{color:#e1ebf1!important}.builder-nav small{color:#8799a6!important}.builder-nav>.bn-ico{background:#1b2a34!important;color:#89cff0!important}.builder-nav.active>.bn-ico{background:#203d4c!important;color:#a6e1ff!important}
+.builder-inspector-row,.builder-inspector-title{border-color:#283641!important}
+.builder-photo{background:#111820!important;border:1px solid #2b3944!important}
+.builder-photo-meta{background:#15212a!important}
+.builder-history-head h3,.client-comms h3{color:#e5edf3!important}
+.builder-version-row,.client-comms-row,.client-followup-row{background:#0d151d!important}
+.overview-link,.overview-action>span:last-child{color:#89cff0!important}
+.pill{background:#172a36!important;border-color:#31576b!important;color:#a9e2ff!important}
+.notice{background:#14232d!important;border-color:#29495a!important;color:#b6d8e8!important}
+.catalogue-switch button.active{background:#89cff0!important;border-color:#89cff0!important;color:#08131b!important}
+#services>.catalogue-pane{background:#111820!important;border-color:#263440!important}
+input,textarea,select{color-scheme:dark}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #89cff0!important;outline-offset:2px}
+.route-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:0 0 25px;padding-bottom:18px;border-bottom:1px solid #24313b}
+.route-heading .crumb{font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:#718391}
+.route-heading h1{font-size:30px;margin:6px 0 3px}
+.route-heading p{margin:0;color:#8293a0;font-size:12px}
+body[data-page="overview"] .module-section{display:none!important}
+body[data-page="overview"] #overview{display:block!important}
+body[data-page]:not([data-page="overview"]) #overview{display:none!important}
+body[data-page="bookings"] #bookings,
+body[data-page="calendar"] #calendar,
+body[data-page="portfolio"] #portfolio,
+body[data-page="services"] #services,
+body[data-page="clients"] #clients,
+body[data-page="galleries"] #galleries,
+body[data-page="website"] #content,
+body[data-page="settings"] #settings{display:block!important}
+body[data-page="bookings"] .module-section:not(#bookings),
+body[data-page="calendar"] .module-section:not(#calendar),
+body[data-page="portfolio"] .module-section:not(#portfolio),
+body[data-page="services"] .module-section:not(#services),
+body[data-page="clients"] .module-section:not(#clients),
+body[data-page="galleries"] .module-section:not(#galleries),
+body[data-page="website"] .module-section:not(#content),
+body[data-page="settings"] .module-section:not(#settings){display:none!important}
+@media(max-width:900px){.shell{grid-template-columns:210px minmax(0,1fr)}aside{width:auto}.route-heading h1{font-size:26px}}
+@media(max-width:620px){.shell{grid-template-columns:1fr}aside{position:sticky!important;top:0;z-index:30;height:auto!important;min-height:0!important;padding:10px 9px!important;background:#090d12!important}.brand{display:block!important;padding:0 6px 9px!important}.brand small{display:block!important}.shell aside nav{display:flex!important;overflow-x:auto;gap:4px;padding-bottom:3px}.shell aside nav a{flex:0 0 auto!important;width:auto!important;min-width:70px!important;height:55px!important;min-height:55px!important;padding:5px 8px!important;display:flex!important;flex-direction:column;justify-content:center;gap:3px}.shell aside nav a:before{display:none}.shell aside nav a .nav-icon{height:20px!important}.shell aside nav a .nav-label{font-size:9px!important;white-space:nowrap}.logout,.note{display:none!important}main{padding:22px 14px 42px!important}.route-heading{margin-bottom:17px}.route-heading h1{font-size:23px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:14px!important}.metric{font-size:27px}}
+
 </style>
 
 <style id="x7-custom-select-styles">
@@ -1632,5 +1713,49 @@ window.x7LoadAvailabilityCalendar=load;$("calendarPrev").onclick=()=>{month.setM
 })();
 </script>
 
+
+<script>
+(()=> {
+ const routes={
+  overview:{id:"overview",title:"Overview",desc:"Your studio at a glance"},
+  bookings:{id:"bookings",title:"Bookings",desc:"Review enquiries and manage confirmed sessions"},
+  calendar:{id:"calendar",title:"Availability calendar",desc:"Manage available, limited and unavailable dates"},
+  portfolio:{id:"portfolio",title:"Portfolio",desc:"Manage the photographs displayed across your website"},
+  services:{id:"services",title:"Services & pricing",desc:"Manage photography services and session pricing"},
+  clients:{id:"clients",title:"Clients",desc:"Client profiles, booking history and private records"},
+  galleries:{id:"galleries",title:"Private galleries",desc:"Manage client gallery access and image collections"},
+  website:{id:"content",title:"Website Studio",desc:"Edit, preview and publish your X7 Studios website"},
+  settings:{id:"settings",title:"Settings",desc:"Manage website and administration settings"}
+ };
+ const params=new URLSearchParams(location.search);
+ const requested=params.get("page")||"overview";
+ const page=routes[requested]?requested:"overview";
+ document.body.dataset.page=page;
+ document.title="X7 Studios | "+routes[page].title;
+ const nav=document.querySelector('nav[aria-label="Admin sections"]');
+ if(nav){
+  nav.querySelectorAll("a").forEach(a=>{
+   const id=(a.getAttribute("href")||"").replace(/^#/,"");
+   const key=Object.keys(routes).find(k=>routes[k].id===id);
+   if(!key)return;
+   a.href="?page="+key;
+   a.classList.toggle("active",key===page);
+   if(key===page)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");
+  });
+ }
+ const main=document.querySelector(".shell main")||document.querySelector("main");
+ if(main && page!=="overview"){
+  const heading=document.createElement("header");
+  heading.className="route-heading";
+  heading.innerHTML='<div><div class="crumb">X7 STUDIOS / WORKSPACE</div><h1>'+routes[page].title+'</h1><p>'+routes[page].desc+'</p></div><div class="pill">Admin workspace</div>';
+  main.insertBefore(heading,main.firstChild);
+ }
+ document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  const id=a.getAttribute("href").slice(1);
+  const key=Object.keys(routes).find(k=>routes[k].id===id);
+  if(key)a.href="?page="+key;
+ });
+})();
+</script>
 </body>
 </html>
