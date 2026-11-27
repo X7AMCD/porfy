@@ -1399,7 +1399,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
    Object.assign(x7SelectionOverlay.style,{left:(r.left+doc.defaultView.scrollX)+"px",top:(r.top+doc.defaultView.scrollY)+"px",width:r.width+"px",height:r.height+"px"});
   }
   function x7StartElementMove(ev){
-   if(!x7SelectedNode||x7SelectionOverlay?.contains(ev.target)||!(ev.target===x7SelectedNode||x7SelectedNode.contains(ev.target))||ev.button!==0)return;
+   if(!x7SelectedNode||x7SelectionOverlay?.contains(ev.target)||ev.target!==x7SelectedNode||ev.button!==0)return;
    ev.preventDefault();const doc=x7Frame.contentDocument,view=doc.defaultView,sx=ev.clientX,sy=ev.clientY,cs=view.getComputedStyle(x7SelectedNode);
    if(cs.position==="static")x7SelectedNode.style.position="relative";
    const left=parseFloat(cs.left)||0,top=parseFloat(cs.top)||0;
@@ -1416,6 +1416,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif!important}
   function x7AttachFrame(){
    try{
     const doc=x7Frame.contentDocument;if(!doc)return;
+    x7SelectedNode=null;x7SelectedSelector="";x7SelectedId="";x7SelectionOverlay=null;if(x7LayerHost)x7LayerHost.innerHTML='<div class="empty">Select an element in the preview.</div>';
     doc.addEventListener("click",ev=>{const node=ev.target?.closest?.("*");if(!node||x7IsProtected(node))return;ev.preventDefault();ev.stopPropagation();x7SelectNode(node)},{capture:true});
     doc.addEventListener("mouseover",ev=>{const n=ev.target;if(!n||x7IsProtected(n))return;n.style.outline="1px dashed #39a6d4";},{capture:true});
     doc.addEventListener("mouseout",ev=>{const n=ev.target;if(n?.style?.outline==="1px dashed rgb(57, 166, 212)")n.style.outline="";},{capture:true});
